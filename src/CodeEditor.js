@@ -4,6 +4,7 @@ import { faPlay } from '@fortawesome/free-solid-svg-icons';
 import CodeMirror from '@uiw/react-codemirror';
 import { StreamLanguage } from '@codemirror/language';
 import { go } from '@codemirror/legacy-modes/mode/go';
+import { EditorView } from "@codemirror/view"
 import { basicDark } from '@uiw/codemirror-theme-basic';
 import { run } from './go/index.ts';
 
@@ -45,17 +46,18 @@ function CodeEditor() {
                         onChange={(value) => {
                             setCode(value);
                         }}
-                        extensions={[StreamLanguage.define(go)]}
+                        extensions={[EditorView.lineWrapping, StreamLanguage.define(go)]}
                         theme={basicDark}
                     />
                 </div>
             </div>
             <div style={{ height: 'calc(100% - 25px)', width: '50%', float: 'right' }}>
-                <div style={{ border: '1px solid #ccc', marginTop: '40px' }}>
+                <div style={{ border: '1px solid #ccc', marginTop: '40px', maxHeight: 'calc(100% - 40px)', overflowY: 'auto' }}>
                     <CodeMirror
                         value={output}
                         readOnly={true}
                         theme={basicDark}
+                        extensions={[EditorView.lineWrapping]}
                     />
                 </div>
             </div>
