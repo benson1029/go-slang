@@ -2,6 +2,7 @@
   "name": "go-slang",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://benson1029.github.io/go-slang",
   "dependencies": {
     "@codemirror/lang-go": "6.0.0",
     "@codemirror/language": "6.6.0",
