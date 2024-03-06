@@ -6,7 +6,7 @@ function App() {
     return (
         <div className="App" style={{ height: '92vh', color: '#ffffff' }}>
             <header className="App-header">
-                <h3>CS4215 Project - Explicit-control evaluator (ECE) for Go</h3>
+                <h3>Go Interpreter with Explicit-control evaluator (ECE)</h3>
             </header>
             <CodeEditor />
         </div>
