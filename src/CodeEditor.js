@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlay } from '@fortawesome/free-solid-svg-icons';
+import { faPlay, faRefresh } from '@fortawesome/free-solid-svg-icons';
 import CodeMirror from '@uiw/react-codemirror';
 import { StreamLanguage } from '@codemirror/language';
 import { go } from '@codemirror/legacy-modes/mode/go';
@@ -8,15 +8,29 @@ import { EditorView } from "@codemirror/view"
 import { basicDark } from '@uiw/codemirror-theme-basic';
 import { run } from './go/index.ts';
 
+const sampleCode = `package main
+
+import "fmt"
+
+func main() {
+  fmt.Println("Hello, World!")
+}`;
 
 function CodeEditor() {
-    const [code, setCode] = useState('');
-    const [output, setOutput] = useState('');
+    const [code, setCode] = useState(
+        localStorage.getItem("code") || sampleCode
+    );
+    const [output, setOutput] = useState("");
 
     const handleRunCode = async (code) => {
         setOutput("Running...");
         let output = await run(code);
         setOutput(output);
+    };
+
+    const resetCode = () => {
+        setCode(sampleCode);
+        localStorage.setItem("code", sampleCode);
     };
 
     return (
@@ -32,12 +46,30 @@ function CodeEditor() {
                             color: 'white',
                             border: 'none',
                             cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center'
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            marginLeft: '10px'
                         }}
                     >
                         <FontAwesomeIcon icon={faPlay} style={{ marginRight: '5px' }} />
                         Run Code
+                    </button>
+                    <button
+                        onClick={() => resetCode()}
+                        style={{
+                            padding: '10px',
+                            borderRadius: '5px',
+                            backgroundColor: '#2e3235',
+                            color: 'white',
+                            border: 'none',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            marginLeft: '10px'
+                        }}
+                    >
+                        <FontAwesomeIcon icon={faRefresh} style={{ marginRight: '5px' }} />
+                        Reset Code
                     </button>
                 </div>
                 <div style={{ height: 'calc(100% - 40px)', border: '1px solid #ccc' }}>
@@ -45,6 +77,7 @@ function CodeEditor() {
                         value={code}
                         onChange={(value) => {
                             setCode(value);
+                            localStorage.setItem("code", value);
                         }}
                         extensions={[EditorView.lineWrapping, StreamLanguage.define(go)]}
                         theme={basicDark}

@@ -6,7 +6,9 @@ function App() {
     return (
         <div className="App" style={{ height: '92vh', color: '#ffffff' }}>
             <header className="App-header">
-                <h3>Go Interpreter with Explicit-control evaluator (ECE)</h3>
+                <h3 style={{ marginLeft: '10px' }}>
+                    Go Interpreter with Explicit-control evaluator (ECE)
+                </h3>
             </header>
             <CodeEditor />
         </div>
