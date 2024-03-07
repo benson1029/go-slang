@@ -85,7 +85,7 @@ function CodeEditor() {
                 </div>
             </div>
             <div style={{ height: 'calc(100% - 25px)', width: '50%', float: 'right' }}>
-                <div style={{ border: '1px solid #ccc', marginTop: '40px', maxHeight: 'calc(100% - 40px)', overflowY: 'auto' }}>
+                <div style={{ border: '1px solid #ccc', marginTop: '40px', maxHeight: 'calc(100% - 160px)', overflowY: 'auto' }}>
                     <CodeMirror
                         value={output}
                         readOnly={true}
@@ -93,6 +93,11 @@ function CodeEditor() {
                         extensions={[EditorView.lineWrapping]}
                     />
                 </div>
+                <img
+                    src={process.env.PUBLIC_URL + '/gopher.png'}
+                    alt="Go Logo"
+                    style={{ position: 'fixed', bottom: '0', right: '10%' }}
+                />
             </div>
         </>
     );
