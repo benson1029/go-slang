@@ -1,11 +1,11 @@
 import { parse, SyntaxError } from './parser/go';
 
 /**
- * Parses the given code and returns the result. If the code has a syntax error, it will
- * return a string with the error message.
+ * Parses and executes the given code. If the code has a syntax error or the
+ * execution failed, it will return a string with the error message.
  * 
- * @param code The code to parse
- * @returns The result of the parsing
+ * @param code The code to parse and execute
+ * @returns The result of the execution
  */
 function parseAndExecute(code: string): string {
     try {

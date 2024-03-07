@@ -220,7 +220,6 @@ Statement
     / GoFunctionCall
     / Assignment
     / Block
-    / IfElseStatement
     / IfStatement
     / ForStatement
     / DeferStatement
@@ -256,10 +255,9 @@ Block
     = "{" __ body:StatementList __ "}" { return { tag: "block", body: body }; }
 
 IfStatement "if"
-    = "if" WhiteSpace __ condition:Expression __ body:Block { return { tag: "if", condition: condition, body: body }; }
-
-IfElseStatement "if-else"
-    = "if" WhiteSpace __ condition:Expression __ body:Block __ "else" WhiteSpace __ elseBody:Block { return { tag: "if-else", condition: condition, body: body, elseBody: elseBody }; }
+    = "if" WhiteSpace __ condition:Expression __ body:Block __ "else" WhiteSpace __ elseBody:IfStatement { return { tag: "if", condition: condition, body: body, elseBody: elseBody }; }
+    / "if" WhiteSpace __ condition:Expression __ body:Block __ "else" WhiteSpace __ elseBody:Block { return { tag: "if", condition: condition, body: body, elseBody: elseBody }; }
+    / "if" WhiteSpace __ condition:Expression __ body:Block { return { tag: "if", condition: condition, body: body }; }
 
 ForInitPostStatement "statement"
     = VariableDeclaration

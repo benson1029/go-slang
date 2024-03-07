@@ -1,0 +1,239 @@
+import { parse, SyntaxError } from './go';
+
+test(
+    'parser should parse syntactically correct go code',
+    async () => {
+        const code = `package main
+
+        import "fmt"
+
+        func main() {
+            fmt.Println("Hello, World!")
+        }`;
+        const result = await parse(code);
+        expect(result).toMatchObject({
+            tag: "program",
+            package: "main",
+            imports: ["fmt"],
+            body: {
+                tag: "sequence",
+                stmts: [
+                    {
+                        tag: "function",
+                        name: "main",
+                        params: [],
+                        returnType: null,
+                        body: {
+                            tag: "block",
+                            body: {
+                                tag: "sequence",
+                                stmts: [
+                                    {
+                                        tag: "call",
+                                        name: "fmt.Println",
+                                        args: [
+                                            {
+                                                tag: "literal",
+                                                type: "string",
+                                                value: "Hello, World!"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                ]
+            }
+        });
+    }
+)
+
+test(
+    'parser should throw an error for syntactically incorrect go code',
+    async () => {
+        const code = `package main
+
+        import "fmt"
+
+        func main() {
+            fmt.Println("Hello, World!"
+        }`;
+        expect(() => parse(code)).toThrow(SyntaxError);
+    }
+)
+
+test(
+    "parser supports import statements",
+    async () => {
+        const code = `package main
+
+        import "fmt"
+        import "math/rand"
+        import (
+            "time"
+            "math"
+        )
+
+        func main() {
+            fmt.Println("Hello, World!")
+        }`;
+        const result = await parse(code);
+        expect(result).toBeInstanceOf(Object);
+    }
+)
+
+test(
+    "parser supports parsing variable declarations",
+    async () => {
+        const code = `package main
+
+        import "fmt"
+
+        func main() {
+            w := 1
+            var x int = 2
+            var y = 3
+            var z int
+            fmt.Println(x)
+        }`;
+        const result = await parse(code);
+        expect(result).toBeInstanceOf(Object);
+    }
+)
+
+test(
+    "parser supports parsing for loops",
+    async () => {
+        const code = `package main
+
+        import "fmt"
+
+        func main() {
+            for i := 0; i < 10; i = i + 1 {
+                fmt.Println(i)
+            }
+            for ; true; {
+                fmt.Println("infinite loop")
+            }
+        }`;
+        const result = await parse(code);
+        expect(result).toBeInstanceOf(Object);
+    }
+)
+
+test(
+    "parser supports parsing if statements",
+    async () => {
+        const code = `package main
+
+        import "fmt"
+
+        func main() {
+            if true {
+                fmt.Println("true")
+            } else {
+                fmt.Println("false")
+            }
+            x := 1;
+            if x < 0 {
+                fmt.Println("negative")
+            }
+            if x > 0 {
+                fmt.Println("positive")
+            } else if x == 0 {
+                fmt.Println("zero")
+            }
+            if x < 0 {
+                fmt.Println("negative")
+            } else if x > 0 {
+                fmt.Println("positive")
+            } else {
+                fmt.Println("zero")
+            }
+        }`;
+        const result = await parse(code);
+        expect(result).toBeInstanceOf(Object);
+    }
+)
+
+test(
+    "parser supports parsing function declarations",
+    async () => {
+        const code = `package main
+
+        import "fmt"
+
+        func main() {
+            func print(x int) {
+                fmt.Println(x)
+            }
+            print(add(1, 2))
+        }
+
+        func add(x int, y int) int {
+            return x + y
+        }`;
+        const result = await parse(code);
+        expect(result).toBeInstanceOf(Object);
+    }
+)
+
+test(
+    "parser supports parsing anonymous functions",
+    async () => {
+        const code = `package main
+
+        import "fmt"
+
+        func main() {
+            func(x int) {
+                fmt.Println(x)
+            }(1)
+            func() {
+                fmt.Println("anonymous")
+            }()
+            x := 4 * func(x int, y int) int {
+                return x + y
+            }(1, 2) + 3
+        }`;
+        const result = await parse(code);
+        expect(result).toBeInstanceOf(Object);
+    }
+)
+
+test(
+    "parser supports go routines",
+    async () => {
+        const code = `package main
+
+        import "fmt"
+
+        func main() {
+            go fmt.Println("Hello, World!")
+            go func() {
+                fmt.Println("Hello, World!")
+            }()
+        }`;
+        const result = await parse(code);
+        expect(result).toBeInstanceOf(Object);
+    }
+)
+
+test(
+    "go supports literals of int, float32, string and bool",
+    async () => {
+        const code = `package main
+
+        import "fmt"
+
+        func main() {
+            fmt.Println(1)
+            fmt.Println(1.0)
+            fmt.Println("hello")
+            fmt.Println(true)
+        }`;
+        const result = await parse(code);
+        expect(result).toBeInstanceOf(Object);
+    }
+)
