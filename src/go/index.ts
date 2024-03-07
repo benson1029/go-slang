@@ -10,12 +10,12 @@ import { parse, SyntaxError } from './parser/go';
 function parseAndExecute(code: string): string {
     try {
         const result = parse(code);
-        return JSON.stringify(result, null, '\t');
+        return JSON.stringify(result, null, '  ');
     } catch (error) {
         if (error instanceof SyntaxError) {
-            return `Syntax error: ${error.message}`;
+            return `Syntax error (${error.location.start.line}:${error.location.start.column}): ${error.message}`;
         } else {
-            return 'Unknown error';
+            return `Unknown error: ${error.message}`;
         }
     }
 }
