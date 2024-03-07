@@ -237,3 +237,34 @@ test(
         expect(result).toBeInstanceOf(Object);
     }
 )
+
+test(
+    "go supports parsing expressions",
+    async () => {
+        const code = `package main
+
+        import "fmt"
+
+        func main() {
+            fmt.Println(1 + 2)
+            fmt.Println(1 - 2)
+            fmt.Println(1 * 2)
+            fmt.Println(1 / 2)
+            fmt.Println(1 % 2)
+            fmt.Println(true && false)
+            fmt.Println(true || false)
+            fmt.Println(!true)
+            fmt.Println(1 < 2)
+            fmt.Println(1 > 2)
+            fmt.Println(1 <= 2)
+            fmt.Println(1 >= 2)
+            fmt.Println(1 == 2)
+            fmt.Println(1 != 2)
+            x := 1
+            y := x++
+            z := x--
+        }`;
+        const result = await parse(code);
+        expect(result).toBeInstanceOf(Object);
+    }
+)

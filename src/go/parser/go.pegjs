@@ -140,12 +140,20 @@ PrimaryExpression
     / Identifier
     / "(" __ exp:Expression __ ")" { return exp; }
 
+PostfixOperator
+    = "++" / "--"
+
+PostfixExpression
+    = exp:PrimaryExpression __ operator:PostfixOperator { return { tag: "postfix", operator: operator, operand: exp }; }
+    / exp:PrimaryExpression { return exp; }
+    / "(" __ exp:Expression __ ")" { return exp; }
+
 UnaryOperator
     = "+" / "-" / "!"
 
 UnaryExpression
-    = operator:UnaryOperator __ exp:PrimaryExpression { return { tag: "unary", operator: operator, operand: exp }; }
-    / exp:PrimaryExpression { return exp; }
+    = operator:UnaryOperator __ exp:UnaryExpression { return { tag: "unary", operator: operator, operand: exp }; }
+    / exp:PostfixExpression { return exp; }
     / "(" __ exp:Expression __ ")" { return exp; }
 
 MultiplicativeOperator
@@ -165,7 +173,7 @@ AdditiveExpression
     / "(" __ exp:Expression __ ")" { return exp; }
 
 RelationalOperator
-    = "<" / "<=" / ">" / ">="
+    = "<=" / "<" / ">=" / ">"
 
 RelationalExpression
     = head:AdditiveExpression tail:(__ RelationalOperator __ AdditiveExpression)* { return buildBinaryExpression(head, tail); }
