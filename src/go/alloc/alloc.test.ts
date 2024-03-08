@@ -88,7 +88,7 @@ describe('BuddyAllocator', () => {
   });
 
   it('should handle edge case of allocating maximum memory', () => {
-    const allocator = new BuddyAllocator(546); // Allocate 1024 words of memory
+    const allocator = new BuddyAllocator(534); // Allocate 1024 words of memory
     // Allocate maximum memory block
     const address = allocator.allocate(511);
     expect(address).not.toBeNull();
