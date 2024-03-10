@@ -1,5 +1,3 @@
-import { assert, error } from "console";
-
 const WORD_SIZE       = 8; // 2^3 = 8 bytes. All values below are in words.
 
 const HEADER_SIZE     = 1;
@@ -121,7 +119,7 @@ class BuddyAllocator {
 
   constructor(words: number) {
     if (words > MAX_ALLOC) {
-      error("Memory limit too high. Cannot allocate memory.");
+      console.error("Memory limit too high. Cannot allocate memory.");
     }
 
     this.data = new ArrayBuffer(words * WORD_SIZE);
@@ -153,7 +151,7 @@ class BuddyAllocator {
       };
 
       if (num_bytes_needed(1) > num_bytes) {
-        error("Memory limit too low. Cannot allocate any memory for user space.");
+        console.error("Memory limit too low. Cannot allocate any memory for user space.");
       }
 
       this.numNodesLog2 = 0;
@@ -164,26 +162,23 @@ class BuddyAllocator {
 
       let currentSize = 0;
 
-      { // Initialize free list
-        this.baseFreeList = currentSize;
-        currentSize += (this.numNodesLog2 + 1) * MIN_ALLOC;
-        for (let i = 0; i <= this.numNodesLog2; i++) {
-          this.init_free_list(i);
-        }
+      // Initialize free list
+      this.baseFreeList = currentSize;
+      currentSize += (this.numNodesLog2 + 1) * MIN_ALLOC;
+      for (let i = 0; i <= this.numNodesLog2; i++) {
+        this.init_free_list(i);
       }
 
-      { // Initialize binary tree
-        this.baseBinaryTree = currentSize;
-        currentSize += pad_bits(1 << this.numNodesLog2) / WORD_SIZE;
-      }
+      // Initialize binary tree
+      this.baseBinaryTree = currentSize;
+      currentSize += pad_bits(1 << this.numNodesLog2) / WORD_SIZE;
 
-      { // Initialize user space
-        this.baseUser = currentSize;
-        currentSize += (1 << this.numNodesLog2) * MIN_ALLOC;
-        this.insert_free_list(0, this.node_to_pointer(1, 0));
-      }
+      // Initialize user space
+      this.baseUser = currentSize;
+      currentSize += (1 << this.numNodesLog2) * MIN_ALLOC;
+      this.insert_free_list(0, this.node_to_pointer(1, 0));
 
-      assert(currentSize <= num_bytes);
+      console.assert(currentSize <= num_bytes);
     }
   }
 
