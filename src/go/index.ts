@@ -1,4 +1,5 @@
 import { parse, SyntaxError } from './parser/go';
+import { ECE, UnsupportedCommandError } from './ece';
 
 /**
  * Parses and executes the given code. If the code has a syntax error or the
@@ -8,9 +9,9 @@ import { parse, SyntaxError } from './parser/go';
  * @returns The result of the execution
  */
 function parseAndExecute(code: string): string {
+    let parsed_program: object;
     try {
-        const result = parse(code);
-        return JSON.stringify(result, null, '  ');
+        parsed_program = parse(code);
     } catch (error) {
         if (error instanceof SyntaxError) {
             return `Syntax error (${error.location.start.line}:${error.location.start.column}): ${error.message}`;
@@ -18,6 +19,17 @@ function parseAndExecute(code: string): string {
             return `Unknown error: ${error.message}`;
         }
     }
+    let result;
+    try {
+        result = (new ECE(1024, parsed_program)).evaluate();
+    } catch (error) {
+        if (error instanceof UnsupportedCommandError) {
+            return `${error.message}\n${JSON.stringify(parsed_program, null, 2)}`;
+        } else {
+            return `Execution error: ${error.message}`;
+        }
+    }
+    return JSON.stringify(result);
 }
 
 /**
