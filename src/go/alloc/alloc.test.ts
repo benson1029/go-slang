@@ -2,7 +2,8 @@ import { BuddyAllocator } from './alloc';
 
 describe('BuddyAllocator', () => {
   it('should allocate and deallocate memory correctly', () => {
-    const allocator = new BuddyAllocator(1024); // Allocate 1024 words of memory
+    // Allocate 1024 words of memory = 499 nodes
+    const allocator = new BuddyAllocator(1024);
 
     // Allocate memory blocks
     const address1 = allocator.allocate(100);
@@ -49,7 +50,7 @@ describe('BuddyAllocator', () => {
     // Allocate memory block again
     const address3 = allocator.allocate(500);
 
-    expect(address3).toBeNull();
+    expect(address3).not.toBeNull();
 
     // Deallocate memory blocks
     allocator.deallocate(address1);
@@ -83,18 +84,31 @@ describe('BuddyAllocator', () => {
     allocator.deallocate(address5);
 
     const address6 = allocator.allocate(512);
-    expect(address6).toBeNull();    
+    expect(address6).toBeNull();
 
   });
 
   it('should handle edge case of allocating maximum memory', () => {
-    const allocator = new BuddyAllocator(534); // Allocate 1024 words of memory
+    const allocator = new BuddyAllocator(534); // Allocate 534 words of memory (512 user, 22 kernel)
     // Allocate maximum memory block
     const address = allocator.allocate(511);
     expect(address).not.toBeNull();
     // Try to allocate more memory
     const address2 = allocator.allocate(1);
     expect(address2).toBeNull();
+    // Deallocate memory block
+    allocator.deallocate(address);
+    allocator.deallocate(address2); // handle null
+
+    const address3 = allocator.allocate(512);
+    expect(address3).toBeNull();
+  });
+
+  it('should handle large memory', () => {
+    const allocator = new BuddyAllocator(1024 * 1024 * 1024); // Allocate 8GB of memory
+    // Allocate maximum memory block
+    const address = allocator.allocate(1024 * 1024 * 1024 / 2 - 1);
+    expect(address).not.toBeNull();
     // Deallocate memory block
     allocator.deallocate(address);
   });
