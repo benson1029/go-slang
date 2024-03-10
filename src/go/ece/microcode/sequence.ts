@@ -4,9 +4,9 @@ import { Env } from '../env';
 import { Heap } from '../../heap';
 
 function evaluate_sequence(cmd: any, heap: Heap, C: Control, S: Stash, E: Env) {
-    const stmts = cmd.stmts;
-    for (let i = stmts.length - 1; i >= 0; i--) {
-        C.push(stmts[i]);
+    const body = cmd.body;
+    for (let i = body.length - 1; i >= 0; i--) {
+        C.push(body[i]);
     }
     return E;
 }

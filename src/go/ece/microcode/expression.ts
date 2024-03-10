@@ -28,7 +28,7 @@ function evaluate_unary(cmd: any, heap: Heap, C: Control, S: Stash, E: Env) {
 }
 
 function evaluate_unary_i(cmd: any, heap: Heap, C: Control, S: Stash, E: Env) {
-    const operand = S.pop();
+    const operand = heap.value_of(S.pop());
     const result = unary_operator(cmd.operator, operand);
     const address = heap.allocate_number(result);
     S.push(address);
@@ -75,8 +75,8 @@ function evaluate_binary(cmd: any, heap: Heap, C: Control, S: Stash, E: Env) {
 }
 
 function evaluate_binary_i(cmd: any, heap: Heap, C: Control, S: Stash, E: Env) {
-    const left = S.pop();
-    const right = S.pop();
+    const left = heap.value_of(S.pop());
+    const right = heap.value_of(S.pop());
     const result = binary_operator(cmd.operator, left, right);
     const address = heap.allocate_number(result);
     S.push(address);

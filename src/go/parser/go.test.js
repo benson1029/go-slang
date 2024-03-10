@@ -15,36 +15,33 @@ test(
             tag: "program",
             package: "main",
             imports: ["fmt"],
-            body: {
-                tag: "sequence",
-                stmts: [
-                    {
-                        tag: "function",
-                        name: "main",
-                        params: [],
-                        returnType: null,
+            body: [
+                {
+                    tag: "function",
+                    name: "main",
+                    params: [],
+                    returnType: null,
+                    body: {
+                        tag: "block",
                         body: {
-                            tag: "block",
-                            body: {
-                                tag: "sequence",
-                                stmts: [
-                                    {
-                                        tag: "call",
-                                        name: "fmt.Println",
-                                        args: [
-                                            {
-                                                tag: "literal",
-                                                type: "string",
-                                                value: "Hello, World!"
-                                            }
-                                        ]
-                                    }
-                                ]
-                            }
+                            tag: "sequence",
+                            body: [
+                                {
+                                    tag: "call",
+                                    name: "fmt.Println",
+                                    args: [
+                                        {
+                                            tag: "literal",
+                                            type: "string",
+                                            value: "Hello, World!"
+                                        }
+                                    ]
+                                }
+                            ]
                         }
                     }
-                ]
-            }
+                }
+            ]
         });
     }
 )

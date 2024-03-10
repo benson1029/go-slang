@@ -121,11 +121,17 @@ PackageName "packageName"
     = [a-zA-Z_][a-zA-Z0-9_]* { return text(); }
 
 IdentifierAndReserved "identifier"
-    = pack:PackageName __ "." __ name:IdentifierAndReserved { return pack + "." + name; }
-    / [a-zA-Z_][a-zA-Z0-9_]* { return text(); }
+    = [a-zA-Z_][a-zA-Z0-9_]* { return text(); }
 
 Identifier "identifier"
     = content:((! ReservedWord) IdentifierAndReserved) { return content[1]; }
+
+IdentifierWithPackage "identifier"
+    = packageName:PackageName __ "." __ identifier:IdentifierWithPackage { return packageName + "." + identifier; }
+    / identifier:Identifier { return identifier; }
+
+Name "name"
+    = identifier:Identifier { return { tag: "name", name: identifier }; }
 
 Type "type"
     = "int" { return "int"; }
@@ -137,7 +143,7 @@ PrimaryExpression
     = AnonymousFunctionCall
     / FunctionCall
     / Literal
-    / Identifier
+    / Name
     / "(" __ exp:Expression __ ")" { return exp; }
 
 PostfixOperator
@@ -253,11 +259,11 @@ ReturnStatement "return"
 // ===== 4. Sequences, Control Structures and Blocks =====
 
 StatementList
-    = __ stmt:Statement __ ";" __ stmts:StatementList { return { tag: "sequence", stmts: [stmt].concat(stmts.stmts) }; }
-    / __ stmt:Statement [ \t]* LineTerminator __ stmts:StatementList { return { tag: "sequence", stmts: [stmt].concat(stmts.stmts) }; }
-    / __ stmt:Statement __ ";" { return { tag: "sequence", stmts: [stmt] }; }
-    / __ stmt:Statement __ { return { tag: "sequence", stmts: [stmt] }; }
-    / __ { return { tag: "sequence", stmts: [] }; }
+    = __ stmt:Statement __ ";" __ stmts:StatementList { return { tag: "sequence", body: [stmt].concat(stmts.body) }; }
+    / __ stmt:Statement [ \t]* LineTerminator __ stmts:StatementList { return { tag: "sequence", body: [stmt].concat(stmts.body) }; }
+    / __ stmt:Statement __ ";" { return { tag: "sequence", body: [stmt] }; }
+    / __ stmt:Statement __ { return { tag: "sequence", body: [stmt] }; }
+    / __ { return { tag: "sequence", body: [] }; }
 
 Block
     = "{" __ body:StatementList __ "}" { return { tag: "block", body: body }; }
@@ -292,9 +298,9 @@ FunctionDeclaration
     / "func" WhiteSpace __ name:Identifier __ "(" __ ")" __ body:Block { return buildFunctionDeclaration(name, [], [], null, body); }
 
 FunctionCall
-    = name:Identifier __ "(" __ arg0:Expression args:((__ "," __ Expression)*) __ ")" { return buildFunctionCall(name, [arg0], args); }
-    / name:Identifier __ "(" __ arg0:Expression __ ")" { return buildFunctionCall(name, [arg0], []); }
-    / name:Identifier __ "(" __ ")" { return buildFunctionCall(name, [], []); }
+    = name:IdentifierWithPackage __ "(" __ arg0:Expression args:((__ "," __ Expression)*) __ ")" { return buildFunctionCall(name, [arg0], args); }
+    / name:IdentifierWithPackage __ "(" __ arg0:Expression __ ")" { return buildFunctionCall(name, [arg0], []); }
+    / name:IdentifierWithPackage __ "(" __ ")" { return buildFunctionCall(name, [], []); }
 
 AnonymousFunctionDeclaration
     = "func" __ "(" __ param0:(__ Identifier __ Type) __ params:((__ "," __ Identifier __ Type)*) __ ")" __ returnType:Type __ body:Block { return buildFunctionDeclaration(null, [param0], params, returnType, body); }
@@ -317,5 +323,16 @@ GoAnomymousFunctionCall
 
 // ===== 6. Program =====
 
+GlobalScopeStatements
+    = FunctionDeclaration
+    / VariableDeclaration
+
+GlobalScopeStatementList
+    = __ stmt:GlobalScopeStatements __ ";" __ stmts:GlobalScopeStatementList { return [stmt].concat(stmts); }
+    / __ stmt:GlobalScopeStatements __ stmts:GlobalScopeStatementList { return [stmt].concat(stmts); }
+    / __ stmt:GlobalScopeStatements __ ";" { return [stmt]; }
+    / __ stmt:GlobalScopeStatements { return [stmt]; }
+    / __ { return []; }
+
 Program
-    = __ pack:PackageStatement imports:((__ ImportStatement)*) __ stmts:StatementList __ { return buildProgram(pack, imports, stmts); }
+    = __ pack:PackageStatement imports:((__ ImportStatement)*) __ stmts:GlobalScopeStatementList __ { return buildProgram(pack, imports, stmts); }

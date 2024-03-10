@@ -30,8 +30,10 @@ class ECE {
     }
 
     public evaluate() {
+        // A placeholder to find the main function.
+        let main = this.program.body.filter((x: any) => x.tag === "function" && x.name === "main")[0];
         // Initialize the control, stash and environment.
-        this.C = new Control(this.program.body);
+        this.C = new Control(main.body.body);
         this.S = new Stash();
         this.E = create_global_environment(this.heap, this.program.imports);
 

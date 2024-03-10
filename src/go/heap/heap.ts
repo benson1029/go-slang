@@ -1,4 +1,4 @@
-import { BuddyAllocator } from "../alloc";
+import { BuddyAllocator } from "./alloc";
 
 // TODO: Store the contents in the BuddyAllocator. This is a placeholder.
 class Heap {
