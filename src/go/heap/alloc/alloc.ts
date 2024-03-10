@@ -139,13 +139,16 @@ class BuddyAllocator {
 
   constructor(words: number) {
     if (words > MAX_ALLOC) {
-      console.error("Memory limit too high. Cannot allocate memory.");
+      throw new Error("Memory limit too high. Cannot allocate memory.");
     }
 
     try {
       this.data = new ArrayBuffer(words * WORD_SIZE);
-    } catch (RangeError) {
-      console.error("Memory limit too high. Cannot allocate memory.");
+    } catch (error) {
+      if (error instanceof RangeError) {
+        throw new Error("Memory limit too high. Cannot allocate memory.");
+      }
+      throw error;
     }
 
     this.memory = new DataView(this.data);
@@ -184,7 +187,7 @@ class BuddyAllocator {
       };
 
       if (num_bytes_needed(1) > num_bytes) {
-        console.error("Memory limit too low. Cannot allocate any memory for user space.");
+        throw new Error("Memory limit too low. Cannot allocate any memory for user space.");
       }
 
       this.numNodes = 0;

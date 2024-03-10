@@ -21,7 +21,7 @@ function parseAndExecute(code: string): string {
     }
     let result;
     try {
-        result = (new ECE(1024, parsed_program)).evaluate();
+        result = (new ECE(8 * 1024 * 1024, parsed_program)).evaluate();
     } catch (error) {
         if (error instanceof UnsupportedCommandError) {
             return `${error.message}\n${JSON.stringify(parsed_program, null, 2)}`;
