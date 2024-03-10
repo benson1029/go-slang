@@ -20,30 +20,29 @@ function buildBinaryExpression(head, tail) {
     }, head);
 }
 
-function buildFunctionDeclaration(name, param0, params, returnType, body) {
+function buildFunctionDeclaration(name, params, returnType, body) {
     return {
         tag: "function",
         name: name,
-        params: param0.map(x => { return { name: x[1], type: x[3] }; })
-            .concat(params.map(x => { return { name: x[3], type: x[5] }; })),
+        params: params,
         returnType: returnType,
         body: body
     };
 }
 
-function buildFunctionCall(name, arg0, args) {
+function buildFunctionCall(name, args) {
     return {
         tag: "call",
         name: name,
-        args: arg0.concat(args.map(x => x[3]))
+        args: args
     };
 }
 
-function buildAnonymousFunctionCall(func, arg0, args) {
+function buildAnonymousFunctionCall(func, args) {
     return {
         tag: "lambda-call",
         func: func,
-        args: arg0.concat(args.map(x => x[3]))
+        args: args
     };
 }
 
@@ -93,9 +92,9 @@ Comment
 
 // ===== 2. Literals and Expressions =====
 
-IntegerLiteral "int"
-    = [0-9]+ { return makeLiteral("int", parseInt(text(), 10)); }
-    / "-" [0-9]+ { return makeLiteral("int", -parseInt(text(), 10)); }
+IntegerLiteral "int32"
+    = [0-9]+ { return makeLiteral("int32", parseInt(text(), 10)); }
+    / "-" [0-9]+ { return makeLiteral("int32", -parseInt(text(), 10)); }
 
 FloatLiteral "float32"
     = [0-9]+ "." [0-9]+ { return makeLiteral("float32", parseFloat(text(), 10)); }
@@ -133,11 +132,23 @@ IdentifierWithPackage "identifier"
 Name "name"
     = identifier:Identifier { return { tag: "name", name: identifier }; }
 
+FunctionTypeList "functionTypeList"
+    = __ param0:Type __ params:((__ "," __ Type)*) __ { return [param0].concat(params.map(x => x[3])); }
+    / __ param0:Type __ { return [param0]; }
+    / __ { return []; }
+
+FunctionType "functionType"
+    = "func" __ "(" __ params:FunctionTypeList __ ")" __ returnType:Type { return { tag: "functionType", params: params, returnType: returnType }; }
+    / "func" __ "(" __ ")" __ returnType:Type { return { tag: "functionType", params: [], returnType: returnType }; }
+    / "func" __ "(" __ params:FunctionTypeList __ ")" { return { tag: "functionType", params: params, returnType: null }; }
+    / "func" __ "(" __ ")" { return { tag: "functionType", params: [], returnType: null }; }
+
 Type "type"
-    = "int" { return "int"; }
+    = "int32" { return "int32"; }
     / "float32" { return "float32"; }
     / "bool" { return "bool"; }
     / "string" { return "string"; }
+    / FunctionType { return "function"; }
 
 PrimaryExpression
     = AnonymousFunctionCall
@@ -212,6 +223,7 @@ LogicalOrExpression
 
 Expression
     = LogicalOrExpression
+    / AnonymousFunctionDeclaration
 
 // ===== 3. Statements =====
 
@@ -289,31 +301,32 @@ ContinueStatement "continue"
 
 // ===== 5. Function Declaration =====
 
+FunctionParamList
+    = __ param0:(__ Identifier __ Type) __ params:((__ "," __ Identifier __ Type)*) __ {
+        return [{name: param0[1], type: param0[3]}].concat(params.map(x => ({name: x[3], type: x[5]})));
+    }
+    / __ param0:(__ Identifier __ Type) __ { return [{name: param0[1], type: param0[3]}]; }
+    / __ { return []; }
+
 FunctionDeclaration
-    = "func" WhiteSpace __ name:Identifier __ "(" __ param0:(__ Identifier __ Type) __ params:((__ "," __ Identifier __ Type)*) __ ")" __ returnType:Type __ body:Block { return buildFunctionDeclaration(name, [param0], params, returnType, body); }
-    / "func" WhiteSpace __ name:Identifier __ "(" __ param0:(__ Identifier __ Type) __ params:((__ "," __ Identifier __ Type)*) __ ")" __ body:Block { return buildFunctionDeclaration(name, [param0], params, null, body); }
-    / "func" WhiteSpace __ name:Identifier __ "(" __ param0:(__ Identifier __ Type) __ ")" __ returnType:Type __ body:Block { return buildFunctionDeclaration(name, [param0], [], returnType, body); }
-    / "func" WhiteSpace __ name:Identifier __ "(" __ param0:(__ Identifier __ Type) __ ")" __ body:Block { return buildFunctionDeclaration(name, [param0], [], null, body); }
-    / "func" WhiteSpace __ name:Identifier __ "(" __ ")" __ returnType:Type __ body:Block { return buildFunctionDeclaration(name, [], [], returnType, body); }
-    / "func" WhiteSpace __ name:Identifier __ "(" __ ")" __ body:Block { return buildFunctionDeclaration(name, [], [], null, body); }
+    = "func" WhiteSpace __ name:Identifier __ "(" params:FunctionParamList __ ")" __ returnType:Type __ body:Block { return buildFunctionDeclaration(name, params, returnType, body); }
+    / "func" WhiteSpace __ name:Identifier __ "(" params:FunctionParamList __ ")" __ body:Block { return buildFunctionDeclaration(name, params, null, body); }
+
+FunctionArgList
+    = __ arg0:Expression args:((__ "," __ Expression)*) __ { return [arg0].concat(args.map(x => x[3])); }
+    / __ arg0:Expression __ { return [arg0]; }
+    / __ { return []; }
 
 FunctionCall
-    = name:IdentifierWithPackage __ "(" __ arg0:Expression args:((__ "," __ Expression)*) __ ")" { return buildFunctionCall(name, [arg0], args); }
-    / name:IdentifierWithPackage __ "(" __ arg0:Expression __ ")" { return buildFunctionCall(name, [arg0], []); }
-    / name:IdentifierWithPackage __ "(" __ ")" { return buildFunctionCall(name, [], []); }
+    = name:IdentifierWithPackage __ "(" __ args:FunctionArgList __ ")" { return buildFunctionCall(name, args); }
 
 AnonymousFunctionDeclaration
-    = "func" __ "(" __ param0:(__ Identifier __ Type) __ params:((__ "," __ Identifier __ Type)*) __ ")" __ returnType:Type __ body:Block { return buildFunctionDeclaration(null, [param0], params, returnType, body); }
-    / "func" __ "(" __ param0:(__ Identifier __ Type) __ params:((__ "," __ Identifier __ Type)*) __ ")" __ body:Block { return buildFunctionDeclaration(null, [param0], params, null, body); }
-    / "func" __ "(" __ param0:(__ Identifier __ Type) __ ")" __ returnType:Type __ body:Block { return buildFunctionDeclaration(null, [param0], [], returnType, body); }
-    / "func" __ "(" __ param0:(__ Identifier __ Type) __ ")" __ body:Block { return buildFunctionDeclaration(null, [param0], [], null, body); }
-    / "func" __ "(" __ ")" __ returnType:Type __ body:Block { return buildFunctionDeclaration(null, [], [], returnType, body); }
-    / "func" __ "(" __ ")" __ body:Block { return buildFunctionDeclaration(null, [], [], null, body); }
+    = "func" __ "(" __ params:FunctionParamList __ ")" __ returnType:Type __ body:Block { return buildFunctionDeclaration(null, params, returnType, body); }
+    / "func" __ "(" __ params:FunctionParamList __ ")" __ body:Block { return buildFunctionDeclaration(null, params, null, body); }
 
 AnonymousFunctionCall
-    = func:AnonymousFunctionDeclaration __ "(" __ arg0:Expression args:((__ "," __ Expression)*) __ ")" { return buildAnonymousFunctionCall(func, [arg0], args); }
-    / func:AnonymousFunctionDeclaration __ "(" __ arg0:Expression __ ")" { return buildAnonymousFunctionCall(func, [arg0], []); }
-    / func:AnonymousFunctionDeclaration __ "(" __ ")" { return buildAnonymousFunctionCall(func, [], []); }
+    = func:AnonymousFunctionDeclaration __ "(" __ args:FunctionArgList __ ")" { return buildAnonymousFunctionCall(func, args); }
+    / func:Name __ "(" __ args:FunctionArgList __ ")" { return buildAnonymousFunctionCall(func, args); }
 
 GoFunctionCall
     = "go" WhiteSpace __ func:FunctionCall { func.tag = "go-call"; return func; }

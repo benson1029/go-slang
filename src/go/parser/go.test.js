@@ -89,9 +89,9 @@ test(
 
         func main() {
             w := 1
-            var x int = 2
+            var x int32 = 2
             var y = 3
-            var z int
+            var z int32
             fmt.Println(x)
         }`;
         const result = await parse(code);
@@ -162,13 +162,13 @@ test(
         import "fmt"
 
         func main() {
-            func print(x int) {
+            func print(x int32) {
                 fmt.Println(x)
             }
             print(add(1, 2))
         }
 
-        func add(x int, y int) int {
+        func add(x int32, y int32) int32 {
             return x + y
         }`;
         const result = await parse(code);
@@ -184,13 +184,13 @@ test(
         import "fmt"
 
         func main() {
-            func(x int) {
+            func(x int32) {
                 fmt.Println(x)
             }(1)
             func() {
                 fmt.Println("anonymous")
             }()
-            x := 4 * func(x int, y int) int {
+            x := 4 * func(x int32, y int32) int32 {
                 return x + y
             }(1, 2) + 3
         }`;
