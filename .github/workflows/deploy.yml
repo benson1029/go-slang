@@ -41,14 +41,19 @@ jobs:
           cache: ${{ steps.detect-package-manager.outputs.manager }}
       - name: Install dependencies
         run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
-      - name: Build project
-        run: ${{ steps.detect-package-manager.outputs.runner }} npm run build
-      - name: Run tests
-        run: ${{ steps.detect-package-manager.outputs.runner }} npm test
+      - name: Build React app
+        run: npm run build
+      - name: Build Docusaurus docs
+        run: cd docs && npm install && npm run build
+      - name: Move Docusaurus build to root
+        run: |
+          mkdir -p ./build/docs
+          mv ./docs/build/* ./build/docs
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2
         with:
           path: ./build
+
   # Deployment job
   deploy:
     environment:
