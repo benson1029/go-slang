@@ -88,7 +88,7 @@ function CodeEditor() {
                     onChange={(e) => setHeapSize(e.target.value)}
                     />
                 <button
-                    onClick={() => window.location.replace('/docs/')}
+                    onClick={() => window.location.replace('./docs/')}
                     style={{
                         padding: '10px',
                         borderRadius: '5px',
