@@ -1,12 +1,10 @@
-const WORD_SIZE       = 8; // 2^3 = 8 bytes. All values below are in words.
+const WORD_SIZE       = 4; // 2^2 = 4 bytes.
 
-const HEADER_SIZE     = 1;
-
+// All values below are in words.
 const MIN_ALLOC_LOG2  = 1;
-const MIN_ALLOC       = 1 << MIN_ALLOC_LOG2;
-
-const MAX_ALLOC_LOG2  = 30;
-const MAX_ALLOC       = 1 << MAX_ALLOC_LOG2;
+const MIN_ALLOC       = 2 ** MIN_ALLOC_LOG2;
+const MAX_ALLOC_LOG2  = 31;
+const MAX_ALLOC       = 2 ** MAX_ALLOC_LOG2;
 
 class BuddyAllocator {
   private data: ArrayBuffer;
@@ -17,7 +15,6 @@ class BuddyAllocator {
    *
    * Assumption: memory at most 2^33 bytes.
    * Apparently ArrayBuffer is limited to 2^33 bytes on 64-bit systems (Firefox 89).
-   * Therefore, at most 2^30 nodes in binary tree. We can use << and >> without overflow.
    * - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Errors/Invalid_array_length
    *
    * We split memory into [kernel] and [user].
@@ -36,31 +33,45 @@ class BuddyAllocator {
   private numNodesLog2: number;
 
   private baseUser: number;       // base address of [user] memory
+  private endUser: number;        // end  address of [user] memory
   // baseUser + i: 0 <= i < memorySize
 
   private baseFreeList: number;   // base address of free list buckets
-  // baseFreeList + i: free list for 2^{MIN_ALLOC_LOG2 + i} words, 0 <= i < BUCKET_COUNT
+  // baseFreeList + i: free list for 2^{numNodesLog2 - i + MIN_ALLOC_LOG2} words, 0 <= i < BUCKET_COUNT
 
   private baseBinaryTree: number; // base address of is_split memory
   // baseBinaryTree + i: 1-indexed binary tree, 1 <= i <= 2^{numNodesLog2 - 1}
-  // the value of i-th bit represents how many of its children is in free list, mod 2
+  // the value of (2i)-th and (2i+1)-bit represents whether its children is in the free list
 
-  private memory_get_64(address: number): number {
-    return this.memory.getFloat64(address * WORD_SIZE);
+  private memory_get_word(address: number): number {
+    return this.memory.getInt32(address);
   }
 
-  private memory_set_64(address: number, value: number): void {
-    this.memory.setFloat64(address * WORD_SIZE, value);
+  private memory_set_word(address: number, value: number): void {
+    this.memory.setInt32(address, value);
   }
 
-  private get_bucket(size: number): number | null {
-    // Size is in words
-    if (size > MAX_ALLOC) {
+  private memory_get_bit(address: number, bit: number): boolean {
+    const value = this.memory.getInt8(address);
+    return (value & (1 << bit)) !== 0;
+  }
+
+  private memory_set_bit(address: number, bit: number, value: boolean): void {
+    const oldValue = this.memory.getInt8(address);
+    if (value) {
+      this.memory.setInt8(address, oldValue | (1 << bit));
+    } else {
+      this.memory.setInt8(address, oldValue & ~(1 << bit));
+    }
+  }
+
+  private get_bucket(words: number): number | null {
+    if (words > MAX_ALLOC) {
       return null;
     }
 
     let s = MIN_ALLOC_LOG2;
-    while ((1 << s) < size) {
+    while ((2 ** s) < words) {
       s += 1;
     }
     if (s > this.numNodesLog2 + MIN_ALLOC_LOG2) {
@@ -70,36 +81,36 @@ class BuddyAllocator {
   }
 
   private init_free_list(bucket: number): void {
-    const head = this.baseFreeList + bucket * MIN_ALLOC;
-    this.memory_set_64(head, head);     // prev
-    this.memory_set_64(head + 1, head); // next
+    const head = this.baseFreeList + bucket * MIN_ALLOC * WORD_SIZE;
+    this.memory_set_word(head, head);     // prev
+    this.memory_set_word(head + WORD_SIZE, head); // next
   }
 
   private insert_free_list(bucket: number, address: number): void {
     const node = this.pointer_to_node(address, bucket);
-    this.toggle_split_parent(node);
+    this.toggle_node_status(node);
 
-    const head = this.baseFreeList + bucket * MIN_ALLOC;
-    const next = this.memory_get_64(head + 1);
-    this.memory_set_64(address, head);      // prev
-    this.memory_set_64(address + 1, next);  // next
-    this.memory_set_64(head + 1, address);  // next
-    this.memory_set_64(next, address);      // prev
+    const head = this.baseFreeList + bucket * MIN_ALLOC * WORD_SIZE;
+    const next = this.memory_get_word(head + WORD_SIZE);
+    this.memory_set_word(address, head);
+    this.memory_set_word(address + WORD_SIZE, next);
+    this.memory_set_word(head + WORD_SIZE, address);
+    this.memory_set_word(next, address);
   }
 
   private remove_free_list(bucket: number, address: number): void {
     const node = this.pointer_to_node(address, bucket);
-    this.toggle_split_parent(node);
+    this.toggle_node_status(node);
 
-    const prev = this.memory_get_64(address);
-    const next = this.memory_get_64(address + 1);
-    this.memory_set_64(prev + 1, next);
-    this.memory_set_64(next, prev);
+    const prev = this.memory_get_word(address);
+    const next = this.memory_get_word(address + WORD_SIZE);
+    this.memory_set_word(prev + WORD_SIZE, next);
+    this.memory_set_word(next, prev);
   }
 
   private pop_free_list(bucket: number): number | null {
-    const head = this.baseFreeList + bucket * MIN_ALLOC;
-    const address = this.memory_get_64(head);
+    const head = this.baseFreeList + bucket * MIN_ALLOC * WORD_SIZE;
+    const address = this.memory_get_word(head);
 
     if (head === address) {
       return null;
@@ -110,31 +121,71 @@ class BuddyAllocator {
   }
 
   private node_to_pointer(node: number, bucket: number): number {
-    const multiplier = 1 << (this.numNodesLog2 - bucket);
-    return this.baseUser + (node - (1 << bucket)) * multiplier * MIN_ALLOC;
+    const multiplier = 2 ** (this.numNodesLog2 - bucket);
+    return this.baseUser + (node - (2 ** bucket)) * multiplier * MIN_ALLOC * WORD_SIZE;
   }
 
   private pointer_to_node(pointer: number, bucket: number): number {
-    const multiplier = 1 << (this.numNodesLog2 - bucket);
-    return (pointer - this.baseUser) / MIN_ALLOC / multiplier + (1 << bucket);
+    const multiplier = 2 ** (this.numNodesLog2 - bucket);
+    return (pointer - this.baseUser) / multiplier / MIN_ALLOC / WORD_SIZE + (2 ** bucket);
   }
 
-  private toggle_split_parent(node: number): void {
-    node = node >> 1 // get parent
-    const bit = node % 8;
-    const byte = (node - bit) / 8;
-    const address = this.baseBinaryTree * WORD_SIZE + byte;
-    const value = this.memory.getUint8(address);
-    this.memory.setUint8(address, value ^ (1 << bit));
+  private toggle_node_status(node: number): void {
+    const ch = node % 2    // left child or right child
+    node = (node - ch) / 2 // get parent
+    const bit_offset = node * 2 + ch
+
+    const bit = bit_offset % 8;
+    const byte = (bit_offset - bit) / 8;
+    const address = this.baseBinaryTree + byte;
+    const bit_value = this.memory_get_bit(address, bit);
+    this.memory_set_bit(address, bit, !bit_value);
   }
 
-  private is_split_parent(node: number): boolean {
-    node = node >> 1 // get parent
-    const bit = node % 8;
-    const byte = (node - bit) / 8;
-    const address = this.baseBinaryTree * WORD_SIZE + byte;
-    const value = this.memory.getUint8(address);
-    return (value & (1 << bit)) !== 0;
+  private is_sibling_free(node: number): boolean {
+    const ch = node % 2    // left child or right child
+    node = (node - ch) / 2 // get parent
+    const bit_offset = node * 2 + (1 - ch)
+
+    const bit = bit_offset % 8;
+    const byte = (bit_offset - bit) / 8;
+    const address = this.baseBinaryTree + byte;
+    return this.memory_get_bit(address, bit);
+  }
+
+  private is_self_free(node: number): boolean {
+    const ch = node % 2    // left child or right child
+    node = (node - ch) / 2 // get parent
+    const bit_offset = node * 2 + ch
+
+    const bit = bit_offset % 8;
+    const byte = (bit_offset - bit) / 8;
+    const address = this.baseBinaryTree + byte;
+    return this.memory_get_bit(address, bit);
+  }
+
+  private write_bucket_value(address: number, bucket: number): void {
+    for (let i = 0; i < 5; i++) {
+      this.memory_set_bit(address, i, (bucket & (1 << i)) !== 0);
+    }
+  }
+
+  private read_bucket_value(address: number): number {
+    let bucket = 0;
+    for (let i = 0; i < 5; i++) {
+      if (this.memory_get_bit(address, i)) {
+        bucket |= (1 << i);
+      }
+    }
+    return bucket;
+  }
+
+  private set_mark_and_sweep(address: number, value: boolean): void {
+    this.memory_set_bit(address, 5, value);
+  }
+
+  private get_mark_and_sweep(address: number): boolean {
+    return this.memory_get_bit(address, 5);
   }
 
   constructor(words: number) {
@@ -164,7 +215,7 @@ class BuddyAllocator {
 
       const log2_ceil = (num: number) => {
         let re = 0;
-        while ((1 << re) < num) {
+        while ((2 ** re) < num) {
           re += 1;
         }
         return re;
@@ -181,7 +232,7 @@ class BuddyAllocator {
         num += (log2_ceil(num_nodes) + 1) * (MIN_ALLOC * WORD_SIZE);
 
         // Binary tree nodes
-        num += pad_bits(1 << log2_ceil(num_nodes));
+        num += pad_bits((2 ** log2_ceil(num_nodes)) * 2)
 
         return num;
       };
@@ -192,8 +243,8 @@ class BuddyAllocator {
 
       this.numNodes = 0;
       for (let i = MAX_ALLOC_LOG2; i >= 0; i--) {
-        if (num_bytes_needed(this.numNodes + (1 << i)) <= num_bytes) {
-          this.numNodes += (1 << i);
+        if (num_bytes_needed(this.numNodes + (2 ** i)) <= num_bytes) {
+          this.numNodes += (2 ** i);
         }
       }
       this.numNodesLog2 = log2_ceil(this.numNodes);
@@ -202,31 +253,39 @@ class BuddyAllocator {
 
       // Initialize free list space
       this.baseFreeList = currentSize;
-      currentSize += (this.numNodesLog2 + 1) * MIN_ALLOC;
+      currentSize += (this.numNodesLog2 + 1) * MIN_ALLOC * WORD_SIZE;
 
       // Initialize binary tree space
       this.baseBinaryTree = currentSize;
-      currentSize += pad_bits(1 << this.numNodesLog2) / WORD_SIZE;
+      currentSize += pad_bits((2 ** this.numNodesLog2) * 2);
 
       // Initialize user space
       this.baseUser = currentSize;
-      currentSize += this.numNodes * MIN_ALLOC;
+      currentSize += this.numNodes * MIN_ALLOC * WORD_SIZE;
 
       // Initialize free list
       let address = this.baseUser;
+      this.endUser = this.baseUser + this.numNodes * MIN_ALLOC * WORD_SIZE;
       for (let i = this.numNodesLog2; i >= 0; i--) {
         const bucket = this.numNodesLog2 - i
         this.init_free_list(bucket);
-        if ((this.numNodes & (1 << i)) !== 0) {
+        const new_address = address + (2 ** i) * MIN_ALLOC * WORD_SIZE;
+        if (new_address <= this.endUser) {
           this.insert_free_list(bucket, address);
-          address += (1 << i) * MIN_ALLOC;
+          address = new_address
         }
       }
+      // console.assert(address === this.endUser);
+      // console.log("Memory allocated:", this.numNodes, this.baseUser / WORD_SIZE, words, currentSize / WORD_SIZE);
     }
   }
 
-  allocate(size: number): number | null {
-    const bucket = this.get_bucket(size + HEADER_SIZE);
+  allocate(words: number): number | null {
+    if (words <= 0) {
+      return null;
+    }
+
+    const bucket = this.get_bucket(words);
     if (bucket === null) {
       return null;
     }
@@ -248,13 +307,22 @@ class BuddyAllocator {
     // Split
     while (i < bucket) {
       i += 1; // move to left child
+      // console.log("Split", address / WORD_SIZE, i)
       const node = this.pointer_to_node(address, i);
       const buddy = this.node_to_pointer(node ^ 1, i);
       this.insert_free_list(i, buddy);
     }
 
-    this.memory_set_64(address, size);
-    return address + HEADER_SIZE;
+    // We initialize everything to 0
+    for (let j = 0; j < words; j++) {
+      this.memory_set_word(address + j * WORD_SIZE, 0);
+    }
+
+    // We also keep the bucket value on first 5 bits of the first word
+    this.write_bucket_value(address, bucket);
+
+    // console.log("Allocate:", address / WORD_SIZE, bucket)
+    return address;
   }
 
   deallocate(address: number): void {
@@ -262,28 +330,89 @@ class BuddyAllocator {
       return;
     }
 
-    address -= HEADER_SIZE;
-    const size = this.memory_get_64(address);
-    let bucket = this.get_bucket(size + HEADER_SIZE);
-
-    if (bucket === null) {
-      // This should never happen.
-      // Possibly double free or memory corruption.
-      return;
-    }
-
+    let bucket = this.read_bucket_value(address);
     let node = this.pointer_to_node(address, bucket);
-    while (bucket >= 0) {
-      if (this.is_split_parent(node)) {
+
+    // console.log("Deallocate", address / WORD_SIZE, bucket)
+
+    while (bucket >= 0) {``
+      if (this.is_sibling_free(node)) {
         // Buddy is in free list
+        // console.log("Merge", address / WORD_SIZE, bucket)
         const buddy = this.node_to_pointer(node ^ 1, bucket);
         this.remove_free_list(bucket, buddy);
-        node = node >> 1;
+        node = (node - (node % 2)) / 2;
         bucket -= 1;
       } else {
         // Buddy is not in free list
-        this.insert_free_list(bucket, address);
+        // console.log("Free", this.node_to_pointer(node, bucket) / WORD_SIZE, bucket)
+        this.insert_free_list(bucket, this.node_to_pointer(node, bucket));
         break;
+      }
+    }
+  }
+
+  // Free all nodes with mark/sweep bit 0
+  sweep_and_free(): void {
+    // console.log("Sweep and free");
+
+    let node = 1;
+    let bucket = 0;
+    let address = this.node_to_pointer(node, bucket);
+    while (address < this.endUser) {
+      let nodeAddressStart = this.node_to_pointer(node, bucket);
+      let nodeAddressEnd = nodeAddressStart + (2 ** (this.numNodesLog2 - bucket)) * MIN_ALLOC * WORD_SIZE;
+
+      // console.assert(nodeAddressStart <= address);
+
+      if (address >= nodeAddressEnd) {
+        // address not reachable from current node
+        node = (node - (node % 2)) / 2;
+        bucket -= 1;
+        continue;
+      }
+
+      // console.assert(nodeAddressStart <= address && address < nodeAddressEnd);
+
+      if (this.is_self_free(node)) {
+        address = nodeAddressEnd;
+        continue;
+      }
+
+      // current address is allocated
+      if (bucket == this.numNodesLog2) {
+        if (this.get_mark_and_sweep(address)) {
+          // already marked, this node is alive
+          // we reset the mark bit
+          this.set_mark_and_sweep(address, false);
+          const allocated_bucket = this.read_bucket_value(address);
+          address += (2 ** (this.numNodesLog2 - allocated_bucket)) * MIN_ALLOC * WORD_SIZE;
+        } else {
+          // not marked, this node is dead
+          // we deallocate this node
+          this.deallocate(address);
+
+          // address deallocated, we need which level it got put in free list
+          while (!this.is_self_free(node)) {
+            node = (node - (node % 2)) / 2;
+            bucket -= 1;
+          }
+
+          // node is in the free list, we move to something after this node
+          address = this.node_to_pointer(node, bucket) + (2 ** (this.numNodesLog2 - bucket)) * MIN_ALLOC * WORD_SIZE;
+        }
+      } else {
+        // need to check whether address is allocated or not
+        const nodeAddressMiddle = this.node_to_pointer(node * 2 + 1, bucket + 1);
+        if (address < nodeAddressMiddle) {
+          // address is in left child
+          node = node * 2;
+          bucket += 1;
+        } else {
+          // address is in right child
+          node = node * 2 + 1;
+          bucket += 1;
+        }
       }
     }
   }
