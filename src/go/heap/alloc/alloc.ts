@@ -43,26 +43,34 @@ class BuddyAllocator {
   // baseBinaryTree + i: 1-indexed binary tree, 1 <= i <= 2^{numNodesLog2 - 1}
   // the value of (2i)-th and (2i+1)-bit represents whether its children is in the free list
 
-  private memory_get_word(address: number): number {
+  memory_get_word(address: number): number {
     return this.memory.getInt32(address);
   }
 
-  private memory_set_word(address: number, value: number): void {
+  memory_set_word(address: number, value: number): void {
     this.memory.setInt32(address, value);
   }
 
-  private memory_get_bit(address: number, bit: number): boolean {
+  memory_get_bit(address: number, bit: number): boolean {
     const value = this.memory.getInt8(address);
     return (value & (1 << bit)) !== 0;
   }
 
-  private memory_set_bit(address: number, bit: number, value: boolean): void {
+  memory_set_bit(address: number, bit: number, value: boolean): void {
     const oldValue = this.memory.getInt8(address);
     if (value) {
       this.memory.setInt8(address, oldValue | (1 << bit));
     } else {
       this.memory.setInt8(address, oldValue & ~(1 << bit));
     }
+  }
+
+  set_mark_and_sweep(address: number, value: boolean): void {
+    this.memory_set_bit(address, 5, value);
+  }
+
+  get_mark_and_sweep(address: number): boolean {
+    return this.memory_get_bit(address, 5);
   }
 
   private get_bucket(words: number): number | null {
@@ -178,14 +186,6 @@ class BuddyAllocator {
       }
     }
     return bucket;
-  }
-
-  private set_mark_and_sweep(address: number, value: boolean): void {
-    this.memory_set_bit(address, 5, value);
-  }
-
-  private get_mark_and_sweep(address: number): boolean {
-    return this.memory_get_bit(address, 5);
   }
 
   constructor(words: number) {
@@ -380,7 +380,7 @@ class BuddyAllocator {
       }
 
       // current address is allocated
-      if (bucket == this.numNodesLog2) {
+      if (bucket === this.numNodesLog2) {
         if (this.get_mark_and_sweep(address)) {
           // already marked, this node is alive
           // we reset the mark bit
