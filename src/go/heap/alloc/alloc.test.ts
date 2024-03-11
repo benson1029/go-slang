@@ -224,4 +224,44 @@ describe('BuddyAllocator', () => {
       allocator.sweep_and_free();
     }
   });
+
+  it('should handle cannot-be-freed', () => {
+    const allocator = new BuddyAllocator(64);
+    // 50 words in total
+
+    const address1 = allocator.allocate(32);
+    const address2 = allocator.allocate(16);
+    const address3 = allocator.allocate(2);
+
+    expect(address1).not.toBeNull();
+    expect(address2).not.toBeNull();
+    expect(address3).not.toBeNull();
+
+    allocator.set_cannnot_be_freed(address2, true);
+    allocator.deallocate(address2);
+
+    const address4 = allocator.allocate(16);
+    expect(address4).toBeNull();
+
+    allocator.sweep_and_free();
+
+    const address5 = allocator.allocate(32);
+    const address6 = allocator.allocate(16);
+    const address7 = allocator.allocate(2);
+
+    expect(address5).not.toBeNull();
+    expect(address6).toBeNull();
+    expect(address7).not.toBeNull();
+
+    allocator.set_cannnot_be_freed(address2, false);
+    allocator.sweep_and_free();
+
+    const address8 = allocator.allocate(32);
+    const address9 = allocator.allocate(16);
+    const address10 = allocator.allocate(2);
+
+    expect(address8).not.toBeNull();
+    expect(address9).not.toBeNull();
+    expect(address10).not.toBeNull();
+  });
 });

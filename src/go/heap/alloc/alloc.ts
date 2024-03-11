@@ -43,34 +43,66 @@ class BuddyAllocator {
   // baseBinaryTree + i: 1-indexed binary tree, 1 <= i <= 2^{numNodesLog2 - 1}
   // the value of (2i)-th and (2i+1)-bit represents whether its children is in the free list
 
-  memory_get_word(address: number): number {
+  public memory_get_float32(address: number): number {
+    return this.memory.getFloat32(address);
+  }
+
+  public memory_set_float32(address: number, value: number): void {
+    this.memory.setFloat32(address, value);
+  }
+
+  public memory_get_word(address: number): number {
     return this.memory.getInt32(address);
   }
 
-  memory_set_word(address: number, value: number): void {
+  public memory_set_word(address: number, value: number): void {
     this.memory.setInt32(address, value);
   }
 
-  memory_get_bit(address: number, bit: number): boolean {
-    const value = this.memory.getInt8(address);
+  public memory_get_byte(address: number): number {
+    return this.memory.getInt8(address);
+  }
+
+  public memory_set_byte(address: number, value: number): void {
+    this.memory.setInt8(address, value);
+  }
+
+  public memory_get_2_bytes(address: number): number {
+    return this.memory.getInt16(address);
+  }
+
+  public memory_set_2_bytes(address: number, value: number): void {
+    this.memory.setInt16(address, value);
+  }
+
+  public memory_get_bit(address: number, bit: number): boolean {
+    const value = this.memory_get_byte(address);
     return (value & (1 << bit)) !== 0;
   }
 
-  memory_set_bit(address: number, bit: number, value: boolean): void {
-    const oldValue = this.memory.getInt8(address);
+  public memory_set_bit(address: number, bit: number, value: boolean): void {
+    const oldValue = this.memory_get_byte(address);
     if (value) {
-      this.memory.setInt8(address, oldValue | (1 << bit));
+      this.memory_set_byte(address, oldValue | (1 << bit));
     } else {
-      this.memory.setInt8(address, oldValue & ~(1 << bit));
+      this.memory_set_byte(address, oldValue & ~(1 << bit));
     }
   }
 
-  set_mark_and_sweep(address: number, value: boolean): void {
+  public set_mark_and_sweep(address: number, value: boolean): void {
     this.memory_set_bit(address, 5, value);
   }
 
-  get_mark_and_sweep(address: number): boolean {
+  public get_mark_and_sweep(address: number): boolean {
     return this.memory_get_bit(address, 5);
+  }
+
+  public set_cannnot_be_freed(address: number, value: boolean): void {
+    this.memory_set_bit(address, 6, value);
+  }
+
+  public get_cannnot_be_freed(address: number): boolean {
+    return this.memory_get_bit(address, 6);
   }
 
   private get_bucket(words: number): number | null {
@@ -86,6 +118,10 @@ class BuddyAllocator {
       return null;
     }
     return this.numNodesLog2 + MIN_ALLOC_LOG2 - s;
+  }
+
+  public bucket_to_words(bucket: number): number {
+    return 2 ** (this.numNodesLog2 + MIN_ALLOC_LOG2 - bucket);
   }
 
   private init_free_list(bucket: number): void {
@@ -280,7 +316,7 @@ class BuddyAllocator {
     }
   }
 
-  allocate(words: number): number | null {
+  public allocate(words: number): number | null {
     if (words <= 0) {
       return null;
     }
@@ -325,8 +361,8 @@ class BuddyAllocator {
     return address;
   }
 
-  deallocate(address: number): void {
-    if (address === null) {
+  public deallocate(address: number): void {
+    if (address === null || this.get_cannnot_be_freed(address)) {
       return;
     }
 
@@ -353,7 +389,7 @@ class BuddyAllocator {
   }
 
   // Free all nodes with mark/sweep bit 0
-  sweep_and_free(): void {
+  public sweep_and_free(): void {
     // console.log("Sweep and free");
 
     let node = 1;
@@ -361,7 +397,7 @@ class BuddyAllocator {
     let address = this.node_to_pointer(node, bucket);
     while (address < this.endUser) {
       let nodeAddressStart = this.node_to_pointer(node, bucket);
-      let nodeAddressEnd = nodeAddressStart + (2 ** (this.numNodesLog2 - bucket)) * MIN_ALLOC * WORD_SIZE;
+      let nodeAddressEnd = nodeAddressStart + this.bucket_to_words(bucket) * WORD_SIZE;
 
       // console.assert(nodeAddressStart <= address);
 
@@ -381,12 +417,12 @@ class BuddyAllocator {
 
       // current address is allocated
       if (bucket === this.numNodesLog2) {
-        if (this.get_mark_and_sweep(address)) {
+        if (this.get_mark_and_sweep(address) || this.get_cannnot_be_freed(address)) {
           // already marked, this node is alive
           // we reset the mark bit
           this.set_mark_and_sweep(address, false);
           const allocated_bucket = this.read_bucket_value(address);
-          address += (2 ** (this.numNodesLog2 - allocated_bucket)) * MIN_ALLOC * WORD_SIZE;
+          address += this.bucket_to_words(allocated_bucket) * WORD_SIZE;
         } else {
           // not marked, this node is dead
           // we deallocate this node
@@ -399,7 +435,7 @@ class BuddyAllocator {
           }
 
           // node is in the free list, we move to something after this node
-          address = this.node_to_pointer(node, bucket) + (2 ** (this.numNodesLog2 - bucket)) * MIN_ALLOC * WORD_SIZE;
+          address = this.node_to_pointer(node, bucket) + this.bucket_to_words(bucket) * WORD_SIZE;
         }
       } else {
         // need to check whether address is allocated or not
@@ -418,4 +454,4 @@ class BuddyAllocator {
   }
 }
 
-export { BuddyAllocator };
+export { BuddyAllocator, WORD_SIZE };
