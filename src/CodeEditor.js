@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlay, faRefresh } from '@fortawesome/free-solid-svg-icons';
+import { faBook, faPlay, faRefresh } from '@fortawesome/free-solid-svg-icons';
 import CodeMirror from '@uiw/react-codemirror';
 import { StreamLanguage } from '@codemirror/language';
 import { go } from '@codemirror/legacy-modes/mode/go';
@@ -87,6 +87,23 @@ function CodeEditor() {
                     value={heapSize}
                     onChange={(e) => setHeapSize(e.target.value)}
                     />
+                <button
+                    onClick={() => window.location.replace('/docs/')}
+                    style={{
+                        padding: '10px',
+                        borderRadius: '5px',
+                        backgroundColor: '#2e3235',
+                        color: 'white',
+                        border: 'none',
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        marginLeft: '10px'
+                    }}
+                >
+                    <FontAwesomeIcon icon={faBook} style={{ marginRight: '5px' }} />
+                    Language Specification
+                </button>
             </div>
             <div style={{ height: 'calc(100% - 40px)', width: '50%', float: 'left' }}>
                 <div style={{ height: 'calc(100% - 40px)', border: '1px solid #ccc' }}>
