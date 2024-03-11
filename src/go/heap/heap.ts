@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { BuddyAllocator, WORD_SIZE } from "./alloc";
 
 // TODO: Store the contents in the BuddyAllocator. This is a placeholder.
