@@ -335,7 +335,7 @@ class BuddyAllocator {
 
     // console.log("Deallocate", address / WORD_SIZE, bucket)
 
-    while (bucket >= 0) {``
+    while (bucket >= 0) {
       if (this.is_sibling_free(node)) {
         // Buddy is in free list
         // console.log("Merge", address / WORD_SIZE, bucket)
