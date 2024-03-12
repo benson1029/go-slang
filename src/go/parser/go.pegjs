@@ -326,7 +326,6 @@ AnonymousFunctionDeclaration
 
 AnonymousFunctionCall
     = func:AnonymousFunctionDeclaration __ "(" __ args:FunctionArgList __ ")" { return buildAnonymousFunctionCall(func, args); }
-    / func:Name __ "(" __ args:FunctionArgList __ ")" { return buildAnonymousFunctionCall(func, args); }
 
 GoFunctionCall
     = "go" WhiteSpace __ func:FunctionCall { func.tag = "go-call"; return func; }
