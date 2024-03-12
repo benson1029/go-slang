@@ -88,7 +88,7 @@ describe('BuddyAllocator', () => {
   });
 
   it('should handle edge case of allocating maximum memory', () => {
-    const allocator = new BuddyAllocator(546); // Allocate 534 words of memory (512 user, 22 kernel)
+    const allocator = new BuddyAllocator(548); // (512 user, 36 kernel)
     // Allocate maximum memory block
     const address = allocator.allocate(512);
     expect(address).not.toBeNull();
@@ -130,7 +130,7 @@ describe('BuddyAllocator', () => {
   });
 
   it('should handle mark_and_sweep', () => {
-    const allocator = new BuddyAllocator(1024); // Allocate 1024 words of memory
+    const allocator = new BuddyAllocator(1026);
     // Allocate memory blocks
     // 972 words = 512 + 256 + 128 + 64 + 8 + 4
     const address1 = allocator.allocate(100);
@@ -198,7 +198,7 @@ describe('BuddyAllocator', () => {
   });
 
   it('should handle mark_and_sweep', () => {
-    const allocator = new BuddyAllocator(64);
+    const allocator = new BuddyAllocator(66);
     // 50 words in total
     
     const address1 = allocator.allocate(32);
@@ -226,7 +226,7 @@ describe('BuddyAllocator', () => {
   });
 
   it('should handle cannot-be-freed', () => {
-    const allocator = new BuddyAllocator(64);
+    const allocator = new BuddyAllocator(66);
     // 50 words in total
 
     const address1 = allocator.allocate(32);

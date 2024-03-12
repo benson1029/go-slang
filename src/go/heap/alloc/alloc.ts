@@ -261,6 +261,9 @@ class BuddyAllocator {
         // Assume node is a power of 2
         let num = 0
 
+        // Reserved for nil node
+        num += MIN_ALLOC * WORD_SIZE;
+
         // User nodes
         num += num_nodes * (MIN_ALLOC * WORD_SIZE);
 
@@ -286,6 +289,7 @@ class BuddyAllocator {
       this.numNodesLog2 = log2_ceil(this.numNodes);
 
       let currentSize = 0;
+      currentSize += MIN_ALLOC * WORD_SIZE; // Reserved for nil node
 
       // Initialize free list space
       this.baseFreeList = currentSize;
@@ -362,7 +366,7 @@ class BuddyAllocator {
   }
 
   public deallocate(address: number): void {
-    if (address === null || this.get_cannnot_be_freed(address)) {
+    if (address === null || address === 0 || this.get_cannnot_be_freed(address)) {
       return;
     }
 
