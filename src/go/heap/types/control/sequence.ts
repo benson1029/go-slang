@@ -5,16 +5,21 @@
  */
 
 import { Heap } from "../../heap";
+import { ComplexLinkedList } from "../complex/linked_list";
 import { HeapObject } from "../objects";
 import { TAG_CONTROL_sequence } from "../tags";
 
 class ControlSequence extends HeapObject {
-  public copy(): number {
-    this.increment_reference_count();
-    return this.address;
+  public get_linked_list_address(): number {
+    return this.get_child(0);
   }
 
-  
+  public remove_first_linked_list_element(): void {
+    const linked_list = new ComplexLinkedList(this.heap, this.get_linked_list_address());
+    const new_linked_list_address = linked_list.get_next_address();
+    this.set_child(0, this.heap.reference_object(new_linked_list_address));
+    linked_list.free();
+  }
 
   public static allocate(heap: Heap, body: any[]): number {
     const address = heap.allocate_object(TAG_CONTROL_sequence, 1, 1);

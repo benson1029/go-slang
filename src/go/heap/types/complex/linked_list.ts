@@ -15,11 +15,6 @@ import { HeapObject } from "../objects";
 import { TAG_COMPLEX_linked_list } from "../tags";
 
 class ComplexLinkedList extends HeapObject {
-  public copy(): number {
-    this.increment_reference_count();
-    return this.address;
-  }
-
   public get_value_address(): number {
     return this.get_child(0);
   }
@@ -28,7 +23,27 @@ class ComplexLinkedList extends HeapObject {
     return this.get_child(1);
   }
 
-  public static allocate(heap: Heap, values: any[]): number {
+  public static allocate(heap: Heap, value: any, next_address: number): number {
+    heap.set_cannnot_be_freed(next_address, true);
+
+    const head = heap.allocate_object(TAG_COMPLEX_linked_list, 1, 2);
+    heap.set_cannnot_be_freed(head, true);
+
+    const head_value = heap.allocate_any(value);
+    heap.set_cannnot_be_freed(head_value, true);
+
+    heap.set_child(head, 0, head_value);
+    heap.set_child(head, 1, heap.reference_object(next_address));
+
+    // Unmark cannot-be-free
+    heap.set_cannnot_be_freed(head, false);
+    heap.set_cannnot_be_freed(head_value, false);
+    heap.set_cannnot_be_freed(next_address, false);
+
+    return head;
+  }
+
+  public static allocate_from_array(heap: Heap, values: any[]): number {
     if (values.length === 0) {
       return 0;
     }

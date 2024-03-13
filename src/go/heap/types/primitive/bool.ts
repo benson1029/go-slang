@@ -12,11 +12,6 @@ import { HeapObject } from "../objects";
 import { TAG_PRIMITIVE_bool } from "../tags";
 
 class PrimitiveBool extends HeapObject {
-  public copy(): number {
-    const copy_address = PrimitiveBool.allocate(this.heap, this.get_value());
-    return copy_address;
-  }
-
   public get_value(): boolean {
     return this.get_field(0) === 1;
   }

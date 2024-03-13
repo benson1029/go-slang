@@ -1,6 +1,6 @@
 import { Heap } from "../heap"
 
-abstract class HeapObject {
+class HeapObject {
   public heap: Heap;
   public address: number;
 
@@ -37,10 +37,6 @@ abstract class HeapObject {
     this.heap.set_child(this.address, index, value);
   }
 
-  public get_reference_count(): number {
-    return this.heap.get_reference_count(this.address);
-  }
-
   public increment_reference_count(): void {
     this.heap.increment_reference_count(this.address);
   }
@@ -57,7 +53,13 @@ abstract class HeapObject {
     this.heap.free_object(this.address);
   }
 
-  public abstract copy(): number;
+  public reference(): number {
+    return this.heap.reference_object(this.address);
+  }
+
+  public copy(): number {
+    return this.heap.copy_object(this.address);
+  }
 };
 
 export { HeapObject };

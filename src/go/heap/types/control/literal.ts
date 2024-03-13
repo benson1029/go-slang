@@ -15,11 +15,6 @@ import { PrimitiveInt32 } from "../primitive/int32";
 import { TAG_CONTROL_literal } from "../tags";
 
 class ControlLiteral extends HeapObject {
-  public copy(): number {
-    this.increment_reference_count();
-    return this.address;
-  }
-
   public get_type_address(): number {
     return this.get_child(0);
   }

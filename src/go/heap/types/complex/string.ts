@@ -13,11 +13,6 @@ import { PrimitiveRune } from "../primitive/rune";
 import { TAG_COMPLEX_string } from "../tags";
 
 class ComplexString extends HeapObject {
-  public copy(): number {
-    this.increment_reference_count();
-    return this.address;
-  }
-
   public get_string(): string {
     let str = "";
     for (let i = 0; i < this.get_number_of_children(); i++) {

@@ -13,11 +13,6 @@ import { HeapObject } from "../objects";
 import { TAG_CONTROL_assign } from "../tags";
 
 class ControlAssign extends HeapObject {
-  public copy(): number {
-    this.increment_reference_count();
-    return this.address;
-  }
-
   public get_name_address(): number {
     return this.get_child(0);
   }

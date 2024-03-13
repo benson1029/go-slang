@@ -12,11 +12,6 @@ import { HeapObject } from "../objects";
 import { TAG_COMPLEX_pointer } from "../tags";
 
 class ComplexPointer extends HeapObject {
-  public copy(): number {
-    const copy_address = ComplexPointer.allocate(this.heap, this.get_value());
-    return copy_address;
-  }
-
   public get_value(): number {
     return this.get_child(0);
   }

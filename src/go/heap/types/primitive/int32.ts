@@ -12,11 +12,6 @@ import { HeapObject } from "../objects";
 import { TAG_PRIMITIVE_int32 } from "../tags";
 
 class PrimitiveInt32 extends HeapObject {
-  public copy(): number {
-    const copy_address = PrimitiveInt32.allocate(this.heap, this.get_value());
-    return copy_address;
-  }
-
   public get_value(): number {
     return this.get_field(0);
   }

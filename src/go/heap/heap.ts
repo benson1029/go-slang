@@ -230,6 +230,30 @@ class Heap {
         }
     }
 
+    public copy_object(address: number): number {
+        this.set_cannnot_be_freed(address, true);
+
+        const copy_address = this.allocate_object(
+            this.get_tag(address),
+            this.get_number_of_fields(address),
+            this.get_number_of_children(address)
+        );
+        for (let i = 0; i < this.get_number_of_fields(address); i++) {
+            this.set_field(copy_address, i, this.get_field(address, i));
+        }
+        for (let i = 0; i < this.get_number_of_children(address); i++) {
+            this.set_child(copy_address, i, this.reference_object(this.get_child(address, i)));
+        }
+
+        this.set_cannnot_be_freed(address, false);
+        return copy_address;
+    }
+
+    public reference_object(address: number): number {
+        this.increment_reference_count(address);
+        return address;
+    }
+
     constructor(memory: number) { // memory is in bytes
         const num_words = Math.floor(memory / WORD_SIZE);
         this.alloc = new BuddyAllocator(num_words);
@@ -326,7 +350,7 @@ class Heap {
      * @returns address of the object
      */
     public allocate_COMPLEX_linked_list(values: any[]): number {
-        return ComplexLinkedList.allocate(this, values);
+        return ComplexLinkedList.allocate_from_array(this, values);
     }
 
     /**

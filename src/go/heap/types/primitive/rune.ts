@@ -12,11 +12,6 @@ import { HeapObject } from "../objects";
 import { TAG_PRIMITIVE_rune } from "../tags";
 
 class PrimitiveRune extends HeapObject {
-  public copy(): number {
-    const copy_address = PrimitiveRune.allocate(this.heap, this.get_value());
-    return copy_address;
-  }
-
   public get_value(): number {
     return this.get_field(0);
   }
