@@ -2,13 +2,20 @@ import { Control } from '../control';
 import { Stash } from '../stash';
 import { Env } from '../env';
 import { Heap } from '../../heap';
+import { ControlSequence } from '../../heap/types/control/sequence';
 
-function evaluate_sequence(cmd: any, heap: Heap, C: Control, S: Stash, E: Env) {
-    const body = cmd.body;
-    for (let i = body.length - 1; i >= 0; i--) {
-        C.push(body[i]);
+function evaluate_sequence(cmd: number, heap: Heap, C: Control, S: Stash, E: Env): void {
+    const seq_object = new ControlSequence(heap, cmd);
+    const linked_list = seq_object.get_linked_list_address();
+    if (linked_list.is_nil()) {
+        return;
     }
-    return E;
+    const value = linked_list.get_value_address().reference();
+    const seq_object_copy = seq_object.copy();
+    const new_seq_object = new ControlSequence(heap, seq_object_copy.address);
+    new_seq_object.remove_first_linked_list_element();
+    C.push(new_seq_object.address);
+    C.push(value.address);
 }
 
 export { evaluate_sequence };

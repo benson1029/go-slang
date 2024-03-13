@@ -1,22 +1,26 @@
 import * as expression from "./expression";
 import * as sequence from "./sequence";
+import * as tags from "../../heap/types/tags";
 
-function lookup_microcode(cmd: any): Function {
-    switch (cmd.tag) {
-        case "literal":
+function lookup_microcode(tag: number): Function {
+    switch (tag) {
+        case tags.TAG_PRIMITIVE_bool:
+        case tags.TAG_PRIMITIVE_int32:
+        case tags.TAG_PRIMITIVE_float32:
+        case tags.TAG_COMPLEX_string:
             return expression.evaluate_literal;
-        case "unary":
+        case tags.TAG_CONTROL_unary:
             return expression.evaluate_unary;
-        case "unary_i":
+        case tags.TAG_CONTROL_unary_i:
             return expression.evaluate_unary_i;
-        case "binary":
+        case tags.TAG_CONTROL_binary:
             return expression.evaluate_binary;
-        case "binary_i":
+        case tags.TAG_CONTROL_binary_i:
             return expression.evaluate_binary_i;
-        case "sequence":
+        case tags.TAG_CONTROL_sequence:
             return sequence.evaluate_sequence;
         default:
-            throw new UnsupportedCommandError(cmd.tag);
+            throw new UnsupportedCommandError(tag.toString());
     }
 }
 

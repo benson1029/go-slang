@@ -1,7 +1,11 @@
-import { parse } from '../parser/go';
-import { scan_global_declarations } from "./globalScan";
+import { parse } from '../../parser/go';
+import { sort_global_declarations } from "./globalSort";
 
-describe('scan_global_declarations', () => {
+function retrieve_declaration_order(program: any) {
+    return program.body.map((stmt: any) => stmt.name);
+}
+
+describe('sort_global_declarations', () => {
     it('should perform topological sort on global declarations', () => {
         const program = parse(`
             package main
@@ -18,8 +22,9 @@ describe('scan_global_declarations', () => {
             var c = b + 1;
             var e = d + 1;
         `);
-        const refs = scan_global_declarations(program);
-        expect(refs).toEqual(['x', 'y', 'z', 'w', 'a', 'b', 'c', 'd', 'e', 'f', 'g']);
+        sort_global_declarations(program);
+        const declOrder = retrieve_declaration_order(program);
+        expect(declOrder).toEqual(['x', 'y', 'z', 'w', 'a', 'b', 'c', 'd', 'e', 'f', 'g']);
     })
 
     it('should throw an error when cyclic dependency is detected', () => {
@@ -29,7 +34,7 @@ describe('scan_global_declarations', () => {
             var a = b + 1;
             var b = a + 1;
         `);
-        expect(() => scan_global_declarations(program)).toThrowError('cyclic dependency in global declarations');
+        expect(() => sort_global_declarations(program)).toThrowError('cyclic dependency in global declarations');
     })
 
     it('should throw an error is self-referencing is detected', () => {
@@ -38,7 +43,7 @@ describe('scan_global_declarations', () => {
 
             var a = a + 1;
         `);
-        expect(() => scan_global_declarations(program)).toThrowError('cyclic dependency in global declarations');
+        expect(() => sort_global_declarations(program)).toThrowError('cyclic dependency in global declarations');
     })
 
     it('should handle global function declarations', () => {
@@ -49,8 +54,9 @@ describe('scan_global_declarations', () => {
                 println("Hello, World!");
             }
         `);
-        const refs = scan_global_declarations(program);
-        expect(refs).toEqual(['main']);
+        sort_global_declarations(program);
+        const declOrder = retrieve_declaration_order(program);
+        expect(declOrder).toEqual(['main']);
     })
 
     it('should handle function dependencies', () => {
@@ -64,8 +70,9 @@ describe('scan_global_declarations', () => {
                 return 1;
             }
         `);
-        const refs = scan_global_declarations(program);
-        expect(refs).toEqual(['f', 'x', 'y']);
+        sort_global_declarations(program);
+        const declOrder = retrieve_declaration_order(program);
+        expect(declOrder).toEqual(['f', 'x', 'y']);
     })
 
     it('should ignore recursive function dependencies', () => {
@@ -79,8 +86,9 @@ describe('scan_global_declarations', () => {
                 return f();
             }
         `);
-        const refs = scan_global_declarations(program);
-        expect(refs).toEqual(['f', 'x', 'y']);
+        sort_global_declarations(program);
+        const declOrder = retrieve_declaration_order(program);
+        expect(declOrder).toEqual(['f', 'x', 'y']);
     })
 
     it('should scan expressions in function calls', () => {
@@ -94,8 +102,9 @@ describe('scan_global_declarations', () => {
                 return a;
             }
         `);
-        const refs = scan_global_declarations(program);
-        expect(refs).toEqual(['f', 'x', 'y']);
+        sort_global_declarations(program);
+        const declOrder = retrieve_declaration_order(program);
+        expect(declOrder).toEqual(['f', 'x', 'y']);
     })
 
     it('should scan expressions in function calls and its arguments', () => {
@@ -109,7 +118,8 @@ describe('scan_global_declarations', () => {
                 return a + b;
             }
         `);
-        const refs = scan_global_declarations(program);
-        expect(refs).toEqual(['f', 'y', 'x']);
+        sort_global_declarations(program);
+        const declOrder = retrieve_declaration_order(program);
+        expect(declOrder).toEqual(['f', 'y', 'x']);
     })
 })

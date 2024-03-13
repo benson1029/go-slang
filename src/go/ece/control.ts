@@ -3,15 +3,15 @@
  * heap.
  */
 class Control {
-    private control: Array<object>;
+    private control: Array<number>;
 
     /**
      * Creates a new instance of the control stack.
      * 
      * @param cmd The program to evaluate.
      */
-    constructor(cmd: object) {
-        this.control = [cmd];
+    constructor() {
+        this.control = [];
     }
 
     /**
@@ -19,7 +19,7 @@ class Control {
      * 
      * @returns The top element of the control stack.
      */
-    public pop(): object {
+    public pop(): number {
         return this.control.pop();
     }
 
@@ -28,7 +28,7 @@ class Control {
      * 
      * @param cmd The element to push onto the control stack.
      */
-    public push(cmd: object): void {
+    public push(cmd: number): void {
         this.control.push(cmd);
     }
 
@@ -37,7 +37,7 @@ class Control {
      * 
      * @returns The top element of the control stack.
      */
-    public peek(): object {
+    public peek(): number {
         return this.control[this.control.length - 1];
     }
 

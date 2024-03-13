@@ -40,6 +40,7 @@ import { ComplexPointer } from "./types/complex/pointer";
 import { ComplexString } from "./types/complex/string";
 import { ControlAssign } from "./types/control/assign";
 import { ControlBinary } from "./types/control/binary";
+import { ControlBinaryI } from "./types/control/binary_i";
 import { ControlCall } from "./types/control/call";
 import { ControlFunction } from "./types/control/function";
 import { ControlLambdaCall } from "./types/control/lambda_call";
@@ -48,6 +49,7 @@ import { ControlName } from "./types/control/name";
 import { ControlPostfix } from "./types/control/postfix";
 import { ControlSequence } from "./types/control/sequence";
 import { ControlUnary } from "./types/control/unary";
+import { ControlUnaryI } from "./types/control/unary_i";
 import { ControlVar } from "./types/control/var";
 import { PrimitiveBool } from "./types/primitive/bool";
 import { PrimitiveFloat32 } from "./types/primitive/float32";
@@ -72,7 +74,9 @@ import {
     TAGSTRING_CONTROL_sequence,
     TAGSTRING_CONTROL_call, 
     TAGSTRING_CONTROL_function, 
-    TAGSTRING_CONTROL_lambda_call, 
+    TAGSTRING_CONTROL_lambda_call,
+    TAGSTRING_CONTROL_unary_i,
+    TAGSTRING_CONTROL_binary_i,
     TAG_PRIMITIVE_nil
 } from "./types/tags";
 
@@ -508,6 +512,32 @@ class Heap {
         return ControlLambdaCall.allocate(this, obj.func, obj.args);
     }
 
+    /**
+     * CONTROL_unary_i
+     * Fields    : number of children
+     * Children  :
+     * - 4 bytes address of the operator (COMPLEX_string)
+     * 
+     * @param obj control object
+     * @returns address of the object
+     */
+    public allocate_CONTROL_unary_i(obj: { tag: string, operator: ComplexString }): number {
+        return ControlUnaryI.allocate(this, obj.operator);
+    }
+
+    /**
+     * CONTROL_binary_i
+     * Fields    : number of children
+     * Children  :
+     * - 4 bytes address of the operator (COMPLEX_string)
+     * 
+     * @param obj control object
+     * @returns address of the object
+     */
+    public allocate_CONTROL_binary_i(obj: { tag: string, operator: ComplexString }): number {
+        return ControlBinaryI.allocate(this, obj.operator);
+    }
+
     public allocate_number(value: number): number {
         return value;
     }
@@ -530,13 +560,13 @@ class Heap {
         }
         switch (obj.tag) {
             case TAGSTRING_PRIMITIVE_bool:
-                return this.allocate_PRIMITIVE_bool(obj);
+                return this.allocate_PRIMITIVE_bool(obj.value);
             case TAGSTRING_PRIMITIVE_int32:
-                return this.allocate_PRIMITIVE_int32(obj);
+                return this.allocate_PRIMITIVE_int32(obj.value);
             case TAGSTRING_PRIMITIVE_float32:
-                return this.allocate_PRIMITIVE_float32(obj);
+                return this.allocate_PRIMITIVE_float32(obj.value);
             case TAGSTRING_PRIMITIVE_rune:
-                return this.allocate_PRIMITIVE_rune(obj);
+                return this.allocate_PRIMITIVE_rune(obj.value);
             case TAGSTRING_COMPLEX_string:
                 return this.allocate_COMPLEX_string(obj);
             case TAGSTRING_COMPLEX_linked_list:
@@ -565,6 +595,10 @@ class Heap {
                 return this.allocate_CONTROL_call(obj);
             case TAGSTRING_CONTROL_lambda_call:
                 return this.allocate_CONTROL_lambda_call(obj);
+            case TAGSTRING_CONTROL_unary_i:
+                return this.allocate_CONTROL_unary_i(obj);
+            case TAGSTRING_CONTROL_binary_i:
+                return this.allocate_CONTROL_binary_i(obj);
             default:
                 throw new Error("Unknown tag");
         }

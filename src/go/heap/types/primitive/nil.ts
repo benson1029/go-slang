@@ -6,9 +6,13 @@
  * @returns address of the object
  */
 
-import { HeapObject } from "../objects";
+import { Primitive } from ".";
 
-class PrimitiveNil extends HeapObject {
+class PrimitiveNil extends Primitive {
+  public get_type(): string {
+    return "nil";
+  }
+
   public get_value(): null {
     return null;
   }

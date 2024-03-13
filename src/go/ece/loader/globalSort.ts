@@ -1,5 +1,5 @@
 
-function scan_global_declarations(program) {
+function sort_global_declarations(program: any): void {
     let refs = {};
     let refCount = {};
     for (let i = 0; i < program.body.length; i++) {
@@ -8,6 +8,7 @@ function scan_global_declarations(program) {
         refs[stmt.name] = [];
         refCount[stmt.name] = 0;
     }
+    let declOrder = [];
     for (let i = 0; i < program.body.length; i++) {
         let ref_stmt = program.body[i];
         if (ref_stmt.tag === 'var') {
@@ -34,7 +35,6 @@ function scan_global_declarations(program) {
             scan_expression(ref_stmt.value);
         }
     }
-    let declOrder = [];
     let dfs = (decl) => {
         refCount[decl] = -1;
         declOrder.push(decl);
@@ -53,7 +53,15 @@ function scan_global_declarations(program) {
     if (declOrder.length !== Object.keys(refs).length) {
         throw new Error('cyclic dependency in global declarations');
     }
-    return declOrder;
+    program.body.sort((a, b) => {
+        if (a.tag === 'function' && b.tag === 'var') {
+            return -1;
+        }
+        if (a.tag === 'var' && b.tag === 'function') {
+            return 1;
+        }
+        return declOrder.indexOf(a.name) - declOrder.indexOf(b.name);
+    })
 }
 
-export { scan_global_declarations };
+export { sort_global_declarations };

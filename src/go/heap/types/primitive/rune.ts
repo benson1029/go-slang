@@ -7,11 +7,15 @@
  * @returns address of the object
  */
 
+import { Primitive } from ".";
 import { Heap } from "../../heap";
-import { HeapObject } from "../objects";
 import { TAG_PRIMITIVE_rune } from "../tags";
 
-class PrimitiveRune extends HeapObject {
+class PrimitiveRune extends Primitive {
+  public get_type(): string {
+    return "rune";
+  }
+
   public get_value(): number {
     return this.get_field(0);
   }

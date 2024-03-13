@@ -3,6 +3,9 @@ import { Control } from "./control";
 import { Stash } from "./stash";
 import { Env, create_global_environment } from "./env";
 import { lookup_microcode } from "./microcode";
+import { auto_cast } from "../heap/types/auto_cast";
+import { Primitive } from "../heap/types/primitive";
+// import { load } from "./loader";
 
 /**
  * Represents the main logic of the Explicit Control Evaluator.
@@ -30,12 +33,16 @@ class ECE {
     }
 
     public evaluate() {
-        // A placeholder to find the main function.
-        let main = this.program.body.filter((x: any) => x.tag === "function" && x.name === "main")[0];
         // Initialize the control, stash and environment.
-        this.C = new Control(main.body.body);
+        this.C = new Control();
         this.S = new Stash();
         this.E = create_global_environment(this.heap, this.program.imports);
+
+        // load(this.program, this.C, this.S, this.E, this.heap)
+        // Stub for loading the main function directly:
+        let main = this.program.body.filter((x: any) => x.tag === "function" && x.name === "main")[0];
+        const main_addr = this.heap.allocate_any(main.body.body)
+        this.C.push(main_addr)
 
         // Evaluate the program.
         while (true) {
@@ -44,11 +51,13 @@ class ECE {
             }
 
             const cmd = this.C.pop();
-            const microcode = lookup_microcode(cmd);
-            this.E = microcode(cmd, this.heap, this.C, this.S, this.E);
+            const microcode = lookup_microcode(this.heap.get_tag(cmd));
+            microcode(cmd, this.heap, this.C, this.S, this.E);
+            this.heap.free_object(cmd);
         }
 
-        return this.S.pop();
+        const result = auto_cast(this.heap, this.S.pop()) as unknown as Primitive;
+        return result.get_value();
     }
 }
 
