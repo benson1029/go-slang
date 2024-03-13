@@ -26,10 +26,31 @@ const TAG_CONTROL_sequence          = 0xC008; // 1100 0000 0000 1000
 // const TAG_CONTROL_continue          = 0xC00D; // 1100 0000 0000 1101
 // const TAG_CONTROL_defer             = 0xC00E; // 1100 0000 0000 1110
 // const TAG_CONTROL_return            = 0xC00F; // 1100 0000 0000 1111
-// const TAG_CONTROL_function          = 0xC010; // 1100 0000 0001 0000
-// const TAG_CONTROL_call              = 0xC011; // 1100 0000 0001 0001
-// const TAG_CONTROL_lambda            = 0xC012; // 1100 0000 0001 0010
-// const TAG_CONTROL_lambda_call       = 0xC013; // 1100 0000 0001 0011
+const TAG_CONTROL_function          = 0xC010; // 1100 0000 0001 0000
+const TAG_CONTROL_call              = 0xC011; // 1100 0000 0001 0001
+const TAG_CONTROL_lambda_call       = 0xC012; // 1100 0000 0001 0010
+
+const TAGSTRING_PRIMITIVE_nil       = "nil";
+const TAGSTRING_PRIMITIVE_bool      = "bool";
+const TAGSTRING_PRIMITIVE_int32     = "int32";
+const TAGSTRING_PRIMITIVE_float32   = "float32";
+const TAGSTRING_PRIMITIVE_rune      = "rune";
+
+const TAGSTRING_COMPLEX_string      = "string";
+const TAGSTRING_COMPLEX_linked_list = "linked_list";
+const TAGSTRING_COMPLEX_pointer     = "pointer";
+
+const TAGSTRING_CONTROL_name        = "name";
+const TAGSTRING_CONTROL_literal     = "literal";
+const TAGSTRING_CONTROL_var         = "var";
+const TAGSTRING_CONTROL_assign      = "assign";
+const TAGSTRING_CONTROL_unary       = "unary";
+const TAGSTRING_CONTROL_postfix     = "postfix";
+const TAGSTRING_CONTROL_binary      = "binary";
+const TAGSTRING_CONTROL_sequence    = "sequence";
+const TAGSTRING_CONTROL_function    = "function";
+const TAGSTRING_CONTROL_call        = "call";
+const TAGSTRING_CONTROL_lambda_call = "lambda-call";
 
 export {
   TAG_PRIMITIVE_nil,
@@ -48,4 +69,26 @@ export {
   TAG_CONTROL_postfix,
   TAG_CONTROL_binary,
   TAG_CONTROL_sequence,
+  TAG_CONTROL_function,
+  TAG_CONTROL_call,
+  TAG_CONTROL_lambda_call,
+  TAGSTRING_PRIMITIVE_nil,
+  TAGSTRING_PRIMITIVE_bool,
+  TAGSTRING_PRIMITIVE_int32,
+  TAGSTRING_PRIMITIVE_float32,
+  TAGSTRING_PRIMITIVE_rune,
+  TAGSTRING_COMPLEX_string,
+  TAGSTRING_COMPLEX_linked_list,
+  TAGSTRING_COMPLEX_pointer,
+  TAGSTRING_CONTROL_name,
+  TAGSTRING_CONTROL_literal,
+  TAGSTRING_CONTROL_var,
+  TAGSTRING_CONTROL_assign,
+  TAGSTRING_CONTROL_unary,
+  TAGSTRING_CONTROL_postfix,
+  TAGSTRING_CONTROL_binary,
+  TAGSTRING_CONTROL_sequence,
+  TAGSTRING_CONTROL_function,
+  TAGSTRING_CONTROL_call,
+  TAGSTRING_CONTROL_lambda_call
 };

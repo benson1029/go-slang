@@ -40,6 +40,9 @@ import { ComplexPointer } from "./types/complex/pointer";
 import { ComplexString } from "./types/complex/string";
 import { ControlAssign } from "./types/control/assign";
 import { ControlBinary } from "./types/control/binary";
+import { ControlCall } from "./types/control/call";
+import { ControlFunction } from "./types/control/function";
+import { ControlLambdaCall } from "./types/control/lambda_call";
 import { ControlLiteral } from "./types/control/literal";
 import { ControlName } from "./types/control/name";
 import { ControlPostfix } from "./types/control/postfix";
@@ -51,23 +54,24 @@ import { PrimitiveFloat32 } from "./types/primitive/float32";
 import { PrimitiveInt32 } from "./types/primitive/int32";
 import { PrimitiveRune } from "./types/primitive/rune";
 
+import { TAG_PRIMITIVE_nil } from "./types/tags";
+
 import {
-    TAG_PRIMITIVE_nil,
-    TAG_PRIMITIVE_bool,
-    TAG_PRIMITIVE_int32,
-    TAG_PRIMITIVE_float32,
-    TAG_PRIMITIVE_rune,
-    TAG_COMPLEX_string,
-    TAG_COMPLEX_linked_list,
-    TAG_COMPLEX_pointer,
-    TAG_CONTROL_name,
-    TAG_CONTROL_literal,
-    TAG_CONTROL_var,
-    TAG_CONTROL_assign,
-    TAG_CONTROL_unary,
-    TAG_CONTROL_postfix,
-    TAG_CONTROL_binary,
-    TAG_CONTROL_sequence
+    TAGSTRING_PRIMITIVE_bool,
+    TAGSTRING_PRIMITIVE_int32,
+    TAGSTRING_PRIMITIVE_float32,
+    TAGSTRING_PRIMITIVE_rune,
+    TAGSTRING_COMPLEX_string,
+    TAGSTRING_COMPLEX_linked_list,
+    TAGSTRING_COMPLEX_pointer,
+    TAGSTRING_CONTROL_name,
+    TAGSTRING_CONTROL_literal,
+    TAGSTRING_CONTROL_var,
+    TAGSTRING_CONTROL_assign,
+    TAGSTRING_CONTROL_unary,
+    TAGSTRING_CONTROL_postfix,
+    TAGSTRING_CONTROL_binary,
+    TAGSTRING_CONTROL_sequence
 } from "./types/tags";
 
 class Heap {
@@ -369,7 +373,7 @@ class Heap {
      * CONTROL_name
      * Fields    : number of children
      * Children  :
-     * - 4 bytes address of the name (MISC_constant_string)
+     * - 4 bytes address of the name (COMPLEX_string)
      *
      * @param obj control object
      * @returns address of the object
@@ -380,10 +384,7 @@ class Heap {
 
     /**
      * CONTROL_literal
-     * Fields    : number of children
-     * Children  :
-     * - 4 bytes address of the type (COMPLEX_string)
-     * - 4 bytes address of the value
+     * Literal will be parsed into one of the PRIMITIVE types
      *
      * @param obj control object
      * @returns address of the object
@@ -396,7 +397,7 @@ class Heap {
      * CONTROL_var
      * Fields    : number of children
      * Children  :
-     * - 4 bytes address of the name (MISC_constant_string)
+     * - 4 bytes address of the name (COMPLEX_string)
      * - 4 bytes address of the value (expression)
      *
      * @param obj control object
@@ -410,7 +411,7 @@ class Heap {
      * CONTROL_assign
      * Fields    : number of children
      * Children  :
-     * - 4 bytes address of the name (MISC_constant_string)
+     * - 4 bytes address of the name (COMPLEX_string)
      * - 4 bytes address of the value (expression)
      *
      * @param obj control object
@@ -424,7 +425,7 @@ class Heap {
      * CONTROL_unary
      * Fields    : number of children
      * Children  :
-     * - 4 bytes address of the operator (MISC_constant_string)
+     * - 4 bytes address of the operator (COMPLEX_string)
      * - 4 bytes address of the operand (expression)
      *
      * @param obj control object
@@ -438,7 +439,7 @@ class Heap {
      * CONTROL_postfix
      * Fields    : number of children
      * Children  :
-     * - 4 bytes address of the operator (MISC_constant_string)
+     * - 4 bytes address of the operator (COMPLEX_string)
      * - 4 bytes address of the operand (expression)
      *
      * @param obj control object
@@ -452,7 +453,7 @@ class Heap {
      * CONTROL_binary
      * Fields    : number of children
      * Children  :
-     * - 4 bytes address of the operator (MISC_constant_string)
+     * - 4 bytes address of the operator (COMPLEX_string)
      * - 4 bytes address of the left operand (expression)
      * - 4 bytes address of the right operand (expression)
      *
@@ -473,6 +474,54 @@ class Heap {
      */
     public allocate_CONTROL_sequence(obj: { tag: string, body: any[] }): number {
         return ControlSequence.allocate(this, obj.body);
+    }
+
+    // { tag: "function", name: "foo", params: [ { name: "x", type: "int" }, ... ], returnType: "int", body: {...}  } // body must be a block, all types are optional
+    // { tag: "call", name: "foo", args: [ {...}, ... ] }
+    // // args is an array of objects
+    // { tag: "lambda-call", func: {...}, args: [ {...}, ... ] } // body must be a block, all types are optional, func is a lambda declaration
+
+    /**
+     * CONTROL_function
+     * Fields    : number of children, number of parameters
+     * Children  :
+     * - 4 bytes address of the function name (COMPLEX_string)
+     * - 4 bytes * num_parameters address of the parameter names (COMPLEX_string)
+     * 
+     * @param obj control object
+     * @returns address of the object
+     */
+    public allocate_CONTROL_function(obj: { tag: string, name: string, params: any[], returnType: string, body: any }): number {
+        const param_names: string[] = obj.params.map(param => param.name);
+        return ControlFunction.allocate(this, obj.name, param_names, obj.body);
+    }
+
+    /**
+     * CONTROL_call
+     * Fields    : number of children
+     * Children  :
+     * - 4 bytes address of the called function name (COMPLEX_string)
+     * - 4 bytes * num_arguments address of the arguments (expression)
+     * 
+     * @param obj control object
+     * @returns address of the object
+     */
+    public allocate_CONTROL_call(obj: { tag: string, name: string, args: any[] }): number {
+        return ControlCall.allocate(this, obj.name, obj.args);
+    }
+
+    /**
+     * CONTROL_lambda_call
+     * Fields    : number of children
+     * Children  :
+     * - 4 bytes address of the called function (CONTROL_function)
+     * - 4 bytes * num_arguments address of the arguments (expression)
+     * 
+     * @param obj control object
+     * @returns address of the object
+     */
+    public allocate_CONTROL_lambda_call(obj: { tag: string, func: any, args: any[] }): number {
+        return ControlLambdaCall.allocate(this, obj.func, obj.args);
     }
 
     public allocate_number(value: number): number {
@@ -496,35 +545,35 @@ class Heap {
             throw new Error("Non-pointer object must have a tag");
         }
         switch (obj.tag) {
-            case TAG_PRIMITIVE_bool:
+            case TAGSTRING_PRIMITIVE_bool:
                 return this.allocate_PRIMITIVE_bool(obj);
-            case TAG_PRIMITIVE_int32:
+            case TAGSTRING_PRIMITIVE_int32:
                 return this.allocate_PRIMITIVE_int32(obj);
-            case TAG_PRIMITIVE_float32:
+            case TAGSTRING_PRIMITIVE_float32:
                 return this.allocate_PRIMITIVE_float32(obj);
-            case TAG_PRIMITIVE_rune:
+            case TAGSTRING_PRIMITIVE_rune:
                 return this.allocate_PRIMITIVE_rune(obj);
-            case TAG_COMPLEX_string:
+            case TAGSTRING_COMPLEX_string:
                 return this.allocate_COMPLEX_string(obj);
-            case TAG_COMPLEX_linked_list:
+            case TAGSTRING_COMPLEX_linked_list:
                 return this.allocate_COMPLEX_linked_list(obj);
-            case TAG_COMPLEX_pointer:
+            case TAGSTRING_COMPLEX_pointer:
                 return this.allocate_COMPLEX_pointer(obj);
-            case TAG_CONTROL_name:
+            case TAGSTRING_CONTROL_name:
                 return this.allocate_CONTROL_name(obj);
-            case TAG_CONTROL_literal:
+            case TAGSTRING_CONTROL_literal:
                 return this.allocate_CONTROL_literal(obj);
-            case TAG_CONTROL_var:
+            case TAGSTRING_CONTROL_var:
                 return this.allocate_CONTROL_var(obj);
-            case TAG_CONTROL_assign:
+            case TAGSTRING_CONTROL_assign:
                 return this.allocate_CONTROL_assign(obj);
-            case TAG_CONTROL_unary:
+            case TAGSTRING_CONTROL_unary:
                 return this.allocate_CONTROL_unary(obj);
-            case TAG_CONTROL_postfix:
+            case TAGSTRING_CONTROL_postfix:
                 return this.allocate_CONTROL_postfix(obj);
-            case TAG_CONTROL_binary:
+            case TAGSTRING_CONTROL_binary:
                 return this.allocate_CONTROL_binary(obj);
-            case TAG_CONTROL_sequence:
+            case TAGSTRING_CONTROL_sequence:
                 return this.allocate_CONTROL_sequence(obj);
             default:
                 throw new Error("Unknown tag");
