@@ -43,14 +43,6 @@ class BuddyAllocator {
   // baseBinaryTree + i: 1-indexed binary tree, 1 <= i <= 2^{numNodesLog2 - 1}
   // the value of (2i)-th and (2i+1)-bit represents whether its children is in the free list
 
-  public memory_get_float32(address: number): number {
-    return this.memory.getFloat32(address);
-  }
-
-  public memory_set_float32(address: number, value: number): void {
-    this.memory.setFloat32(address, value);
-  }
-
   public memory_get_word(address: number): number {
     return this.memory.getUint32(address);
   }

@@ -145,22 +145,6 @@ class Heap {
         this.alloc.memory_set_word(address + (2 + index) * WORD_SIZE, value);
     }
 
-    public get_field_float32(address: number, index: number): number { // 0-indexed
-        const fields = this.get_number_of_fields(address);
-        if (index < 0 || index >= fields) {
-            throw new Error("Field index out of range");
-        }
-        return this.alloc.memory_get_float32(address + (2 + index) * WORD_SIZE);
-    }
-
-    public set_field_float32(address: number, index: number, value: number): void { // 0-indexed
-        const fields = this.get_number_of_fields(address);
-        if (index < 0 || index >= fields) {
-            throw new Error("Field index out of range");
-        }
-        this.alloc.memory_set_float32(address + (2 + index) * WORD_SIZE, value);
-    }
-
     public get_number_of_children(address: number): number {
         if (!this.has_children(address)) {
             return 0;
