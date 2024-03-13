@@ -52,27 +52,27 @@ class BuddyAllocator {
   }
 
   public memory_get_word(address: number): number {
-    return this.memory.getInt32(address);
+    return this.memory.getUint32(address);
   }
 
   public memory_set_word(address: number, value: number): void {
-    this.memory.setInt32(address, value);
+    this.memory.setUint32(address, value);
   }
 
   public memory_get_byte(address: number): number {
-    return this.memory.getInt8(address);
+    return this.memory.getUint8(address);
   }
 
   public memory_set_byte(address: number, value: number): void {
-    this.memory.setInt8(address, value);
+    this.memory.setUint8(address, value);
   }
 
   public memory_get_2_bytes(address: number): number {
-    return this.memory.getInt16(address);
+    return this.memory.getUint16(address);
   }
 
   public memory_set_2_bytes(address: number, value: number): void {
-    this.memory.setInt16(address, value);
+    this.memory.setUint16(address, value);
   }
 
   public memory_get_bit(address: number, bit: number): boolean {
