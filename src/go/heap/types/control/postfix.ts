@@ -7,21 +7,23 @@
  */
 
 import { Heap } from "../../heap";
+import { auto_cast } from "../auto_cast";
 import { ComplexString } from "../complex/string";
 import { HeapObject } from "../objects";
 import { TAG_CONTROL_postfix } from "../tags";
 
 class ControlPostfix extends HeapObject {
-  public get_operator_address(): number {
-    return this.get_child(0);
+  public get_operator_address(): ComplexString {
+    // Guarantee: operator is not nil
+    return new ComplexString(this.heap, this.get_child(0));
   }
 
   public get_operator(): string {
-    return new ComplexString(this.heap, this.get_operator_address()).get_string();
+    return this.get_operator_address().get_string();
   }
 
-  public get_operand_address(): number {
-    return this.get_child(1);
+  public get_operand_address(): HeapObject {
+    return auto_cast(this.heap, this.get_child(1));
   }
 
   public static allocate(heap: Heap, operator: string, operand: any): number {

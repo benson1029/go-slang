@@ -28,17 +28,11 @@ class ComplexString extends HeapObject {
 
     for (let i = 0; i < str.length; i++) {
       const rune = heap.allocate_PRIMITIVE_rune(str.codePointAt(i));
-      heap.set_cannnot_be_freed(rune, true);
       heap.set_child(address, i, rune);
     }
 
     // Unmark cannot-be-free
     heap.set_cannnot_be_freed(address, false);
-    for (let i = 0; i < str.length; i++) {
-      const rune = heap.get_child(address, i);
-      heap.set_cannnot_be_freed(rune, false);
-    }
-
     return address;
   }
 }

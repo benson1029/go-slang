@@ -10,14 +10,13 @@ import { HeapObject } from "../objects";
 import { TAG_CONTROL_sequence } from "../tags";
 
 class ControlSequence extends HeapObject {
-  public get_linked_list_address(): number {
-    return this.get_child(0);
+  public get_linked_list_address(): ComplexLinkedList {
+    return new ComplexLinkedList(this.heap, this.get_child(0));
   }
 
   public remove_first_linked_list_element(): void {
-    const linked_list = new ComplexLinkedList(this.heap, this.get_linked_list_address());
-    const new_linked_list_address = linked_list.get_next_address();
-    this.set_child(0, this.heap.reference_object(new_linked_list_address));
+    const linked_list = this.get_linked_list_address();
+    this.set_child(0, linked_list.get_next_address().reference().address);
     linked_list.free();
   }
 

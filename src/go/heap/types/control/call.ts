@@ -12,20 +12,17 @@ import { HeapObject } from "../objects";
 import { TAG_CONTROL_call } from "../tags";
 
 class ControlCall extends HeapObject {
-  public get_name_address(): number {
-    return this.get_child(0);
+  public get_name_address(): ComplexString {
+    // Guarantee: name is not nil
+    return new ComplexString(this.heap, this.get_child(0));
   }
 
   public get_name(): string | null {
-    const name_address = this.get_name_address();
-    if (name_address === 0) {
-      return null;
-    }
-    return new ComplexString(this.heap, name_address).get_string();
+    return this.get_name_address().get_string();
   }
 
-  public get_arg_address(index: number): number {
-    return this.get_child(index + 1);
+  public get_arg_address(index: number): HeapObject {
+    return new HeapObject(this.heap, this.get_child(index + 1));
   }
 
   public static allocate(heap: Heap, name: string | null, args: any[]): number {

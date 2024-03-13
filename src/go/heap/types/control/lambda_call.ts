@@ -9,14 +9,15 @@
 import { Heap } from "../../heap";
 import { HeapObject } from "../objects";
 import { TAG_CONTROL_lambda_call } from "../tags";
+import { ControlFunction } from "./function";
 
 class ControlLambdaCall extends HeapObject {
-  public get_func_address(): number {
-    return this.get_child(0);
+  public get_func_address(): ControlFunction {
+    return new ControlFunction(this.heap, this.get_child(0));
   }
 
-  public get_arg_address(index: number): number {
-    return this.get_child(index + 1);
+  public get_arg_address(index: number): HeapObject {
+    return new HeapObject(this.heap, this.get_child(index + 1));
   }
 
   public static allocate(heap: Heap, func: any, args: any[]): number {

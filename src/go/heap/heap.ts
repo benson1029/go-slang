@@ -54,8 +54,6 @@ import { PrimitiveFloat32 } from "./types/primitive/float32";
 import { PrimitiveInt32 } from "./types/primitive/int32";
 import { PrimitiveRune } from "./types/primitive/rune";
 
-import { TAGSTRING_CONTROL_call, TAGSTRING_CONTROL_function, TAGSTRING_CONTROL_lambda_call, TAG_PRIMITIVE_nil } from "./types/tags";
-
 import {
     TAGSTRING_PRIMITIVE_bool,
     TAGSTRING_PRIMITIVE_int32,
@@ -71,7 +69,11 @@ import {
     TAGSTRING_CONTROL_unary,
     TAGSTRING_CONTROL_postfix,
     TAGSTRING_CONTROL_binary,
-    TAGSTRING_CONTROL_sequence
+    TAGSTRING_CONTROL_sequence,
+    TAGSTRING_CONTROL_call, 
+    TAGSTRING_CONTROL_function, 
+    TAGSTRING_CONTROL_lambda_call, 
+    TAG_PRIMITIVE_nil
 } from "./types/tags";
 
 class Heap {
@@ -249,7 +251,6 @@ class Heap {
 
         /**
          * PRIMITIVE_nil
-         * Structure : [4 bytes metadata, 4 bytes value]
          * Fields    : None
          * Children  : None
          *

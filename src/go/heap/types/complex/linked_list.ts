@@ -11,16 +11,18 @@
  */
 
 import { Heap } from "../../heap";
+import { auto_cast } from "../auto_cast";
 import { HeapObject } from "../objects";
+import { PrimitiveNil } from "../primitive/nil";
 import { TAG_COMPLEX_linked_list } from "../tags";
 
 class ComplexLinkedList extends HeapObject {
-  public get_value_address(): number {
-    return this.get_child(0);
+  public get_value_address(): HeapObject {
+    return auto_cast(this.heap, this.get_child(0));
   }
 
-  public get_next_address(): number {
-    return this.get_child(1);
+  public get_next_address(): PrimitiveNil | ComplexLinkedList {
+    return auto_cast(this.heap, this.get_child(1)) as PrimitiveNil | ComplexLinkedList;
   }
 
   public static allocate(heap: Heap, value: any, next_address: number): number {

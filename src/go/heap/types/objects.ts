@@ -1,4 +1,5 @@
 import { Heap } from "../heap"
+import { TAG_PRIMITIVE_nil } from "./tags";
 
 class HeapObject {
   public heap: Heap;
@@ -37,29 +38,27 @@ class HeapObject {
     this.heap.set_child(this.address, index, value);
   }
 
-  public increment_reference_count(): void {
-    this.heap.increment_reference_count(this.address);
-  }
-
-  public decrement_reference_count(): void {
-    this.heap.decrement_reference_count(this.address);
-  }
-
   public set_cannnot_be_freed(value: boolean): void {
     this.heap.set_cannnot_be_freed(this.address, value);
+  }
+
+  public is_nil(): boolean {
+    return this.get_tag() === TAG_PRIMITIVE_nil;
   }
 
   public free(): void {
     this.heap.free_object(this.address);
   }
 
-  public reference(): number {
-    return this.heap.reference_object(this.address);
+  public reference(): HeapObject {
+    this.heap.increment_reference_count(this.address);
+    return this;
   }
 
-  public copy(): number {
-    return this.heap.copy_object(this.address);
+  public copy(): HeapObject {
+    const copy_address = this.heap.copy_object(this.address);
+    return new HeapObject(this.heap, copy_address);
   }
-};
+}
 
 export { HeapObject };

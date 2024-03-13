@@ -13,12 +13,13 @@ import { HeapObject } from "../objects";
 import { TAG_CONTROL_assign } from "../tags";
 
 class ControlAssign extends HeapObject {
-  public get_name_address(): number {
-    return this.get_child(0);
+  public get_name_address(): ComplexString {
+    // Guarantee: name is not nil
+    return new ComplexString(this.heap, this.get_child(0));
   }
 
   public get_name(): string {
-    return new ComplexString(this.heap, this.get_name_address()).get_string();
+    return this.get_name_address().get_string();
   }
 
   public static allocate(heap: Heap, name: string, value: any): number {

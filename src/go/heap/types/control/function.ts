@@ -7,25 +7,33 @@
  */
 
 import { Heap } from "../../heap";
+import { auto_cast } from "../auto_cast";
 import { ComplexString } from "../complex/string";
 import { HeapObject } from "../objects";
+import { PrimitiveNil } from "../primitive/nil";
 import { TAG_CONTROL_function } from "../tags";
 
 class ControlFunction extends HeapObject {
-  public get_name_address(): number {
-    return this.get_child(0);
+  public get_name_address(): ComplexString | PrimitiveNil {
+    return auto_cast(this.heap, this.get_child(0)) as ComplexString | PrimitiveNil;
   }
 
-  public get_name(): string {
-    return new ComplexString(this.heap, this.get_name_address()).get_string();
+  public get_name(): string | null {
+    const name_address = this.get_name_address();
+    if (!name_address.is_nil()) {
+      return (name_address as ComplexString).get_string();
+    } else {
+      return null;
+    }
   }
 
-  public get_param_name_address(index: number): number {
-    return this.get_child(index + 1);
+  public get_param_name_address(index: number): ComplexString {
+    // Guarantee: param_name is not nil
+    return new ComplexString(this.heap, this.get_child(index + 1));
   }
 
   public get_param_name(index: number): string {
-    return new ComplexString(this.heap, this.get_param_name_address(index)).get_string();
+    return this.get_param_name_address(index).get_string();
   }
 
   public static allocate(heap: Heap, name: string, param_names: string[], body: any): number {
