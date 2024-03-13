@@ -54,7 +54,7 @@ import { PrimitiveFloat32 } from "./types/primitive/float32";
 import { PrimitiveInt32 } from "./types/primitive/int32";
 import { PrimitiveRune } from "./types/primitive/rune";
 
-import { TAG_PRIMITIVE_nil } from "./types/tags";
+import { TAGSTRING_CONTROL_call, TAGSTRING_CONTROL_function, TAGSTRING_CONTROL_lambda_call, TAG_PRIMITIVE_nil } from "./types/tags";
 
 import {
     TAGSTRING_PRIMITIVE_bool,
@@ -90,26 +90,25 @@ class Heap {
             throw new Error("Out of memory");
         }
 
+        if (fields < 0 || children < 0) {
+            throw new Error("Negative fields or children");
+        }
+
         // Write metadata
         this.alloc.memory_set_2_bytes(address + 1, tag);
 
         // Set number of fields
         this.alloc.memory_set_byte(address + 3, fields);
 
-        // Set number of children
-        if (children > 0) {
+        if (this.has_children(address)) {
             if (fields <= 0) {
                 throw new Error("Trying to set children when there is no fields");
             }
-            if (!this.has_children(address)) {
-                throw new Error("Trying to set children when there is no children");
-            }
-
             // The first field must be number of children
-            this.set_number_of_children(address, children);
+            this.alloc.memory_set_word(address + 2 * WORD_SIZE, children);
         } else {
-            if (this.has_children(address)) {
-                throw new Error("Trying to set no children when there is children");
+            if (children > 0) {
+                throw new Error("Trying to set number of children when there is no children");
             }
         }
 
@@ -575,6 +574,12 @@ class Heap {
                 return this.allocate_CONTROL_binary(obj);
             case TAGSTRING_CONTROL_sequence:
                 return this.allocate_CONTROL_sequence(obj);
+            case TAGSTRING_CONTROL_function:
+                return this.allocate_CONTROL_function(obj);
+            case TAGSTRING_CONTROL_call:
+                return this.allocate_CONTROL_call(obj);
+            case TAGSTRING_CONTROL_lambda_call:
+                return this.allocate_CONTROL_lambda_call(obj);
             default:
                 throw new Error("Unknown tag");
         }

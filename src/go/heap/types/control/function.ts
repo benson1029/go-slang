@@ -29,7 +29,7 @@ class ControlFunction extends HeapObject {
   }
 
   public static allocate(heap: Heap, name: string, param_names: string[], body: any): number {
-    const address = heap.allocate_object(TAG_CONTROL_function, 2, param_names.length);
+    const address = heap.allocate_object(TAG_CONTROL_function, 2, 1 + param_names.length);
     heap.set_cannnot_be_freed(address, true);
 
     const name_address = ComplexString.allocate(heap, name);

@@ -20,7 +20,7 @@ class ControlLambdaCall extends HeapObject {
   }
 
   public static allocate(heap: Heap, func: any, args: any[]): number {
-    const address = heap.allocate_object(TAG_CONTROL_lambda_call, 2, args.length);
+    const address = heap.allocate_object(TAG_CONTROL_lambda_call, 2, 1 + args.length);
     heap.set_cannnot_be_freed(address, true);
 
     const func_address = heap.allocate_any(func);
