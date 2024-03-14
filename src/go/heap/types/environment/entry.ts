@@ -13,13 +13,18 @@ import { HeapObject } from "../objects";
 import { TAG_ENVIRONMENT_entry } from "../tags";
 
 class EnvironmentEntry extends HeapObject {
-  public get_key(): ComplexString {
+  public get_key_address(): ComplexString {
     // Guarantee: key is not null
     return new ComplexString(this.heap, this.get_child(0));
   }
 
-  public get_value(): HeapObject {
+  public get_value_address(): HeapObject {
     return auto_cast(this.heap, this.get_child(1));
+  }
+
+  public set_value_address(value_address: number): void {
+    const value = auto_cast(this.heap, value_address);
+    this.heap.set_child(this.address, 1, value.reference().address);
   }
 
   public static allocate(heap: Heap, key_address: number, value_address: number): number {

@@ -29,7 +29,7 @@ class EnvironmentFrame extends HeapObject {
     const str = new ComplexString(this.heap, key_address).get_string();
     while (!entry.is_nil()) {
       const value = entry.get_value_address() as EnvironmentEntry;
-      if (value.get_key().get_string() === str) {
+      if (value.get_key_address().get_string() === str) {
         return value;
       }
       entry = entry.get_next_address();
@@ -59,7 +59,7 @@ class EnvironmentFrame extends HeapObject {
    * @param key_address address of the variable name (COMPLEX_string)
    * @returns address of the environment entry
    */
-  public insert(key_address: number): EnvironmentEntry {
+  public insert_new_variable(key_address: number): EnvironmentEntry {
     const entry = this.lookup_current_frame(key_address);
     if (!entry.is_nil()) {
       throw new Error("Variable already exists in current scope.");
@@ -72,6 +72,19 @@ class EnvironmentFrame extends HeapObject {
     this.set_cannnot_be_freed(false);
 
     return new EnvironmentEntry(this.heap, new_entry);
+  }
+
+  /**
+   * Sets the value of a variable. This method does not create a new variable.
+   * @param key_address address of the variable name (COMPLEX_string)
+   * @param value_address address of the value (any)
+   */
+  public set_variable_value_address(key_address: number, value_address: number): void {
+    const entry = this.lookup(key_address);
+    if (entry.is_nil()) {
+      throw new Error("Variable does not exist in current environment.");
+    }
+    entry.set_value_address(value_address);
   }
 
   /**
