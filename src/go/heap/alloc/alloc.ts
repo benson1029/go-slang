@@ -1,10 +1,12 @@
-const WORD_SIZE       = 4; // 2^2 = 4 bytes.
+const WORD_SIZE = 4; // 2^2 = 4 bytes.
 
 // All values below are in words.
-const MIN_ALLOC_LOG2  = 1;
-const MIN_ALLOC       = 2 ** MIN_ALLOC_LOG2;
-const MAX_ALLOC_LOG2  = 31;
-const MAX_ALLOC       = 2 ** MAX_ALLOC_LOG2;
+const MIN_ALLOC_LOG2 = 1;
+const MIN_ALLOC = 2 ** MIN_ALLOC_LOG2;
+const MAX_ALLOC_LOG2 = 31;
+const MAX_ALLOC = 2 ** MAX_ALLOC_LOG2;
+
+const NUM_SPECIAL_VALUE = 2; // [null, undefined]
 
 class BuddyAllocator {
   private data: ArrayBuffer;
@@ -254,7 +256,7 @@ class BuddyAllocator {
         let num = 0
 
         // Reserved for nil node
-        num += MIN_ALLOC * WORD_SIZE;
+        num += NUM_SPECIAL_VALUE * MIN_ALLOC * WORD_SIZE;
 
         // User nodes
         num += num_nodes * (MIN_ALLOC * WORD_SIZE);
@@ -281,7 +283,7 @@ class BuddyAllocator {
       this.numNodesLog2 = log2_ceil(this.numNodes);
 
       let currentSize = 0;
-      currentSize += MIN_ALLOC * WORD_SIZE; // Reserved for nil node
+      currentSize += NUM_SPECIAL_VALUE * MIN_ALLOC * WORD_SIZE;
 
       // Initialize free list space
       this.baseFreeList = currentSize;
@@ -450,4 +452,4 @@ class BuddyAllocator {
   }
 }
 
-export { BuddyAllocator, WORD_SIZE };
+export { BuddyAllocator, WORD_SIZE, NUM_SPECIAL_VALUE };

@@ -2,9 +2,6 @@
  * PRIMITIVE_int32
  * Fields    : int32 value
  * Children  : None
- *
- * @param value integer value
- * @returns address of the object
  */
 
 import { Primitive } from ".";

@@ -1,5 +1,5 @@
 import { Heap } from "../heap"
-import { TAG_PRIMITIVE_nil } from "./tags";
+import { TAG_PRIMITIVE_nil, TAG_PRIMITIVE_undefined } from "./tags";
 
 class HeapObject {
   public heap: Heap;
@@ -44,6 +44,10 @@ class HeapObject {
 
   public is_nil(): boolean {
     return this.get_tag() === TAG_PRIMITIVE_nil;
+  }
+
+  public is_undefined(): boolean {
+    return this.get_tag() === TAG_PRIMITIVE_undefined;
   }
 
   public free(): void {

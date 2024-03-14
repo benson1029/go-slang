@@ -1,19 +1,14 @@
 /**
  * COMPLEX_linked_list
- * Structure : [4 bytes metadata, 4 bytes reference count]
  * Fields    : number of children
  * Children  :
  * - value (any)
  * - next_address node (COMPLEX_linked_list)
- *
- * @param values linked list values
- * @returns address of the object
  */
 
 import { Heap } from "../../heap";
 import { auto_cast } from "../auto_cast";
 import { HeapObject } from "../objects";
-import { PrimitiveNil } from "../primitive/nil";
 import { TAG_COMPLEX_linked_list } from "../tags";
 
 class ComplexLinkedList extends HeapObject {
@@ -21,8 +16,8 @@ class ComplexLinkedList extends HeapObject {
     return auto_cast(this.heap, this.get_child(0));
   }
 
-  public get_next_address(): PrimitiveNil | ComplexLinkedList {
-    return auto_cast(this.heap, this.get_child(1)) as PrimitiveNil | ComplexLinkedList;
+  public get_next_address(): ComplexLinkedList {
+    return new ComplexLinkedList(this.heap, this.get_child(1));
   }
 
   public static allocate(heap: Heap, value: any, next_address: number): number {

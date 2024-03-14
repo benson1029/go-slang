@@ -2,8 +2,6 @@
  * PRIMITIVE_nil
  * Fields    : None
  * Children  : None
- *
- * @returns address of the object
  */
 
 import { Primitive } from ".";
@@ -15,6 +13,10 @@ class PrimitiveNil extends Primitive {
 
   public get_value(): null {
     return null;
+  }
+
+  public static allocate(): number {
+    return 0;
   }
 }
 

@@ -2,9 +2,6 @@
  * PRIMITIVE_rune
  * Fields    : rune value (int32)
  * Children  : None
- *
- * @param value rune value
- * @returns address of the object
  */
 
 import { Primitive } from ".";

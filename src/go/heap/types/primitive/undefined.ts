@@ -1,0 +1,24 @@
+/**
+ * PRIMITIVE_undefined
+ * Fields    : None
+ * Children  : None
+ */
+
+import { Primitive } from ".";
+import { WORD_SIZE } from "../../alloc";
+
+class PrimitiveUndefined extends Primitive {
+  public get_type(): string {
+    return "undefined";
+  }
+
+  public get_value(): undefined {
+    return undefined;
+  }
+
+  public static allocate(): number {
+    return 2 * WORD_SIZE;
+  }
+}
+
+export { PrimitiveUndefined };

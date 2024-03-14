@@ -2,9 +2,6 @@
  * PRIMITIVE_float32
  * Fields    : float32 value
  * Children  : None
- *
- * @param value float32 value
- * @returns address of the object
  */
 
 import { Primitive } from ".";

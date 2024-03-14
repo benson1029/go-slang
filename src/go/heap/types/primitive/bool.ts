@@ -2,9 +2,6 @@
  * PRIMITIVE_bool
  * Fields    : boolean value
  * Children  : None
- *
- * @param value boolean value
- * @returns address of the object
  */
 
 import { Primitive } from ".";

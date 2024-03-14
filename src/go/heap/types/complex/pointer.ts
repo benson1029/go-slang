@@ -2,9 +2,6 @@
  * COMPLEX_pointer
  * Fields    : number of children
  * Children  : address of the object referenced
- *
- * @param value address value
- * @returns address of the object
  */
 
 import { Heap } from "../../heap";

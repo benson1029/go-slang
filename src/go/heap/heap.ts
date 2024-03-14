@@ -54,7 +54,9 @@ import { ControlVar } from "./types/control/var";
 import { PrimitiveBool } from "./types/primitive/bool";
 import { PrimitiveFloat32 } from "./types/primitive/float32";
 import { PrimitiveInt32 } from "./types/primitive/int32";
+import { PrimitiveNil } from "./types/primitive/nil";
 import { PrimitiveRune } from "./types/primitive/rune";
+import { PrimitiveUndefined } from "./types/primitive/undefined";
 
 import {
     TAGSTRING_PRIMITIVE_bool,
@@ -72,12 +74,13 @@ import {
     TAGSTRING_CONTROL_postfix,
     TAGSTRING_CONTROL_binary,
     TAGSTRING_CONTROL_sequence,
-    TAGSTRING_CONTROL_call, 
-    TAGSTRING_CONTROL_function, 
+    TAGSTRING_CONTROL_call,
+    TAGSTRING_CONTROL_function,
     TAGSTRING_CONTROL_lambda_call,
     TAGSTRING_CONTROL_unary_i,
     TAGSTRING_CONTROL_binary_i,
-    TAG_PRIMITIVE_nil
+    TAG_PRIMITIVE_nil,
+    TAG_PRIMITIVE_undefined
 } from "./types/tags";
 
 class Heap {
@@ -251,19 +254,37 @@ class Heap {
         const num_words = Math.floor(memory / WORD_SIZE);
         this.alloc = new BuddyAllocator(num_words);
 
-        // Allocate the nil object
+        {
+            /**
+             * PRIMITIVE_nil
+             * Fields    : None
+             * Children  : None
+             *
+             * @returns address of the object
+             */
+            const address = PrimitiveNil.allocate();
+            this.alloc.memory_set_byte(address, 0); // 1 reserved byte for BuddyAllocator
+            this.alloc.memory_set_2_bytes(address + 1, TAG_PRIMITIVE_nil); // 2 bytes tag
+            this.alloc.memory_set_byte(address + 3, 0); // 1 byte number of fields
+            this.alloc.memory_set_word(address + 4, 0); // 4 bytes reference count
+            this.alloc.set_cannnot_be_freed(address, true);
+        }
 
-        /**
-         * PRIMITIVE_nil
-         * Fields    : None
-         * Children  : None
-         *
-         * @returns address of the object
-         */
-        this.alloc.memory_set_byte(0, 0); // 1 reserved byte for BuddyAllocator
-        this.alloc.memory_set_2_bytes(1, TAG_PRIMITIVE_nil); // 2 bytes tag
-        this.alloc.memory_set_byte(3, 0); // 1 byte number of fields
-        this.alloc.memory_set_word(4, 0); // 4 bytes reference count
+        {
+            /**
+             * PRIMITIVE_undefined
+             * Fields    : None
+             * Children  : None
+             *
+             * @returns address of the object
+             */
+            const address = PrimitiveUndefined.allocate();
+            this.alloc.memory_set_byte(address, 0); // 1 reserved byte for BuddyAllocator
+            this.alloc.memory_set_2_bytes(address + 1, TAG_PRIMITIVE_undefined); // 2 bytes tag
+            this.alloc.memory_set_byte(address + 3, 0); // 1 byte number of fields
+            this.alloc.memory_set_word(address + 4, 0); // 4 bytes reference count
+            this.alloc.set_cannnot_be_freed(address, true);
+        }
     }
 
     public mark_and_sweep(): void {
