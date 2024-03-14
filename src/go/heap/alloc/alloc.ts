@@ -360,7 +360,11 @@ class BuddyAllocator {
   }
 
   public deallocate(address: number): void {
-    if (address === null || address === 0 || this.get_cannnot_be_freed(address)) {
+    if (address === null ||
+      address < this.baseUser ||
+      address >= this.endUser ||
+      this.get_cannnot_be_freed(address)
+    ) {
       return;
     }
 

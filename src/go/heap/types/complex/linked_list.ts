@@ -20,6 +20,26 @@ class ComplexLinkedList extends HeapObject {
     return new ComplexLinkedList(this.heap, this.get_child(1));
   }
 
+  /**
+   * Important: This method calls free() on the current node.
+   * @returns the next node
+   */
+  public insert_before(value: any): ComplexLinkedList {
+    const new_address = ComplexLinkedList.allocate(this.heap, value, this.address);
+    this.free();
+    return new ComplexLinkedList(this.heap, new_address);
+  }
+
+  /**
+   * Important: This method calls free() on the current node.
+   * @returns the next node
+   */
+  public remove_current_node(): ComplexLinkedList {
+    const next = this.get_next_address();
+    this.free();
+    return next;
+  }
+
   public static allocate(heap: Heap, value: any, next_address: number): number {
     heap.set_cannnot_be_freed(next_address, true);
 

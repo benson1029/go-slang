@@ -15,9 +15,7 @@ class ControlSequence extends HeapObject {
   }
 
   public remove_first_linked_list_element(): void {
-    const linked_list = this.get_linked_list_address();
-    this.set_child(0, linked_list.get_next_address().reference().address);
-    linked_list.free();
+    this.set_child(0, this.get_linked_list_address().remove_current_node().address);
   }
 
   public static allocate(heap: Heap, body: any[]): number {

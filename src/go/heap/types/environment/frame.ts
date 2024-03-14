@@ -16,16 +16,16 @@ import { TAG_ENVIRONMENT_frame } from "../tags";
 import { EnvironmentEntry } from "./entry";
 
 class EnvironmentFrame extends HeapObject {
-  public get_parent_frame(): EnvironmentFrame {
+  public get_parent_frame_address(): EnvironmentFrame {
     return new EnvironmentFrame(this.heap, this.get_child(0));
   }
 
-  public get_linked_list(): ComplexLinkedList {
+  public get_linked_list_address(): ComplexLinkedList {
     return new ComplexLinkedList(this.heap, this.get_child(1));
   }
 
   public lookup_current_frame(key_address: number): EnvironmentEntry {
-    let entry = this.get_linked_list();
+    let entry = this.get_linked_list_address();
     const str = new ComplexString(this.heap, key_address).get_string();
     while (!entry.is_nil()) {
       const value = entry.get_value_address() as EnvironmentEntry;
@@ -48,7 +48,7 @@ class EnvironmentFrame extends HeapObject {
       if (!entry.is_nil()) {
         return entry;
       }
-      frame = frame.get_parent_frame();
+      frame = frame.get_parent_frame_address();
     }
     return new EnvironmentEntry(this.heap, PrimitiveNil.allocate());
   }
@@ -66,14 +66,32 @@ class EnvironmentFrame extends HeapObject {
     }
 
     this.set_cannnot_be_freed(true);
-    const new_entry = EnvironmentEntry.allocate(this.heap, key_address, PrimitiveNil.allocate());
-    const new_node = ComplexLinkedList.allocate(this.heap, new_entry, this.get_linked_list().address);
 
-    this.get_linked_list().free();
-    this.set_child(1, new_node);
+    const new_entry = EnvironmentEntry.allocate(this.heap, key_address, PrimitiveNil.allocate());
+    this.set_child(1, this.get_linked_list_address().insert_before(new_entry).address);
     this.set_cannnot_be_freed(false);
 
     return new EnvironmentEntry(this.heap, new_entry);
+  }
+
+  /**
+   * Important: This method calls free() for the current frame (destructive operation).
+   * @returns a new environment frame with the current frame as the parent frame
+   */
+  public push_frame(): EnvironmentFrame {
+    const new_frame = EnvironmentFrame.allocate(this.heap, this.address);
+    this.free();
+    return new EnvironmentFrame(this.heap, new_frame);
+  }
+
+  /**
+   * Important: This method calls free() for the current frame (destructive operation).
+   * @returns a new environment frame with the parent frame as the current frame
+   */
+  public pop_frame(): EnvironmentFrame {
+    const parent_frame = this.get_parent_frame_address();
+    this.free();
+    return parent_frame;
   }
 
   public static allocate(heap: Heap, parent_frame_address: number) {
