@@ -12,6 +12,12 @@ import { PrimitiveNil } from "../primitive/nil";
 import { TAG_COMPLEX_array } from "../tags";
 
 class ComplexArray extends HeapObject {
+  public set_value_address(index: number, value: HeapObject): void {
+    const current_value_address = this.get_value_address(index);    
+    this.set_child(index, value.reference().address);
+    current_value_address.free();
+  }
+
   public get_value_address(index: number): HeapObject {
     return auto_cast(this.heap, this.get_child(index));
   }

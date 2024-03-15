@@ -9,10 +9,7 @@ const TAG_COMPLEX_array = 0x4001; // 0100 0000 0000 0001
 // const TAG_COMPLEX_slice             = 0x4002; // 0100 0000 0000 0010
 const TAG_COMPLEX_string = 0x4003; // 0100 0000 0000 0011
 const TAG_COMPLEX_linked_list = 0x4004; // 0100 0000 0000 0100
-// const TAG_COMPLEX_hash_table        = 0x4005; // 0100 0000 0000 0101
 const TAG_COMPLEX_pointer = 0x4006; // 0100 0000 0000 0110
-const TAG_COMPLEX_hash_table = 0x4007; // 0100 0000 0000 0111
-
 
 const TAG_CONTROL_name = 0xC001; // 1100 0000 0000 0001
 const TAG_CONTROL_literal = 0xC002; // 1100 0000 0000 0010
@@ -37,6 +34,7 @@ const TAG_CONTROL_binary_i = 0xC014; // 1100 0000 0001 0100
 
 const TAG_ENVIRONMENT_entry = 0xC100; // 1100 0001 0000 0000
 const TAG_ENVIRONMENT_frame = 0xC101; // 1100 0001 0000 0001
+const TAG_ENVIRONMENT_hash_table = 0xC102; // 1100 0000 0000 0010
 
 
 const TAGSTRING_PRIMITIVE_nil = "nil";
@@ -77,7 +75,6 @@ export {
   TAG_COMPLEX_string,
   TAG_COMPLEX_linked_list,
   TAG_COMPLEX_pointer,
-  TAG_COMPLEX_hash_table,
   TAG_CONTROL_name,
   TAG_CONTROL_literal,
   TAG_CONTROL_var,
@@ -93,6 +90,7 @@ export {
   TAG_CONTROL_binary_i,
   TAG_ENVIRONMENT_entry,
   TAG_ENVIRONMENT_frame,
+  TAG_ENVIRONMENT_hash_table,
   TAGSTRING_PRIMITIVE_nil,
   TAGSTRING_PRIMITIVE_bool,
   TAGSTRING_PRIMITIVE_int32,

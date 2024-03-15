@@ -4,6 +4,7 @@
  * Children  :
  * - parent frame (ENVIRONMENT_frame)
  * - linked list of entries (ENVIRONMENT_entry)
+ * - hash table of entries for fast lookup (ENVIRONMENT_hash_table)
  */
 
 import { Heap } from "../../heap";
@@ -14,25 +15,25 @@ import { HeapObject } from "../objects";
 import { PrimitiveNil } from "../primitive/nil";
 import { TAG_ENVIRONMENT_frame } from "../tags";
 import { EnvironmentEntry } from "./entry";
+import { EnvironmentHashTable } from "./hash_table";
 
 class EnvironmentFrame extends HeapObject {
-  public get_parent_frame_address(): EnvironmentFrame {
+  private get_parent_frame_address(): EnvironmentFrame {
     return new EnvironmentFrame(this.heap, this.get_child(0));
   }
 
-  public get_linked_list_address(): ComplexLinkedList {
+  private get_linked_list_address(): ComplexLinkedList {
     return new ComplexLinkedList(this.heap, this.get_child(1));
   }
 
-  public lookup_current_frame(key_address: number): EnvironmentEntry {
-    let entry = this.get_linked_list_address();
-    const str = new ComplexString(this.heap, key_address).get_string();
-    while (!entry.is_nil()) {
-      const value = entry.get_value_address() as EnvironmentEntry;
-      if (value.get_key_address().get_string() === str) {
-        return value;
-      }
-      entry = entry.get_next_address();
+  private get_hash_table_address(): EnvironmentHashTable {
+    return new EnvironmentHashTable(this.heap, this.get_child(2));
+  }
+
+  private lookup_current_frame(key_address: number): EnvironmentEntry {
+    const entry = this.get_hash_table_address().find_variable(key_address);
+    if (!entry.is_nil()) {
+      return entry;
     }
     return new EnvironmentEntry(this.heap, PrimitiveNil.allocate());
   }
@@ -41,11 +42,15 @@ class EnvironmentFrame extends HeapObject {
    * @param key address of the variable name (COMPLEX_string)
    * @returns address of the environment entry
    */
-  public lookup(key_address: number): EnvironmentEntry {
+  private lookup(key_address: number): EnvironmentEntry {
     let frame = new EnvironmentFrame(this.heap, this.address);
     while (!frame.is_nil()) {
       const entry = frame.lookup_current_frame(key_address);
       if (!entry.is_nil()) {
+        // Cache it in the hash table
+        this.set_cannnot_be_freed(true);
+        this.get_hash_table_address().insert_new_variable(entry.reference().address);
+        this.set_cannnot_be_freed(false);
         return entry;
       }
       frame = frame.get_parent_frame_address();
@@ -66,9 +71,9 @@ class EnvironmentFrame extends HeapObject {
     }
 
     this.set_cannnot_be_freed(true);
-
     const new_entry = EnvironmentEntry.allocate(this.heap, key_address, PrimitiveNil.allocate());
     this.set_child(1, this.get_linked_list_address().insert_before(new_entry).address);
+    this.get_hash_table_address().insert_new_variable(new_entry);
     this.set_cannnot_be_freed(false);
 
     return new EnvironmentEntry(this.heap, new_entry);
@@ -82,7 +87,7 @@ class EnvironmentFrame extends HeapObject {
   public set_variable_value_address(key_address: number, value_address: number): void {
     const entry = this.lookup(key_address);
     if (entry.is_nil()) {
-      throw new Error("Variable does not exist in current environment.");
+      throw new Error("Variable does not exist in current scope.");
     }
     entry.set_value_address(value_address);
   }
@@ -111,9 +116,10 @@ class EnvironmentFrame extends HeapObject {
     const parent_frame = auto_cast(heap, parent_frame_address);
     heap.set_cannnot_be_freed(parent_frame.address, true);
 
-    const address = heap.allocate_object(TAG_ENVIRONMENT_frame, 1, 2);
+    const address = heap.allocate_object(TAG_ENVIRONMENT_frame, 1, 3);
     heap.set_child(address, 0, parent_frame.address);
     heap.set_child(address, 1, PrimitiveNil.allocate());
+    heap.set_child(address, 2, PrimitiveNil.allocate());
     heap.set_cannnot_be_freed(parent_frame.address, false);
 
     return address;
