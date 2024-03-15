@@ -10,7 +10,6 @@
 import { Heap } from "../../heap";
 import { auto_cast } from "../auto_cast";
 import { ComplexLinkedList } from "../complex/linked_list";
-import { ComplexString } from "../complex/string";
 import { HeapObject } from "../objects";
 import { PrimitiveNil } from "../primitive/nil";
 import { TAG_ENVIRONMENT_frame } from "../tags";
@@ -31,7 +30,11 @@ class EnvironmentFrame extends HeapObject {
   }
 
   private lookup_current_frame(key_address: number): EnvironmentEntry {
-    const entry = this.get_hash_table_address().find_variable(key_address);
+    const table = this.get_hash_table_address();
+    if (table.is_nil()) {
+      return new EnvironmentEntry(this.heap, PrimitiveNil.allocate());
+    }
+    const entry = table.find_variable(key_address);
     if (!entry.is_nil()) {
       return entry;
     }
@@ -47,10 +50,7 @@ class EnvironmentFrame extends HeapObject {
     while (!frame.is_nil()) {
       const entry = frame.lookup_current_frame(key_address);
       if (!entry.is_nil()) {
-        // Cache it in the hash table
-        this.set_cannnot_be_freed(true);
-        this.get_hash_table_address().insert_new_variable(entry.reference().address);
-        this.set_cannnot_be_freed(false);
+        // TODO: Cache it in the hash table
         return entry;
       }
       frame = frame.get_parent_frame_address();
@@ -73,6 +73,9 @@ class EnvironmentFrame extends HeapObject {
     this.set_cannnot_be_freed(true);
     const new_entry = EnvironmentEntry.allocate(this.heap, key_address, PrimitiveNil.allocate());
     this.set_child(1, this.get_linked_list_address().insert_before(new_entry).address);
+    if (this.get_hash_table_address().is_nil()) {
+      this.set_child(2, EnvironmentHashTable.allocate(this.heap));
+    }
     this.get_hash_table_address().insert_new_variable(new_entry);
     this.set_cannnot_be_freed(false);
 
