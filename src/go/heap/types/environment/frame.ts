@@ -5,6 +5,7 @@
  * - parent frame (ENVIRONMENT_frame)
  * - linked list of entries (ENVIRONMENT_entry)
  * - hash table of entries for fast lookup (ENVIRONMENT_hash_table)
+ * - hash table of all entries, including parent frames, for caching (ENVIRONMENT_hash_table)
  */
 
 import { Heap } from "../../heap";
@@ -25,20 +26,42 @@ class EnvironmentFrame extends HeapObject {
     return new ComplexLinkedList(this.heap, this.get_child(1));
   }
 
-  private get_hash_table_address(): EnvironmentHashTable {
+  private get_lookup_hash_table_address(): EnvironmentHashTable {
     return new EnvironmentHashTable(this.heap, this.get_child(2));
   }
 
+  private get_cache_hash_table_address(): EnvironmentHashTable {
+    return new EnvironmentHashTable(this.heap, this.get_child(3));
+  }
+
   private lookup_current_frame(key_address: number): EnvironmentEntry {
-    const table = this.get_hash_table_address();
-    if (table.is_nil()) {
-      return new EnvironmentEntry(this.heap, PrimitiveNil.allocate());
+    { // first, check whether current frame has the variable
+      const table = this.get_lookup_hash_table_address();
+      if (!table.is_nil()) {
+        const entry = table.find_variable(key_address);
+        if (!entry.is_nil()) {
+          return entry;
+        }
+      }
     }
-    const entry = table.find_variable(key_address);
-    if (!entry.is_nil()) {
-      return entry;
+
+    // check the cache of parent frames' variables
+    if (!this.get_cache_hash_table_address().is_nil()) {
+      const entry = this.get_cache_hash_table_address().find_variable(key_address);
+      if (!entry.is_nil()) {
+        return entry;
+      }
     }
+
+    // not found
     return new EnvironmentEntry(this.heap, PrimitiveNil.allocate());
+  }
+
+  private insert_to_cache(entry: EnvironmentEntry): void {
+    if (this.get_cache_hash_table_address().is_nil()) {
+      this.set_child(3, EnvironmentHashTable.allocate(this.heap));
+    }
+    this.get_cache_hash_table_address().force_insert(entry);
   }
 
   /**
@@ -46,11 +69,18 @@ class EnvironmentFrame extends HeapObject {
    * @returns address of the environment entry
    */
   private lookup(key_address: number): EnvironmentEntry {
-    let frame = new EnvironmentFrame(this.heap, this.address);
+    { // try to find the variable in the current frame
+      const entry = this.lookup_current_frame(key_address);
+      if (!entry.is_nil()) {
+        return entry;
+      }
+    }
+    let frame = this.get_parent_frame_address();
     while (!frame.is_nil()) {
       const entry = frame.lookup_current_frame(key_address);
       if (!entry.is_nil()) {
-        // TODO: Cache it in the hash table
+        // Cache it, so subsequent lookups are faster
+        this.insert_to_cache(entry);
         return entry;
       }
       frame = frame.get_parent_frame_address();
@@ -73,12 +103,14 @@ class EnvironmentFrame extends HeapObject {
     this.set_cannnot_be_freed(true);
     const new_entry = EnvironmentEntry.allocate(this.heap, key_address, PrimitiveNil.allocate());
     this.set_child(1, this.get_linked_list_address().insert_before(new_entry).address);
-    if (this.get_hash_table_address().is_nil()) {
+
+    // Insert to the current scope lookup hash table
+    if (this.get_lookup_hash_table_address().is_nil()) {
       this.set_child(2, EnvironmentHashTable.allocate(this.heap));
     }
-    this.get_hash_table_address().insert_new_variable(new_entry);
-    this.set_cannnot_be_freed(false);
+    this.get_lookup_hash_table_address().insert_new_variable(new_entry);
 
+    this.set_cannnot_be_freed(false);
     return new EnvironmentEntry(this.heap, new_entry);
   }
 
@@ -132,10 +164,11 @@ class EnvironmentFrame extends HeapObject {
     const parent_frame = auto_cast(heap, parent_frame_address);
     heap.set_cannnot_be_freed(parent_frame.address, true);
 
-    const address = heap.allocate_object(TAG_ENVIRONMENT_frame, 1, 3);
+    const address = heap.allocate_object(TAG_ENVIRONMENT_frame, 1, 4);
     heap.set_child(address, 0, parent_frame.address);
     heap.set_child(address, 1, PrimitiveNil.allocate());
     heap.set_child(address, 2, PrimitiveNil.allocate());
+    heap.set_child(address, 3, PrimitiveNil.allocate());
     heap.set_cannnot_be_freed(parent_frame.address, false);
 
     return address;

@@ -65,10 +65,10 @@ class EnvironmentHashTable extends HeapObject {
   }
 
   // Returns nil if the key is not found.
-  private find_internal(variable_name_address: number): EnvironmentEntry {
+  private find_internal(variable_name_address: number): number | null {
     const table = this.get_table_address();
     if (table.is_nil()) {
-      return EnvironmentEntry.allocate_nil(this.heap);
+      return null;
     }
 
     const variable_name = new ComplexString(this.heap, variable_name_address);
@@ -80,18 +80,18 @@ class EnvironmentHashTable extends HeapObject {
     while (true) {
       const current_entry = table.get_value_address(index) as EnvironmentEntry;
       if (current_entry.is_nil()) {
-        return EnvironmentEntry.allocate_nil(this.heap);
+        return null;
       }
 
       if (current_entry.get_key_address().get_string() === str) {
-        return current_entry;
+        return index;
       }
 
       const desired = this.fast_mod(current_entry.get_key_address().get_hash());
       const current_dist = this.fast_mod(index + this.get_table_capacity() - desired);
 
       if (current_dist < dist) {
-        return EnvironmentEntry.allocate_nil(this.heap);
+        return null;
       }
 
       dist++;
@@ -129,7 +129,7 @@ class EnvironmentHashTable extends HeapObject {
   }
 
   private contains(variable_name_address: number): boolean {
-    return !this.find_internal(variable_name_address).is_nil();
+    return this.find_internal(variable_name_address) !== null;
   }
 
   private get_table_address(): ComplexArray {
@@ -149,7 +149,7 @@ class EnvironmentHashTable extends HeapObject {
   }
 
   public insert_new_variable(entry_address: number): void {
-    const entry = new EnvironmentEntry(this.heap, entry_address);    
+    const entry = new EnvironmentEntry(this.heap, entry_address);
     if (this.contains(entry.get_key_address().address)) {
       throw new Error("Variable already exists in current scope.");
     }
@@ -165,7 +165,20 @@ class EnvironmentHashTable extends HeapObject {
   }
 
   public find_variable(variable_name_address: number): EnvironmentEntry {
-    return this.find_internal(variable_name_address);
+    const index = this.find_internal(variable_name_address);
+    if (index === null) {
+      return new EnvironmentEntry(this.heap, 0);
+    }
+    return new EnvironmentEntry(this.heap, this.get_table_address().get_value_address(index).address);
+  }
+
+  public force_insert(entry: EnvironmentEntry): void {
+    const index = this.find_internal(entry.get_key_address().address);
+    if (index === null) {
+      this.insert_internal(entry);
+    } else {
+      this.get_table_address().set_value_address(index, entry);
+    }
   }
 
   public static allocate(heap: Heap): number {
