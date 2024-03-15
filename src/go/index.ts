@@ -26,7 +26,7 @@ function parseAndExecute(code: string, heapSize: number): string {
         if (error instanceof UnsupportedCommandError) {
             return `${error.message}\n${JSON.stringify(parsed_program, null, 2)}`;
         } else {
-            return `Execution error: ${error.message}\n${error.stack}\n${JSON.stringify(parsed_program, null, 2)}`;
+            return `Execution error: ${error.message}\n${error.stack}`;
         }
     }
     return JSON.stringify(result);

@@ -52,7 +52,6 @@ class ECE {
 
             const cmd = this.C.pop();
             const microcode = lookup_microcode(this.heap.get_tag(cmd));
-            console.log(cmd, microcode.name);
             microcode(cmd, this.heap, this.C, this.S, this.E);
             //this.heap.free_object(cmd);
         }
