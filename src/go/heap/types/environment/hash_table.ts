@@ -16,14 +16,11 @@
  */
 
 import { Heap } from "../../heap";
-import { auto_cast } from "../auto_cast";
 import { ComplexArray } from "../complex/array";
 import { ComplexString } from "../complex/string";
 import { HeapObject } from "../objects";
-import { PrimitiveNil } from "../primitive/nil";
 import { TAG_ENVIRONMENT_hash_table } from "../tags";
 import { EnvironmentEntry } from "./entry";
-import { EnvironmentFrame } from "./frame";
 
 const LOAD_FACTOR = 0.6;
 const INITIAL_CAPACITY = 8;

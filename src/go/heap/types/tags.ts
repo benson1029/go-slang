@@ -31,6 +31,9 @@ const TAG_CONTROL_call = 0xC011; // 1100 0000 0001 0001
 const TAG_CONTROL_lambda_call = 0xC012; // 1100 0000 0001 0010
 const TAG_CONTROL_unary_i = 0xC013; // 1100 0000 0001 0011
 const TAG_CONTROL_binary_i = 0xC014; // 1100 0000 0001 0100
+const TAG_CONTROL_pop_i = 0xC015; // 1100 0000 0001 0101
+const TAG_CONTROL_var_i = 0xC016; // 1100 0000 0001 0110
+const TAG_CONTROL_assign_i = 0xC017; // 1100 0000 0001 0111
 
 const TAG_ENVIRONMENT_entry = 0xC100; // 1100 0001 0000 0000
 const TAG_ENVIRONMENT_frame = 0xC101; // 1100 0001 0000 0001
@@ -63,6 +66,11 @@ const TAGSTRING_CONTROL_lambda_call = "lambda-call";
 
 const TAGSTRING_CONTROL_unary_i = "unary_i";
 const TAGSTRING_CONTROL_binary_i = "binary_i";
+const TAGSTRING_CONTROL_pop_i = "pop_i";
+const TAGSTRING_CONTROL_var_i = "var_i";
+const TAGSTRING_CONTROL_assign_i = "assign_i";
+
+const TAGSTRING_ENVIRONMENT_frame = "frame";
 
 export {
   TAG_PRIMITIVE_nil,
@@ -88,6 +96,9 @@ export {
   TAG_CONTROL_lambda_call,
   TAG_CONTROL_unary_i,
   TAG_CONTROL_binary_i,
+  TAG_CONTROL_pop_i,
+  TAG_CONTROL_var_i,
+  TAG_CONTROL_assign_i,
   TAG_ENVIRONMENT_entry,
   TAG_ENVIRONMENT_frame,
   TAG_ENVIRONMENT_hash_table,
@@ -114,4 +125,8 @@ export {
   TAGSTRING_CONTROL_lambda_call,
   TAGSTRING_CONTROL_unary_i,
   TAGSTRING_CONTROL_binary_i,
+  TAGSTRING_CONTROL_pop_i,
+  TAGSTRING_CONTROL_var_i,
+  TAGSTRING_CONTROL_assign_i,
+  TAGSTRING_ENVIRONMENT_frame,
 };

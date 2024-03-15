@@ -39,6 +39,7 @@ import { ComplexLinkedList } from "./types/complex/linked_list";
 import { ComplexPointer } from "./types/complex/pointer";
 import { ComplexString } from "./types/complex/string";
 import { ControlAssign } from "./types/control/assign";
+import { ControlAssignI } from "./types/control/assign_i";
 import { ControlBinary } from "./types/control/binary";
 import { ControlBinaryI } from "./types/control/binary_i";
 import { ControlCall } from "./types/control/call";
@@ -46,11 +47,14 @@ import { ControlFunction } from "./types/control/function";
 import { ControlLambdaCall } from "./types/control/lambda_call";
 import { ControlLiteral } from "./types/control/literal";
 import { ControlName } from "./types/control/name";
+import { ControlPopI } from "./types/control/pop_i";
 import { ControlPostfix } from "./types/control/postfix";
 import { ControlSequence } from "./types/control/sequence";
 import { ControlUnary } from "./types/control/unary";
 import { ControlUnaryI } from "./types/control/unary_i";
 import { ControlVar } from "./types/control/var";
+import { ControlVarI } from "./types/control/var_i";
+import { EnvironmentFrame } from "./types/environment/frame";
 import { PrimitiveBool } from "./types/primitive/bool";
 import { PrimitiveFloat32 } from "./types/primitive/float32";
 import { PrimitiveInt32 } from "./types/primitive/int32";
@@ -80,7 +84,11 @@ import {
     TAGSTRING_CONTROL_unary_i,
     TAGSTRING_CONTROL_binary_i,
     TAG_PRIMITIVE_nil,
-    TAG_PRIMITIVE_undefined
+    TAG_PRIMITIVE_undefined,
+    TAGSTRING_ENVIRONMENT_frame,
+    TAGSTRING_CONTROL_pop_i,
+    TAGSTRING_CONTROL_var_i,
+    TAGSTRING_CONTROL_assign_i
 } from "./types/tags";
 
 class Heap {
@@ -559,6 +567,55 @@ class Heap {
         return ControlBinaryI.allocate(this, obj.operator);
     }
 
+    /**
+     * CONTROL_pop_i
+     * Fields    : none
+     *
+     * @returns address of the object
+     */
+    public allocate_CONTROL_pop_i(): number {
+        return ControlPopI.allocate(this);
+    }
+
+    /**
+     * CONTROL_var_i
+     * Fields    : number of children
+     * Children  :
+     * - 4 bytes address of the name (COMPLEX_string)
+     * 
+     * @param obj control object
+     * @returns address of the object
+     */
+    public allocate_CONTROL_var_i(obj: { tag: string, name: ComplexString }): number {
+        return ControlVarI.allocate(this, obj.name);
+    }
+
+    /**
+     * CONTROL_assign_i
+     * Fields    : number of children
+     * Children  :
+     * - 4 bytes address of the name (COMPLEX_string)
+     * 
+     * @param obj control object
+     * @returns address of the object
+     */
+    public allocate_CONTROL_assign_i(obj: { tag: string, name: ComplexString }): number {
+        return ControlAssignI.allocate(this, obj.name);
+    }
+    
+    /**
+     * ENVIRONMENT_frame
+     * Fields    : number of children
+     * Children  :
+     * - parent frame (ENVIRONMENT_frame)
+     * - linked list of entries (ENVIRONMENT_entry)
+     * @param parent_frame_address address of the parent frame (ENVIRONMENT_frame)
+     * @returns address of the object
+     */
+    public allocate_ENVIRONMENT_frame(obj: { tag: string, parent_frame_address: number }): number {
+        return EnvironmentFrame.allocate(this, obj.parent_frame_address);
+    }
+
     public allocate_number(value: number): number {
         return value;
     }
@@ -620,6 +677,14 @@ class Heap {
                 return this.allocate_CONTROL_unary_i(obj);
             case TAGSTRING_CONTROL_binary_i:
                 return this.allocate_CONTROL_binary_i(obj);
+            case TAGSTRING_CONTROL_pop_i:
+                return this.allocate_CONTROL_pop_i();
+            case TAGSTRING_CONTROL_var_i:
+                return this.allocate_CONTROL_var_i(obj);
+            case TAGSTRING_CONTROL_assign_i:
+                return this.allocate_CONTROL_assign_i(obj);
+            case TAGSTRING_ENVIRONMENT_frame:
+                return this.allocate_ENVIRONMENT_frame(obj);
             default:
                 throw new Error("Unknown tag");
         }

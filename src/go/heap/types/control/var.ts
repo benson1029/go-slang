@@ -6,6 +6,7 @@
  */
 
 import { Heap } from "../../heap";
+import { auto_cast } from "../auto_cast";
 import { ComplexString } from "../complex/string";
 import { HeapObject } from "../objects";
 import { TAG_CONTROL_var } from "../tags";
@@ -18,6 +19,14 @@ class ControlVar extends HeapObject {
 
   public get_name(): string {
     return this.get_name_address().get_string();
+  }
+
+  public get_expression_address(): number {
+    return this.get_child(1);
+  }
+
+  public get_expression(): HeapObject {
+    return auto_cast(this.heap, this.get_expression_address());
   }
 
   public static allocate(heap: Heap, name: string, value: any): number {

@@ -1,5 +1,6 @@
 import * as expression from "./expression";
 import * as sequence from "./sequence";
+import * as control_var from "./var";
 import * as tags from "../../heap/types/tags";
 
 function lookup_microcode(tag: number): Function {
@@ -19,6 +20,16 @@ function lookup_microcode(tag: number): Function {
             return expression.evaluate_binary_i;
         case tags.TAG_CONTROL_sequence:
             return sequence.evaluate_sequence;
+        case tags.TAG_CONTROL_var:
+            return control_var.evaluate_var;
+        case tags.TAG_CONTROL_var_i:
+            return control_var.evaluate_var_i;
+        case tags.TAG_CONTROL_assign:
+            return control_var.evaluate_assign;
+        case tags.TAG_CONTROL_assign_i:
+            return control_var.evaluate_assign_i;
+        case tags.TAG_CONTROL_name:
+            return control_var.evaluate_name;
         default:
             throw new UnsupportedCommandError(tag.toString());
     }

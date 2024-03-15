@@ -8,7 +8,6 @@
 import { Heap } from "../../heap";
 import { auto_cast } from "../auto_cast";
 import { HeapObject } from "../objects";
-import { PrimitiveNil } from "../primitive/nil";
 import { TAG_COMPLEX_array } from "../tags";
 
 class ComplexArray extends HeapObject {

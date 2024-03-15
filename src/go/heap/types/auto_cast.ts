@@ -4,14 +4,20 @@ import { ComplexPointer } from "./complex/pointer";
 import { ComplexString } from "./complex/string";
 import { ControlAssign } from "./control/assign";
 import { ControlBinary } from "./control/binary";
+import { ControlBinaryI } from "./control/binary_i";
 import { ControlCall } from "./control/call";
 import { ControlFunction } from "./control/function";
 import { ControlLambdaCall } from "./control/lambda_call";
 import { ControlName } from "./control/name";
+import { ControlPopI } from "./control/pop_i";
 import { ControlPostfix } from "./control/postfix";
 import { ControlSequence } from "./control/sequence";
 import { ControlUnary } from "./control/unary";
+import { ControlUnaryI } from "./control/unary_i";
 import { ControlVar } from "./control/var";
+import { ControlVarI } from "./control/var_i";
+import { EnvironmentEntry } from "./environment/entry";
+import { EnvironmentFrame } from "./environment/frame";
 import { HeapObject } from "./objects";
 import { PrimitiveBool } from "./primitive/bool";
 import { PrimitiveFloat32 } from "./primitive/float32";
@@ -38,6 +44,12 @@ import {
   TAG_CONTROL_call,
   TAG_CONTROL_function,
   TAG_CONTROL_lambda_call,
+  TAG_CONTROL_unary_i,
+  TAG_CONTROL_binary_i,
+  TAG_CONTROL_pop_i,
+  TAG_CONTROL_var_i,
+  TAG_ENVIRONMENT_entry,
+  TAG_ENVIRONMENT_frame,
 } from "./tags"
 
 
@@ -82,6 +94,18 @@ function auto_cast(heap: Heap, address: number): HeapObject {
       return new ControlCall(heap, address);
     case TAG_CONTROL_lambda_call:
       return new ControlLambdaCall(heap, address);
+    case TAG_CONTROL_unary_i:
+      return new ControlUnaryI(heap, address);
+    case TAG_CONTROL_binary_i:
+      return new ControlBinaryI(heap, address);
+    case TAG_CONTROL_pop_i:
+      return new ControlPopI(heap, address);
+    case TAG_CONTROL_var_i:
+      return new ControlVarI(heap, address);
+    case TAG_ENVIRONMENT_entry:
+      return new EnvironmentEntry(heap, address);
+    case TAG_ENVIRONMENT_frame:
+      return new EnvironmentFrame(heap, address);
     default:
       throw new Error("Unknown tag");
   }
