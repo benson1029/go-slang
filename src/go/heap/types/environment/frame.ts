@@ -93,6 +93,19 @@ class EnvironmentFrame extends HeapObject {
   }
 
   /**
+   * Gets the value of a variable. This method does not create a new variable.
+   * @param key_address address of the variable name (COMPLEX_string)
+   * @returns address of the value (any)
+   */
+  public get_variable_value_address(key_address: number): HeapObject {
+    const entry = this.lookup(key_address);
+    if (entry.is_nil()) {
+      throw new Error("Variable does not exist in current scope.");
+    }
+    return entry.get_value_address();
+  }
+
+  /**
    * Important: This method calls free() for the current frame (destructive operation).
    * @returns a new environment frame with the current frame as the parent frame
    */
