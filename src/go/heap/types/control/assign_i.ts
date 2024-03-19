@@ -21,7 +21,7 @@ class ControlAssignI extends HeapObject {
 
   public static allocate(heap: Heap, name: ComplexString): number {
     const address = heap.allocate_object(TAG_CONTROL_assign_i, 1, 1);
-    heap.set_child(address, 0, name.address);
+    heap.set_child(address, 0, name.reference().address);
     return address;
   }
 }

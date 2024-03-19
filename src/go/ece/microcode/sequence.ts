@@ -14,6 +14,8 @@ function evaluate_sequence(cmd: number, heap: Heap, C: Control, S: Stash, E: Env
     const seq_object_copy = seq_object.copy();
     const new_seq_object = new ControlSequence(heap, seq_object_copy.address);
     new_seq_object.remove_first_linked_list_element();
+    // TODO: Remove the following line after Rama fixes the bug in get_linked_list_address
+    new_seq_object.get_linked_list_address().reference();
     C.push(new_seq_object.address);
     C.push(value.address);
 }
