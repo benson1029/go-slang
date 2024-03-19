@@ -160,22 +160,39 @@ ArrayType "array type"
 SliceType "slice type"
     = "[" __ "]" __ type:Type { return { tag: "sliceType", type: type }; }
 
+ExpressionListElements
+    = __ exp0:(Expression / ExpressionList) __ exps:((__ "," __ (Expression / ExpressionList)))* __ { return [exp0].concat(exps.map(x => x[3])); }
+    / __ exp0:(Expression / ExpressionList) __ { return [exp0]; }
+    / __ { return []; }
+
+ExpressionList
+    = "{" __ elements:ExpressionListElements __ "}" { return elements; }
+
+ArrayConstructor
+    = type:(ArrayType / SliceType) __ elements:ExpressionList { return { tag: "arrayLiteral", type: type, elements: elements }; }
+
+SliceExpression
+    = expr:Expression { return expr; }
+    / __ { return null; }
+
 PrimaryExpression
-    = exp:PrimaryExpressionWithoutArray __ index:(("[" __ Expression __ "]") / ("[" __ Expression __ ":" __ Expression __ "]"))* {
+    = expr:PrimaryExpressionWithoutArray __ index:(("[" __ Expression __ "]") / ("[" __ SliceExpression __ ":" __ SliceExpression __ "]"))+ {
         return index.reduce(function(result, element) {
             if (element.length > 5) {
                 return { tag: "slice", array: result, left: element[2], right: element[6] };
             } else {
                 return { tag: "index", array: result, index: element[2] };
             }
-        }, exp);
+        }, expr);
     }
+    / expr:PrimaryExpressionWithoutArray { return expr; }
 
 PrimaryExpressionWithoutArray "PrimaryExpression"
     = AnonymousFunctionCall
     / FunctionCall
     / Literal
     / Name
+    / ArrayConstructor
     / "(" __ exp:Expression __ ")" { return exp; }
 
 PostfixOperator

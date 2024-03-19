@@ -218,7 +218,7 @@ test(
 )
 
 test(
-    "go supports literals of int, float32, string and bool",
+    "parser supports literals of int, float32, string and bool",
     async () => {
         const code = `package main
 
@@ -236,7 +236,7 @@ test(
 )
 
 test(
-    "go supports parsing expressions",
+    "parser supports parsing expressions",
     async () => {
         const code = `package main
 
@@ -260,6 +260,66 @@ test(
             x := 1
             y := x++
             z := x--
+        }`;
+        const result = await parse(code);
+        expect(result).toBeInstanceOf(Object);
+    }
+)
+
+test(
+    "parser supports parsing arrays",
+    async () => {
+        const code = `package main
+
+        import "fmt"
+
+        func main() {
+            var x [5]int32
+            fmt.Println(x)
+            y := [5]int32{1, 2, 3, 4, 5}
+            fmt.Println(y)
+            fmt.Println(y[0])
+        }`;
+        const result = await parse(code);
+        expect(result).toBeInstanceOf(Object);
+    }
+)
+
+test(
+    "parser supports parsing slices",
+    async () => {
+        const code = `package main
+
+        import "fmt"
+
+        func main() {
+            var x []int32
+            fmt.Println(x)
+            y := []int32{1, 2, 3, 4, 5}
+            fmt.Println(y)
+            fmt.Println(y[0])
+            fmt.Println(y[1:3])
+            fmt.Println(y[:3][0])
+        }`;
+        const result = await parse(code);
+        expect(result).toBeInstanceOf(Object);
+    }
+)
+
+test(
+    "parser supports multi-dimensional arrays",
+    async () => {
+        const code = `package main
+
+        import "fmt"
+
+        func main() {
+            var x [5][5]int32
+            fmt.Println(x)
+            y := [2][5]int32{{1, 2, 3, 4, 5}, {6, 7, 8, 9, 10}}
+            fmt.Println(y)
+            fmt.Println(y[0])
+            fmt.Println(y[0][0])
         }`;
         const result = await parse(code);
         expect(result).toBeInstanceOf(Object);

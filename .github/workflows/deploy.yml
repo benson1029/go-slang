@@ -41,6 +41,8 @@ jobs:
           cache: ${{ steps.detect-package-manager.outputs.manager }}
       - name: Install dependencies
         run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
+      - name: Run tests
+        run: npm test
       - name: Build React app
         run: npm run build
       - name: Build Docusaurus docs
