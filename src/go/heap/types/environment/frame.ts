@@ -75,12 +75,10 @@ class EnvironmentFrame extends HeapObject {
         return entry;
       }
     }
-    console.log("lookup in parent frames");
+
     let frame = this.get_parent_frame_address();
-    console.log(frame.is_nil())
     while (!frame.is_nil()) {
       const entry = frame.lookup_current_frame(key_address);
-      console.log(entry.is_nil())
       if (!entry.is_nil()) {
         // Cache it, so subsequent lookups are faster
         this.insert_to_cache(entry);
@@ -158,7 +156,7 @@ class EnvironmentFrame extends HeapObject {
    * @returns a new environment frame with the parent frame as the current frame
    */
   public pop_frame(): EnvironmentFrame {
-    const parent_frame = this.get_parent_frame_address();
+    const parent_frame = this.get_parent_frame_address().reference() as EnvironmentFrame;
     this.free();
     return parent_frame;
   }
