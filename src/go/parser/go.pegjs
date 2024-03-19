@@ -279,6 +279,7 @@ Statement
     / VariableDeclaration
     / GoAnomymousFunctionCall
     / GoFunctionCall
+    / PostfixStatement
     / Assignment
     / Block
     / IfStatement
@@ -303,6 +304,23 @@ ReturnStatement "return"
     = "return" WhiteSpace __ exp:Expression { return { tag: "return", value: exp }; }
     / "return" { return { tag: "return" }; }
 
+PostfixStatement "postfix"
+    = identifier:Identifier __ operator:PostfixOperator {
+        return {
+            tag: "assign",
+            name: identifier,
+            value: {
+                tag: "binary",
+                operator: (operator === "++") ? "+" : "-",
+                leftOperand: {
+                    tag: "name",
+                    name: identifier
+                },
+                rightOperand: makeLiteral("int32", 1)
+            }
+        }
+    }
+
 // ===== 4. Sequences, Control Structures and Blocks =====
 
 StatementList
@@ -320,13 +338,18 @@ IfStatement "if"
     / "if" WhiteSpace __ condition:Expression __ body:Block __ "else" WhiteSpace __ elseBody:Block { return { tag: "if", condition: condition, body: body, elseBody: elseBody }; }
     / "if" WhiteSpace __ condition:Expression __ body:Block { return { tag: "if", condition: condition, body: body }; }
 
-ForInitPostStatement "statement"
+ForInitStatement "statement"
     = VariableDeclaration
     / Assignment
     / __ { return null; }
 
+ForUpdateStatement "statement"
+    = Assignment
+    / PostfixStatement
+    / __ { return null; }
+
 ForStatement "for"
-    = "for" WhiteSpace __ init: ForInitPostStatement __ ";" __ condition:Expression __ ";" __ post:ForInitPostStatement __ body:Block { return { tag: "for", init: init, condition: condition, post: post, body: body }; }
+    = "for" WhiteSpace __ init: ForInitStatement __ ";" __ condition:Expression __ ";" __ update:ForUpdateStatement __ body:Block { return { tag: "for", init: init, condition: condition, update: update, body: body }; }
 
 BreakStatement "break"
     = "break" { return { tag: "break" }; }

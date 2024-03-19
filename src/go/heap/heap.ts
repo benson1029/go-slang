@@ -45,6 +45,8 @@ import { ControlBinaryI } from "./types/control/binary_i";
 import { ControlBlock } from "./types/control/block";
 import { ControlCall } from "./types/control/call";
 import { ControlExitScopeI } from "./types/control/exit_scope";
+import { ControlFor } from "./types/control/for";
+import { ControlForI } from "./types/control/for_i";
 import { ControlFunction } from "./types/control/function";
 import { ControlLambdaCall } from "./types/control/lambda_call";
 import { ControlLiteral } from "./types/control/literal";
@@ -92,7 +94,9 @@ import {
     TAGSTRING_CONTROL_var_i,
     TAGSTRING_CONTROL_assign_i,
     TAGSTRING_CONTROL_block,
-    TAGSTRING_CONTROL_exit_scope_i
+    TAGSTRING_CONTROL_exit_scope_i,
+    TAGSTRING_CONTROL_for,
+    TAGSTRING_CONTROL_for_i
 } from "./types/tags";
 
 class Heap {
@@ -624,6 +628,31 @@ class Heap {
     public allocate_CONTROL_exit_scope_i(): number {
         return ControlExitScopeI.allocate(this);
     }
+
+    /**
+     * CONTROL_for
+     * Fields    : number of children
+     * Children  :
+     * - 4 bytes address of the init (expression)
+     * - 4 bytes address of the condition (expression)
+     * - 4 bytes address of the update (expression)
+     * - 4 bytes address of the body (block)
+     */
+    public allocate_CONTROL_for(obj: { tag: string, init: any, condition: any, update: any, body: any }): number {
+        return ControlFor.allocate(this, obj.init, obj.condition, obj.update, obj.body);
+    }
+
+    /**
+     * CONTROL_for_i
+     * Fields    : number of children
+     * Children  :
+     * - 4 bytes address of the condition (expression)
+     * - 4 bytes address of the update (assign)
+     * - 4 bytes address of the body (block)
+     */
+    public allocate_CONTROL_for_i(obj: { tag: string, condition: any, update: any, body: any }): number {
+        return ControlForI.allocate(this, obj.condition, obj.update, obj.body);
+    }
     
     /**
      * ENVIRONMENT_frame
@@ -709,6 +738,10 @@ class Heap {
                 return this.allocate_CONTROL_block(obj);
             case TAGSTRING_CONTROL_exit_scope_i:
                 return this.allocate_CONTROL_exit_scope_i();
+            case TAGSTRING_CONTROL_for:
+                return this.allocate_CONTROL_for(obj);
+            case TAGSTRING_CONTROL_for_i:
+                return this.allocate_CONTROL_for_i(obj);
             case TAGSTRING_ENVIRONMENT_frame:
                 return this.allocate_ENVIRONMENT_frame(obj);
             default:
