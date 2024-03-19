@@ -1,6 +1,7 @@
 import * as block from "./block";
 import * as expression from "./expression";
 import * as control_for from "./for";
+import * as control_if from "./if";
 import * as sequence from "./sequence";
 import * as control_var from "./var";
 import * as tags from "../../heap/types/tags";
@@ -44,6 +45,12 @@ function lookup_microcode(tag: number): Function {
             return control_for.evaluate_break;
         case tags.TAG_CONTROL_continue:
             return control_for.evaluate_continue;
+        case tags.TAG_CONTROL_if:
+            return control_if.evaluate_if;
+        case tags.TAG_CONTROL_if_i:
+            return control_if.evaluate_if_i;
+        case tags.TAG_PRIMITIVE_nil:
+            return (...args: any[]) => {};
         default:
             throw new UnsupportedCommandError(tag.toString());
     }

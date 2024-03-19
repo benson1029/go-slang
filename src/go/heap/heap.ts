@@ -50,6 +50,8 @@ import { ControlExitScopeI } from "./types/control/exit_scope";
 import { ControlFor } from "./types/control/for";
 import { ControlForI } from "./types/control/for_i";
 import { ControlFunction } from "./types/control/function";
+import { ControlIf } from "./types/control/if";
+import { ControlIfI } from "./types/control/if_i";
 import { ControlLambdaCall } from "./types/control/lambda_call";
 import { ControlLiteral } from "./types/control/literal";
 import { ControlName } from "./types/control/name";
@@ -100,7 +102,9 @@ import {
     TAGSTRING_CONTROL_for,
     TAGSTRING_CONTROL_for_i,
     TAGSTRING_CONTROL_continue,
-    TAGSTRING_CONTROL_break
+    TAGSTRING_CONTROL_break,
+    TAGSTRING_CONTROL_if,
+    TAGSTRING_CONTROL_if_i
 } from "./types/tags";
 
 class Heap {
@@ -668,9 +672,33 @@ class Heap {
 
     /**
      * CONTROL_continue
+     * Fields    : None
      */
     public allocate_CONTROL_continue(): number {
         return ControlContinue.allocate(this);
+    }
+
+    /**
+     * CONTROL_if
+     * Fields    : Number of children
+     * Children  :
+     * - 4 bytes address of the condition (expression)
+     * - 4 bytes address of the then_body (block)
+     * - 4 bytes address of the else_body (block)
+     */
+    public allocate_CONTROL_if(obj: { tag: string, condition: any, then_body: any, else_body: any }): number {
+        return ControlIf.allocate(this, obj.condition, obj.then_body, obj.else_body);
+    }
+
+    /**
+     * CONTROL_if_i
+     * Fields    : Number of children
+     * Children  :
+     * - 4 bytes address of the then_body (block)
+     * - 4 bytes address of the else_body (block)
+     */
+    public allocate_CONTROL_if_i(obj: { tag: string, then_body: any, else_body: any }): number {
+        return ControlIfI.allocate(this, obj.then_body, obj.else_body);
     }
     
     /**
@@ -765,6 +793,10 @@ class Heap {
                 return this.allocate_CONTROL_break();
             case TAGSTRING_CONTROL_continue:
                 return this.allocate_CONTROL_continue();
+            case TAGSTRING_CONTROL_if:
+                return this.allocate_CONTROL_if(obj);
+            case TAGSTRING_CONTROL_if_i:
+                return this.allocate_CONTROL_if_i(obj);
             case TAGSTRING_ENVIRONMENT_frame:
                 return this.allocate_ENVIRONMENT_frame(obj);
             default:

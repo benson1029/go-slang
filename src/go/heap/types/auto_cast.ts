@@ -13,6 +13,8 @@ import { ControlExitScopeI } from "./control/exit_scope";
 import { ControlFor } from "./control/for";
 import { ControlForI } from "./control/for_i";
 import { ControlFunction } from "./control/function";
+import { ControlIf } from "./control/if";
+import { ControlIfI } from "./control/if_i";
 import { ControlLambdaCall } from "./control/lambda_call";
 import { ControlName } from "./control/name";
 import { ControlPopI } from "./control/pop_i";
@@ -62,6 +64,8 @@ import {
   TAG_CONTROL_for_i,
   TAG_CONTROL_continue,
   TAG_CONTROL_break,
+  TAG_CONTROL_if,
+  TAG_CONTROL_if_i,
 } from "./tags"
 
 
@@ -126,6 +130,10 @@ function auto_cast(heap: Heap, address: number): HeapObject {
       return new ControlBreak(heap, address);
     case TAG_CONTROL_continue:
       return new ControlContinue(heap, address);
+    case TAG_CONTROL_if:
+      return new ControlIf(heap, address);
+    case TAG_CONTROL_if_i:
+      return new ControlIfI(heap, address);
     case TAG_ENVIRONMENT_entry:
       return new EnvironmentEntry(heap, address);
     case TAG_ENVIRONMENT_frame:

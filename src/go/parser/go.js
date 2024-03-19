@@ -485,9 +485,9 @@ function peg$parse(input, options) {
   var peg$f81 = function(stmt) { return { tag: "sequence", body: [stmt] }; };
   var peg$f82 = function() { return { tag: "sequence", body: [] }; };
   var peg$f83 = function(body) { return { tag: "block", body: body }; };
-  var peg$f84 = function(condition, body, elseBody) { return { tag: "if", condition: condition, body: body, elseBody: elseBody }; };
-  var peg$f85 = function(condition, body, elseBody) { return { tag: "if", condition: condition, body: body, elseBody: elseBody }; };
-  var peg$f86 = function(condition, body) { return { tag: "if", condition: condition, body: body }; };
+  var peg$f84 = function(condition, body, elseBody) { return { tag: "if", condition: condition, then_body: body, else_body: elseBody }; };
+  var peg$f85 = function(condition, body, elseBody) { return { tag: "if", condition: condition, then_body: body, else_body: elseBody }; };
+  var peg$f86 = function(condition, body) { return { tag: "if", condition: condition, then_body: body }; };
   var peg$f87 = function() { return null; };
   var peg$f88 = function() { return null; };
   var peg$f89 = function(init, condition, update, body) { return { tag: "for", init: init, condition: condition, update: update, body: body }; };
@@ -3894,25 +3894,28 @@ function peg$parse(input, options) {
         if (s0 === peg$FAILED) {
           s0 = peg$parseGoFunctionCall();
           if (s0 === peg$FAILED) {
-            s0 = peg$parsePostfixStatement();
+            s0 = peg$parseAnonymousFunctionCall();
             if (s0 === peg$FAILED) {
-              s0 = peg$parseAssignment();
+              s0 = peg$parseFunctionCall();
               if (s0 === peg$FAILED) {
-                s0 = peg$parseBlock();
+                s0 = peg$parsePostfixStatement();
                 if (s0 === peg$FAILED) {
-                  s0 = peg$parseIfStatement();
+                  s0 = peg$parseAssignment();
                   if (s0 === peg$FAILED) {
-                    s0 = peg$parseForStatement();
+                    s0 = peg$parseBlock();
                     if (s0 === peg$FAILED) {
-                      s0 = peg$parseDeferStatement();
+                      s0 = peg$parseIfStatement();
                       if (s0 === peg$FAILED) {
-                        s0 = peg$parseReturnStatement();
+                        s0 = peg$parseForStatement();
                         if (s0 === peg$FAILED) {
-                          s0 = peg$parseBreakStatement();
+                          s0 = peg$parseDeferStatement();
                           if (s0 === peg$FAILED) {
-                            s0 = peg$parseContinueStatement();
+                            s0 = peg$parseReturnStatement();
                             if (s0 === peg$FAILED) {
-                              s0 = peg$parseExpression();
+                              s0 = peg$parseBreakStatement();
+                              if (s0 === peg$FAILED) {
+                                s0 = peg$parseContinueStatement();
+                              }
                             }
                           }
                         }

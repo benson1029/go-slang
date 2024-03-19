@@ -8,7 +8,7 @@ function evaluateExpression(expression) {
     import "fmt"
     
     func main() {
-        ${expression};
+        var x = ${expression};
     }
     `
     const parsed_program = parse(program);

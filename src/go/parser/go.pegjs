@@ -279,6 +279,8 @@ Statement
     / VariableDeclaration
     / GoAnomymousFunctionCall
     / GoFunctionCall
+    / AnonymousFunctionCall
+    / FunctionCall
     / PostfixStatement
     / Assignment
     / Block
@@ -288,7 +290,6 @@ Statement
     / ReturnStatement
     / BreakStatement
     / ContinueStatement
-    / Expression
 
 PackageStatement "package"
     = "package" WhiteSpace __ identifier:Identifier { return { tag: "package", name: identifier }; }
@@ -334,9 +335,9 @@ Block
     = "{" __ body:StatementList __ "}" { return { tag: "block", body: body }; }
 
 IfStatement "if"
-    = "if" WhiteSpace __ condition:Expression __ body:Block __ "else" WhiteSpace __ elseBody:IfStatement { return { tag: "if", condition: condition, body: body, elseBody: elseBody }; }
-    / "if" WhiteSpace __ condition:Expression __ body:Block __ "else" WhiteSpace __ elseBody:Block { return { tag: "if", condition: condition, body: body, elseBody: elseBody }; }
-    / "if" WhiteSpace __ condition:Expression __ body:Block { return { tag: "if", condition: condition, body: body }; }
+    = "if" WhiteSpace __ condition:Expression __ body:Block __ "else" WhiteSpace __ elseBody:IfStatement { return { tag: "if", condition: condition, then_body: body, else_body: elseBody }; }
+    / "if" WhiteSpace __ condition:Expression __ body:Block __ "else" WhiteSpace __ elseBody:Block { return { tag: "if", condition: condition, then_body: body, else_body: elseBody }; }
+    / "if" WhiteSpace __ condition:Expression __ body:Block { return { tag: "if", condition: condition, then_body: body }; }
 
 ForInitStatement "statement"
     = VariableDeclaration
