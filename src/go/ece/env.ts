@@ -21,22 +21,22 @@ class Env {
     }
 
     /**
-     * Get the environment frame address.
+     * Get the environment frame object.
      *
-     * @returns The address of the environment frame.
+     * @returns The environment frame object.
      */
     public get_frame(): EnvironmentFrame {
         return this.env;
     }
 
     /**
-     * Set the environment frame address.
+     * Set the environment frame object.
      *
-     * @param env The address of the environment frame.
+     * @param env The environment frame object.
      */
 
-    public set_env_address(env: number): void {
-        this.env = new EnvironmentFrame(this.heap, env);
+    public set_frame(env: EnvironmentFrame): void {
+        this.env = env;
     }
 }
 

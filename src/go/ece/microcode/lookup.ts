@@ -1,3 +1,4 @@
+import * as block from "./block";
 import * as expression from "./expression";
 import * as sequence from "./sequence";
 import * as control_var from "./var";
@@ -30,6 +31,10 @@ function lookup_microcode(tag: number): Function {
             return control_var.evaluate_assign_i;
         case tags.TAG_CONTROL_name:
             return control_var.evaluate_name;
+        case tags.TAG_CONTROL_block:
+            return block.evaluate_block;
+        case tags.TAG_CONTROL_exit_scope_i:
+            return block.evaluate_exit_scope_i;
         default:
             throw new UnsupportedCommandError(tag.toString());
     }

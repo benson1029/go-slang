@@ -11,6 +11,9 @@ const TAG_COMPLEX_string = 0x4003; // 0100 0000 0000 0011
 const TAG_COMPLEX_linked_list = 0x4004; // 0100 0000 0000 0100
 const TAG_COMPLEX_pointer = 0x4006; // 0100 0000 0000 0110
 
+const TAG_CONTROL_pop_i = 0x8001; // 1000 0000 0000 0001
+const TAG_CONTROL_exit_scope_i = 0x8002; // 1000 0000 0000 0010
+
 const TAG_CONTROL_name = 0xC001; // 1100 0000 0000 0001
 const TAG_CONTROL_literal = 0xC002; // 1100 0000 0000 0010
 const TAG_CONTROL_var = 0xC003; // 1100 0000 0000 0011
@@ -31,9 +34,9 @@ const TAG_CONTROL_call = 0xC011; // 1100 0000 0001 0001
 const TAG_CONTROL_lambda_call = 0xC012; // 1100 0000 0001 0010
 const TAG_CONTROL_unary_i = 0xC013; // 1100 0000 0001 0011
 const TAG_CONTROL_binary_i = 0xC014; // 1100 0000 0001 0100
-const TAG_CONTROL_pop_i = 0xC015; // 1100 0000 0001 0101
 const TAG_CONTROL_var_i = 0xC016; // 1100 0000 0001 0110
 const TAG_CONTROL_assign_i = 0xC017; // 1100 0000 0001 0111
+const TAG_CONTROL_block = 0xC018; // 1100 0000 0001 1000
 
 const TAG_ENVIRONMENT_entry = 0xC100; // 1100 0001 0000 0000
 const TAG_ENVIRONMENT_frame = 0xC101; // 1100 0001 0000 0001
@@ -63,12 +66,14 @@ const TAGSTRING_CONTROL_sequence = "sequence";
 const TAGSTRING_CONTROL_function = "function";
 const TAGSTRING_CONTROL_call = "call";
 const TAGSTRING_CONTROL_lambda_call = "lambda-call";
+const TAGSTRING_CONTROL_block = "block";
 
 const TAGSTRING_CONTROL_unary_i = "unary_i";
 const TAGSTRING_CONTROL_binary_i = "binary_i";
 const TAGSTRING_CONTROL_pop_i = "pop_i";
 const TAGSTRING_CONTROL_var_i = "var_i";
 const TAGSTRING_CONTROL_assign_i = "assign_i";
+const TAGSTRING_CONTROL_exit_scope_i = "exit-scope_i";
 
 const TAGSTRING_ENVIRONMENT_frame = "frame";
 
@@ -94,11 +99,13 @@ export {
   TAG_CONTROL_function,
   TAG_CONTROL_call,
   TAG_CONTROL_lambda_call,
+  TAG_CONTROL_block,
   TAG_CONTROL_unary_i,
   TAG_CONTROL_binary_i,
   TAG_CONTROL_pop_i,
   TAG_CONTROL_var_i,
   TAG_CONTROL_assign_i,
+  TAG_CONTROL_exit_scope_i,
   TAG_ENVIRONMENT_entry,
   TAG_ENVIRONMENT_frame,
   TAG_ENVIRONMENT_hash_table,
@@ -123,10 +130,12 @@ export {
   TAGSTRING_CONTROL_function,
   TAGSTRING_CONTROL_call,
   TAGSTRING_CONTROL_lambda_call,
+  TAGSTRING_CONTROL_block,
   TAGSTRING_CONTROL_unary_i,
   TAGSTRING_CONTROL_binary_i,
   TAGSTRING_CONTROL_pop_i,
   TAGSTRING_CONTROL_var_i,
   TAGSTRING_CONTROL_assign_i,
+  TAGSTRING_CONTROL_exit_scope_i,
   TAGSTRING_ENVIRONMENT_frame,
 };

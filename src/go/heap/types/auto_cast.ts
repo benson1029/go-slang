@@ -5,7 +5,9 @@ import { ComplexString } from "./complex/string";
 import { ControlAssign } from "./control/assign";
 import { ControlBinary } from "./control/binary";
 import { ControlBinaryI } from "./control/binary_i";
+import { ControlBlock } from "./control/block";
 import { ControlCall } from "./control/call";
+import { ControlExitScopeI } from "./control/exit_scope";
 import { ControlFunction } from "./control/function";
 import { ControlLambdaCall } from "./control/lambda_call";
 import { ControlName } from "./control/name";
@@ -50,6 +52,8 @@ import {
   TAG_CONTROL_var_i,
   TAG_ENVIRONMENT_entry,
   TAG_ENVIRONMENT_frame,
+  TAG_CONTROL_block,
+  TAG_CONTROL_exit_scope_i,
 } from "./tags"
 
 
@@ -102,6 +106,10 @@ function auto_cast(heap: Heap, address: number): HeapObject {
       return new ControlPopI(heap, address);
     case TAG_CONTROL_var_i:
       return new ControlVarI(heap, address);
+    case TAG_CONTROL_block:
+      return new ControlBlock(heap, address);
+    case TAG_CONTROL_exit_scope_i:
+      return new ControlExitScopeI(heap, address);
     case TAG_ENVIRONMENT_entry:
       return new EnvironmentEntry(heap, address);
     case TAG_ENVIRONMENT_frame:

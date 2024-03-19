@@ -42,7 +42,9 @@ import { ControlAssign } from "./types/control/assign";
 import { ControlAssignI } from "./types/control/assign_i";
 import { ControlBinary } from "./types/control/binary";
 import { ControlBinaryI } from "./types/control/binary_i";
+import { ControlBlock } from "./types/control/block";
 import { ControlCall } from "./types/control/call";
+import { ControlExitScopeI } from "./types/control/exit_scope";
 import { ControlFunction } from "./types/control/function";
 import { ControlLambdaCall } from "./types/control/lambda_call";
 import { ControlLiteral } from "./types/control/literal";
@@ -88,7 +90,9 @@ import {
     TAGSTRING_ENVIRONMENT_frame,
     TAGSTRING_CONTROL_pop_i,
     TAGSTRING_CONTROL_var_i,
-    TAGSTRING_CONTROL_assign_i
+    TAGSTRING_CONTROL_assign_i,
+    TAGSTRING_CONTROL_block,
+    TAGSTRING_CONTROL_exit_scope_i
 } from "./types/tags";
 
 class Heap {
@@ -604,6 +608,24 @@ class Heap {
     }
     
     /**
+     * CONTROL_block
+     * Fields    : number of children
+     * Children  :
+     * - 4 bytes address of the body (sequence)
+     */
+    public allocate_CONTROL_block(obj: { tag: string, body: any }): number {
+        return ControlBlock.allocate(this, obj.body);
+    }
+
+    /**
+     * CONTROL_exit_scope_i
+     * Fields    : None
+     */
+    public allocate_CONTROL_exit_scope_i(): number {
+        return ControlExitScopeI.allocate(this);
+    }
+    
+    /**
      * ENVIRONMENT_frame
      * Fields    : number of children
      * Children  :
@@ -683,6 +705,10 @@ class Heap {
                 return this.allocate_CONTROL_var_i(obj);
             case TAGSTRING_CONTROL_assign_i:
                 return this.allocate_CONTROL_assign_i(obj);
+            case TAGSTRING_CONTROL_block:
+                return this.allocate_CONTROL_block(obj);
+            case TAGSTRING_CONTROL_exit_scope_i:
+                return this.allocate_CONTROL_exit_scope_i();
             case TAGSTRING_ENVIRONMENT_frame:
                 return this.allocate_ENVIRONMENT_frame(obj);
             default:

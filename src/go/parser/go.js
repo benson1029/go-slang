@@ -410,13 +410,13 @@ function peg$parse(input, options) {
   var peg$f24 = function(type) { return type; };
   var peg$f25 = function(type) { return type; };
   var peg$f26 = function(lit) { return lit.value; };
-  var peg$f27 = function(len, type) { return { tag: "arrayType", len: len, type: type }; };
-  var peg$f28 = function(type) { return { tag: "sliceType", type: type }; };
+  var peg$f27 = function(len, type) { return { tag: "array-type", len: len, type: type }; };
+  var peg$f28 = function(type) { return { tag: "slice-type", type: type }; };
   var peg$f29 = function(exp0, exps) { return [exp0].concat(exps.map(x => x[3])); };
   var peg$f30 = function(exp0) { return [exp0]; };
   var peg$f31 = function() { return []; };
   var peg$f32 = function(elements) { return elements; };
-  var peg$f33 = function(type, elements) { return { tag: "arrayLiteral", type: type, elements: elements }; };
+  var peg$f33 = function(type, elements) { return { tag: "array-literal", type: type, elements: elements }; };
   var peg$f34 = function(expr) { return expr; };
   var peg$f35 = function() { return null; };
   var peg$f36 = function(expr, index) {

@@ -155,10 +155,10 @@ ArrayLength "array length"
     = lit:IntegerLiteral { return lit.value; }
 
 ArrayType "array type"
-    = "[" __ len:ArrayLength __ "]" __ type:Type { return { tag: "arrayType", len: len, type: type }; }
+    = "[" __ len:ArrayLength __ "]" __ type:Type { return { tag: "array-type", len: len, type: type }; }
 
 SliceType "slice type"
-    = "[" __ "]" __ type:Type { return { tag: "sliceType", type: type }; }
+    = "[" __ "]" __ type:Type { return { tag: "slice-type", type: type }; }
 
 ExpressionListElements
     = __ exp0:(Expression / ExpressionList) __ exps:((__ "," __ (Expression / ExpressionList)))* __ { return [exp0].concat(exps.map(x => x[3])); }
@@ -169,7 +169,7 @@ ExpressionList
     = "{" __ elements:ExpressionListElements __ "}" { return elements; }
 
 ArrayConstructor
-    = type:(ArrayType / SliceType) __ elements:ExpressionList { return { tag: "arrayLiteral", type: type, elements: elements }; }
+    = type:(ArrayType / SliceType) __ elements:ExpressionList { return { tag: "array-literal", type: type, elements: elements }; }
 
 SliceExpression
     = expr:Expression { return expr; }
