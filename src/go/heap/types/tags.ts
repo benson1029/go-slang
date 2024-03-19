@@ -13,6 +13,8 @@ const TAG_COMPLEX_pointer = 0x4006; // 0100 0000 0000 0110
 
 const TAG_CONTROL_pop_i = 0x8001; // 1000 0000 0000 0001
 const TAG_CONTROL_exit_scope_i = 0x8002; // 1000 0000 0000 0010
+const TAG_CONTROL_break = 0x8003; // 1000 0000 0000 0011
+const TAG_CONTROL_continue = 0x8004; // 1000 0000 0000 0100
 
 const TAG_CONTROL_name = 0xC001; // 1100 0000 0000 0001
 const TAG_CONTROL_literal = 0xC002; // 1100 0000 0000 0010
@@ -70,6 +72,8 @@ const TAGSTRING_CONTROL_call = "call";
 const TAGSTRING_CONTROL_lambda_call = "lambda-call";
 const TAGSTRING_CONTROL_block = "block";
 const TAGSTRING_CONTROL_for = "for";
+const TAGSTRING_CONTROL_break = "break";
+const TAGSTRING_CONTROL_continue = "continue";
 
 const TAGSTRING_CONTROL_unary_i = "unary_i";
 const TAGSTRING_CONTROL_binary_i = "binary_i";
@@ -105,6 +109,8 @@ export {
   TAG_CONTROL_lambda_call,
   TAG_CONTROL_block,
   TAG_CONTROL_for,
+  TAG_CONTROL_break,
+  TAG_CONTROL_continue,
   TAG_CONTROL_unary_i,
   TAG_CONTROL_binary_i,
   TAG_CONTROL_pop_i,
@@ -138,6 +144,8 @@ export {
   TAGSTRING_CONTROL_lambda_call,
   TAGSTRING_CONTROL_block,
   TAGSTRING_CONTROL_for,
+  TAGSTRING_CONTROL_break,
+  TAGSTRING_CONTROL_continue,
   TAGSTRING_CONTROL_unary_i,
   TAGSTRING_CONTROL_binary_i,
   TAGSTRING_CONTROL_pop_i,

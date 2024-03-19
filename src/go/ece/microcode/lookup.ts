@@ -40,6 +40,10 @@ function lookup_microcode(tag: number): Function {
             return control_for.evaluate_for;
         case tags.TAG_CONTROL_for_i:
             return control_for.evaluate_for_i;
+        case tags.TAG_CONTROL_break:
+            return control_for.evaluate_break;
+        case tags.TAG_CONTROL_continue:
+            return control_for.evaluate_continue;
         default:
             throw new UnsupportedCommandError(tag.toString());
     }

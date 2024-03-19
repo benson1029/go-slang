@@ -6,7 +6,9 @@ import { ControlAssign } from "./control/assign";
 import { ControlBinary } from "./control/binary";
 import { ControlBinaryI } from "./control/binary_i";
 import { ControlBlock } from "./control/block";
+import { ControlBreak } from "./control/break";
 import { ControlCall } from "./control/call";
+import { ControlContinue } from "./control/continue";
 import { ControlExitScopeI } from "./control/exit_scope";
 import { ControlFor } from "./control/for";
 import { ControlForI } from "./control/for_i";
@@ -58,6 +60,8 @@ import {
   TAG_CONTROL_exit_scope_i,
   TAG_CONTROL_for,
   TAG_CONTROL_for_i,
+  TAG_CONTROL_continue,
+  TAG_CONTROL_break,
 } from "./tags"
 
 
@@ -118,6 +122,10 @@ function auto_cast(heap: Heap, address: number): HeapObject {
       return new ControlFor(heap, address);
     case TAG_CONTROL_for_i:
       return new ControlForI(heap, address);
+    case TAG_CONTROL_break:
+      return new ControlBreak(heap, address);
+    case TAG_CONTROL_continue:
+      return new ControlContinue(heap, address);
     case TAG_ENVIRONMENT_entry:
       return new EnvironmentEntry(heap, address);
     case TAG_ENVIRONMENT_frame:

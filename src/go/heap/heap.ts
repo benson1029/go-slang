@@ -43,7 +43,9 @@ import { ControlAssignI } from "./types/control/assign_i";
 import { ControlBinary } from "./types/control/binary";
 import { ControlBinaryI } from "./types/control/binary_i";
 import { ControlBlock } from "./types/control/block";
+import { ControlBreak } from "./types/control/break";
 import { ControlCall } from "./types/control/call";
+import { ControlContinue } from "./types/control/continue";
 import { ControlExitScopeI } from "./types/control/exit_scope";
 import { ControlFor } from "./types/control/for";
 import { ControlForI } from "./types/control/for_i";
@@ -96,7 +98,9 @@ import {
     TAGSTRING_CONTROL_block,
     TAGSTRING_CONTROL_exit_scope_i,
     TAGSTRING_CONTROL_for,
-    TAGSTRING_CONTROL_for_i
+    TAGSTRING_CONTROL_for_i,
+    TAGSTRING_CONTROL_continue,
+    TAGSTRING_CONTROL_break
 } from "./types/tags";
 
 class Heap {
@@ -653,6 +657,21 @@ class Heap {
     public allocate_CONTROL_for_i(obj: { tag: string, condition: any, update: any, body: any }): number {
         return ControlForI.allocate(this, obj.condition, obj.update, obj.body);
     }
+
+    /**
+     * CONTROL_break
+     * Fields    : None
+     */
+    public allocate_CONTROL_break(): number {
+        return ControlBreak.allocate(this);
+    }
+
+    /**
+     * CONTROL_continue
+     */
+    public allocate_CONTROL_continue(): number {
+        return ControlContinue.allocate(this);
+    }
     
     /**
      * ENVIRONMENT_frame
@@ -742,6 +761,10 @@ class Heap {
                 return this.allocate_CONTROL_for(obj);
             case TAGSTRING_CONTROL_for_i:
                 return this.allocate_CONTROL_for_i(obj);
+            case TAGSTRING_CONTROL_break:
+                return this.allocate_CONTROL_break();
+            case TAGSTRING_CONTROL_continue:
+                return this.allocate_CONTROL_continue();
             case TAGSTRING_ENVIRONMENT_frame:
                 return this.allocate_ENVIRONMENT_frame(obj);
             default:
