@@ -94,7 +94,6 @@ Comment
 
 IntegerLiteral "int32"
     = [0-9]+ { return makeLiteral("int32", parseInt(text(), 10)); }
-    / "-" [0-9]+ { return makeLiteral("int32", -parseInt(text(), 10)); }
 
 FloatLiteral "float32"
     = [0-9]+ "." [0-9]+ { return makeLiteral("float32", parseFloat(text(), 10)); }
@@ -149,8 +148,30 @@ Type "type"
     / "bool" { return "bool"; }
     / "string" { return "string"; }
     / FunctionType { return "function"; }
+    / type:ArrayType { return type; }
+    / type:SliceType { return type; }
+
+ArrayLength "array length"
+    = lit:IntegerLiteral { return lit.value; }
+
+ArrayType "array type"
+    = "[" __ len:ArrayLength __ "]" __ type:Type { return { tag: "arrayType", len: len, type: type }; }
+
+SliceType "slice type"
+    = "[" __ "]" __ type:Type { return { tag: "sliceType", type: type }; }
 
 PrimaryExpression
+    = exp:PrimaryExpressionWithoutArray __ index:(("[" __ Expression __ "]") / ("[" __ Expression __ ":" __ Expression __ "]"))* {
+        return index.reduce(function(result, element) {
+            if (element.length > 5) {
+                return { tag: "slice", array: result, left: element[2], right: element[6] };
+            } else {
+                return { tag: "index", array: result, index: element[2] };
+            }
+        }, exp);
+    }
+
+PrimaryExpressionWithoutArray "PrimaryExpression"
     = AnonymousFunctionCall
     / FunctionCall
     / Literal
