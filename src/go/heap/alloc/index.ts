@@ -1,1 +1,0 @@
-export { BuddyAllocator, WORD_SIZE } from "./alloc";
