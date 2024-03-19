@@ -80,11 +80,8 @@ SingleLineCommentCharacter
 SingleLineComment
     = "//" SingleLineCommentCharacter*
 
-MultiLineCommentCharacter
-    = [^*] / ("*" [^/])
-
 MultiLineComment
-    = "/*" MultiLineCommentCharacter* "*/"
+    = "/*" (!"*/" .)* "*/"
 
 Comment
     = SingleLineComment
