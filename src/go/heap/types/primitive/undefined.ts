@@ -16,6 +16,10 @@ class PrimitiveUndefined extends Primitive {
     return undefined;
   }
 
+  public copy(): PrimitiveUndefined {
+    return this;
+  }
+
   public static allocate(): number {
     return 2 * WORD_SIZE;
   }

@@ -36,7 +36,9 @@ class Env {
      */
 
     public set_frame(env: EnvironmentFrame): void {
-        this.env = env;
+        const new_env = env.reference() as EnvironmentFrame;
+        this.env.free();
+        this.env = new_env;
     }
 }
 

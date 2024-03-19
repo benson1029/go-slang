@@ -175,7 +175,7 @@ class EnvironmentHashTable extends HeapObject {
   public force_insert(entry: EnvironmentEntry): void {
     const index = this.find_internal(entry.get_key_address().address);
     if (index === null) {
-      this.insert_internal(entry);
+      this.insert_new_variable(entry.address);
     } else {
       this.get_table_address().set_value_address(index, entry);
     }

@@ -75,9 +75,12 @@ class EnvironmentFrame extends HeapObject {
         return entry;
       }
     }
+    console.log("lookup in parent frames");
     let frame = this.get_parent_frame_address();
+    console.log(frame.is_nil())
     while (!frame.is_nil()) {
       const entry = frame.lookup_current_frame(key_address);
+      console.log(entry.is_nil())
       if (!entry.is_nil()) {
         // Cache it, so subsequent lookups are faster
         this.insert_to_cache(entry);
@@ -161,7 +164,7 @@ class EnvironmentFrame extends HeapObject {
   }
 
   public static allocate(heap: Heap, parent_frame_address: number) {
-    const parent_frame = auto_cast(heap, parent_frame_address);
+    const parent_frame = auto_cast(heap, parent_frame_address).reference();
     heap.set_cannnot_be_freed(parent_frame.address, true);
 
     const address = heap.allocate_object(TAG_ENVIRONMENT_frame, 1, 4);

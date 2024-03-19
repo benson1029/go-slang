@@ -15,6 +15,10 @@ class PrimitiveNil extends Primitive {
     return null;
   }
 
+  public copy(): PrimitiveNil {
+    return this;
+  }
+
   public static allocate(): number {
     return 0;
   }
