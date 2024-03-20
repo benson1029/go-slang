@@ -10,6 +10,14 @@ import { sort_global_declarations } from "./globalSort";
  */
 function load(program: any, C: Control, S: Stash, E: Env, heap: Heap) {
     sort_global_declarations(program);
+
+    // Stub for loading the main function directly:
+    let main = program.body.filter((x: any) => x.tag === "function" && x.name === "main")[0];
+    const _main_addr = heap.allocate_any(main.body.body)
+    C.push(_main_addr)
+
+    return;
+
     let cmdAddr = {};
     program.body.forEach((cmd) => {
         const addr = heap.allocate_any(cmd);

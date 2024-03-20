@@ -5,6 +5,7 @@ import { Env, create_global_environment } from "./env";
 import { lookup_microcode } from "./microcode";
 import { auto_cast } from "../heap/types/auto_cast";
 import { Primitive } from "../heap/types/primitive";
+import { load } from "./loader";
 // import { load } from "./loader";
 
 /**
@@ -38,11 +39,7 @@ class ECE {
         this.S = new Stash();
         this.E = create_global_environment(this.heap, this.program.imports);
 
-        // load(this.program, this.C, this.S, this.E, this.heap)
-        // Stub for loading the main function directly:
-        let main = this.program.body.filter((x: any) => x.tag === "function" && x.name === "main")[0];
-        const main_addr = this.heap.allocate_any(main.body.body)
-        this.C.push(main_addr)
+        load(this.program, this.C, this.S, this.E, this.heap)
 
         // Evaluate the program.
         while (true) {
