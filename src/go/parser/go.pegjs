@@ -275,8 +275,7 @@ Assignment
     = identifier:Identifier __ "=" __ exp:Expression { return { tag: "assign", name: identifier, value: exp }; }
 
 Statement
-    = FunctionDeclaration
-    / VariableDeclaration
+    = VariableDeclaration
     / GoAnomymousFunctionCall
     / GoFunctionCall
     / AnonymousFunctionCall

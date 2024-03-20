@@ -161,10 +161,11 @@ test(
 
         import "fmt"
 
+        func print(x int32) {
+            fmt.Println(x)
+        }
+
         func main() {
-            func print(x int32) {
-                fmt.Println(x)
-            }
             print(add(1, 2))
         }
 

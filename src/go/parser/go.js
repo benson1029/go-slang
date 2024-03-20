@@ -3886,36 +3886,33 @@ function peg$parse(input, options) {
   function peg$parseStatement() {
     var s0;
 
-    s0 = peg$parseFunctionDeclaration();
+    s0 = peg$parseVariableDeclaration();
     if (s0 === peg$FAILED) {
-      s0 = peg$parseVariableDeclaration();
+      s0 = peg$parseGoAnomymousFunctionCall();
       if (s0 === peg$FAILED) {
-        s0 = peg$parseGoAnomymousFunctionCall();
+        s0 = peg$parseGoFunctionCall();
         if (s0 === peg$FAILED) {
-          s0 = peg$parseGoFunctionCall();
+          s0 = peg$parseAnonymousFunctionCall();
           if (s0 === peg$FAILED) {
-            s0 = peg$parseAnonymousFunctionCall();
+            s0 = peg$parseFunctionCall();
             if (s0 === peg$FAILED) {
-              s0 = peg$parseFunctionCall();
+              s0 = peg$parsePostfixStatement();
               if (s0 === peg$FAILED) {
-                s0 = peg$parsePostfixStatement();
+                s0 = peg$parseAssignment();
                 if (s0 === peg$FAILED) {
-                  s0 = peg$parseAssignment();
+                  s0 = peg$parseBlock();
                   if (s0 === peg$FAILED) {
-                    s0 = peg$parseBlock();
+                    s0 = peg$parseIfStatement();
                     if (s0 === peg$FAILED) {
-                      s0 = peg$parseIfStatement();
+                      s0 = peg$parseForStatement();
                       if (s0 === peg$FAILED) {
-                        s0 = peg$parseForStatement();
+                        s0 = peg$parseDeferStatement();
                         if (s0 === peg$FAILED) {
-                          s0 = peg$parseDeferStatement();
+                          s0 = peg$parseReturnStatement();
                           if (s0 === peg$FAILED) {
-                            s0 = peg$parseReturnStatement();
+                            s0 = peg$parseBreakStatement();
                             if (s0 === peg$FAILED) {
-                              s0 = peg$parseBreakStatement();
-                              if (s0 === peg$FAILED) {
-                                s0 = peg$parseContinueStatement();
-                              }
+                              s0 = peg$parseContinueStatement();
                             }
                           }
                         }
