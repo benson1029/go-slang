@@ -9,7 +9,6 @@ import { Heap } from "../../heap";
 import { HeapObject } from "../objects";
 import { ComplexLinkedList } from "../complex/linked_list";
 import { TAG_CONTEXT_control } from "../tags";
-import { auto_cast } from "../auto_cast";
 
 /**
  * The control stack of the ECE. The content is stored inside the heap.
