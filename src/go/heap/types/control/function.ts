@@ -40,7 +40,8 @@ class ControlFunction extends HeapObject {
     const address = heap.allocate_object(TAG_CONTROL_function, 2, 1 + param_names.length);
     heap.set_cannnot_be_freed(address, true);
 
-    const name_address = ComplexString.allocate(heap, name);
+    const name_address = name === null ? PrimitiveNil.allocate() : ComplexString.allocate(heap, name);
+
     heap.set_cannnot_be_freed(name_address, true);
 
     heap.set_child(address, 0, name_address);

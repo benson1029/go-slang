@@ -4,12 +4,14 @@ import { Control } from "../control";
 import { Env } from "../env";
 import { Stash } from "../stash";
 import { sort_global_declarations } from "./globalSort";
+import { preprocess_program } from "./preprocess";
 
 /**
  * Performs checking on the program and loads the program into the ECE
  * environment.
  */
 function load(program: any, C: Control, S: Stash, E: Env, heap: Heap) {
+    preprocess_program(program);
     sort_global_declarations(program);
 
     // Stub for loading the main function directly:

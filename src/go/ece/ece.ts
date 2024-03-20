@@ -24,7 +24,7 @@ class ECE {
 
     /**
      * Creates a new instance of the ECE.
-     * 
+     *
      * @param memory The amount of memory to allocate for the heap.
      */
     constructor(memory: number, program: any) {
@@ -39,7 +39,7 @@ class ECE {
         this.S = new Stash();
         this.E = create_global_environment(this.heap, this.program.imports);
 
-        load(this.program, this.C, this.S, this.E, this.heap)
+        load(this.program, this.C, this.S, this.E, this.heap);
 
         // Evaluate the program.
         while (true) {
