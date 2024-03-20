@@ -1,6 +1,6 @@
-import { Control } from '../control';
-import { Stash } from '../stash';
-import { Env } from '../env';
+import { ContextControl } from '../../heap/types/context/control';
+import { ContextStash } from '../../heap/types/context/stash';
+import { ContextEnv } from '../../heap/types/context/env';
 import { Heap } from '../../heap';
 import { ControlFor } from '../../heap/types/control/for';
 import { PrimitiveBool } from '../../heap/types/primitive/bool';
@@ -8,12 +8,11 @@ import { auto_cast } from '../../heap/types/auto_cast';
 import { ControlForI } from '../../heap/types/control/for_i';
 import { TAG_CONTROL_for_i } from '../../heap/types/tags';
 
-function evaluate_for(cmd: number, heap: Heap, C: Control, S: Stash, E: Env): void {
+function evaluate_for(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
     const cmd_object = new ControlFor(heap, cmd);
 
     // Start a new scope
-    const env = E.get_frame();
-    E.set_frame(env.push_frame());
+    E.push_frame();
     const exit_scope_cmd = heap.allocate_any({ tag: "exit-scope_i" });
     C.push(exit_scope_cmd);
 
@@ -35,7 +34,7 @@ function evaluate_for(cmd: number, heap: Heap, C: Control, S: Stash, E: Env): vo
     C.push(init.address);
 }
 
-function evaluate_for_i(cmd: number, heap: Heap, C: Control, S: Stash, E: Env): void {
+function evaluate_for_i(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
     const cmd_object = new ControlForI(heap, cmd);
     const condition = cmd_object.get_condition_address().reference();
     const update = cmd_object.get_update_address().reference();
@@ -53,7 +52,7 @@ function evaluate_for_i(cmd: number, heap: Heap, C: Control, S: Stash, E: Env): 
     }
 }
 
-function evaluate_break(cmd: number, heap: Heap, C: Control, S: Stash, E: Env): void {
+function evaluate_break(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
     const cmd_object = new ControlForI(heap, cmd);
     const top_cmd = auto_cast(heap, C.pop());
     if (top_cmd.get_tag() === TAG_CONTROL_for_i) {
@@ -63,7 +62,7 @@ function evaluate_break(cmd: number, heap: Heap, C: Control, S: Stash, E: Env): 
     }
 }
 
-function evaluate_continue(cmd: number, heap: Heap, C: Control, S: Stash, E: Env): void {
+function evaluate_continue(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
     const cmd_object = new ControlForI(heap, cmd);
     const top_cmd = auto_cast(heap, C.pop());
     if (top_cmd.get_tag() === TAG_CONTROL_for_i) {

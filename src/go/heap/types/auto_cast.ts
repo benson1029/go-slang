@@ -3,6 +3,7 @@ import { ComplexLinkedList } from "./complex/linked_list";
 import { ComplexPointer } from "./complex/pointer";
 import { ComplexString } from "./complex/string";
 import { ControlAssign } from "./control/assign";
+import { ControlAssignI } from "./control/assign_i";
 import { ControlBinary } from "./control/binary";
 import { ControlBinaryI } from "./control/binary_i";
 import { ControlBlock } from "./control/block";
@@ -66,6 +67,7 @@ import {
   TAG_CONTROL_break,
   TAG_CONTROL_if,
   TAG_CONTROL_if_i,
+  TAG_CONTROL_assign_i,
 } from "./tags"
 
 
@@ -96,6 +98,8 @@ function auto_cast(heap: Heap, address: number): HeapObject {
       return new ControlVar(heap, address);
     case TAG_CONTROL_assign:
       return new ControlAssign(heap, address);
+    case TAG_CONTROL_assign_i:
+      return new ControlAssignI(heap, address);
     case TAG_CONTROL_unary:
       return new ControlUnary(heap, address);
     case TAG_CONTROL_postfix:
@@ -139,6 +143,7 @@ function auto_cast(heap: Heap, address: number): HeapObject {
     case TAG_ENVIRONMENT_frame:
       return new EnvironmentFrame(heap, address);
     default:
+      console.log(tag);
       throw new Error("Unknown tag");
   }
 }

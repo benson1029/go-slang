@@ -1,6 +1,6 @@
-import { Control } from '../control';
-import { Stash } from '../stash';
-import { Env } from '../env';
+import { ContextControl } from '../../heap/types/context/control';
+import { ContextStash } from '../../heap/types/context/stash';
+import { ContextEnv } from '../../heap/types/context/env';
 import { Heap } from '../../heap';
 import { ControlUnary } from '../../heap/types/control/unary';
 import { ControlUnaryI } from '../../heap/types/control/unary_i';
@@ -15,7 +15,7 @@ import { ControlBinary } from '../../heap/types/control/binary';
 import { ControlBinaryI } from '../../heap/types/control/binary_i';
 import { HeapObject } from '../../heap/types/objects';
 
-function evaluate_literal(cmd: number, heap: Heap, C: Control, S: Stash, E: Env): void {
+function evaluate_literal(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
     const cmd_object = new HeapObject(heap, cmd);
     cmd_object.reference();
     S.push(cmd_object.address);
@@ -64,7 +64,7 @@ function apply_unary_operator(operator: string, operand: Primitive): any {
     }
 }
 
-function evaluate_unary(cmd: number, heap: Heap, C: Control, S: Stash, E: Env): void {
+function evaluate_unary(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
     const cmd_object = new ControlUnary(heap, cmd);
     const operator = cmd_object.get_operator_address();
     const operand = cmd_object.get_operand_address().reference();
@@ -73,7 +73,7 @@ function evaluate_unary(cmd: number, heap: Heap, C: Control, S: Stash, E: Env): 
     C.push(operand.address);
 }
 
-function evaluate_unary_i(cmd: number, heap: Heap, C: Control, S: Stash, E: Env): void {
+function evaluate_unary_i(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
     const cmd_object = new ControlUnaryI(heap, cmd);
     const operator = cmd_object.get_operator();
     const operand = auto_cast(heap, S.pop()) as unknown as Primitive;
@@ -173,7 +173,7 @@ function binary_operator(operator: string, left: Primitive, right: Primitive): a
     }
 }
 
-function evaluate_binary(cmd: number, heap: Heap, C: Control, S: Stash, E: Env): void {
+function evaluate_binary(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
     const cmd_object = new ControlBinary(heap, cmd);
     const operator = cmd_object.get_operator_address();
     const left = cmd_object.get_left_operand_address().reference();
@@ -184,7 +184,7 @@ function evaluate_binary(cmd: number, heap: Heap, C: Control, S: Stash, E: Env):
     C.push(right.address);
 }
 
-function evaluate_binary_i(cmd: number, heap: Heap, C: Control, S: Stash, E: Env): void {
+function evaluate_binary_i(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
     const cmd_object = new ControlBinaryI(heap, cmd);
     const operator = cmd_object.get_operator();
     const left = auto_cast(heap, S.pop()) as unknown as Primitive;

@@ -35,7 +35,7 @@ class ComplexLinkedList extends HeapObject {
    * @returns the next node
    */
   public remove_current_node(): ComplexLinkedList {
-    const next = this.get_next_address();
+    const next = this.get_next_address().reference() as ComplexLinkedList;
     this.free();
     return next;
   }
