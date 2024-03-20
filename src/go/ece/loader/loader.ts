@@ -1,3 +1,4 @@
+/* eslint-disable no-unreachable */
 import { Heap } from "../../heap";
 import { Control } from "../control";
 import { Env } from "../env";
