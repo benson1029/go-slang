@@ -20,15 +20,25 @@ class FunctionObject {
   }
 }
 
+class DeclarationObject {
+  captures: any[];
+
+  constructor(captures: any[]) {
+    this.captures = captures;
+  }
+}
+
 class Scope {
   frames: Array<Map<string, VariableObject>>;
   variables: Map<string, Array<VariableObject>>;
   function_declaration_stack: Array<FunctionObject>;
+  current_declaration: DeclarationObject | null;
 
   constructor() {
     this.frames = [new Map()];
     this.variables = new Map();
     this.function_declaration_stack = [];
+    this.current_declaration = null;
   }
 
   level(): number {
@@ -87,6 +97,9 @@ const microcode_preprocess = {
     if (t === undefined) {
       throw new Error(`VariableObject ${comp.name} not declared.`);
     }
+    if (scope.current_declaration != null) {
+      scope.current_declaration.captures.push({ name: t.name, type: t.type });
+    }
     for (let i = scope.function_declaration_stack.length - 1; i >= 0; i--) {
       let f = scope.function_declaration_stack[i];
       if (f.level > t.level) {
@@ -134,10 +147,16 @@ const microcode_preprocess = {
       tag: string;
       name: string;
       value: any;
+      return_captures: any | null;
     },
     scope: Scope
   ) => {
+    scope.current_declaration = new DeclarationObject([]);
     preprocess(comp.value, scope);
+    if (comp.return_captures != null) {
+      comp.return_captures.captures = scope.current_declaration.captures;
+    }
+    scope.current_declaration = null;
   },
 
   unary: (
@@ -335,7 +354,7 @@ const microcode_preprocess = {
     }
     for (let exp of comp.body) {
       if (exp.tag === "var") {
-        preprocess({ tag: "assign", name: exp.name, value: exp.value }, scope);
+        preprocess({ tag: "assign", name: exp.name, value: exp.value, return_captures: exp }, scope);
       } else if (exp.tag === "function") {
         preprocess({ tag: "assign", name: exp.name, value: exp }, scope);
       }

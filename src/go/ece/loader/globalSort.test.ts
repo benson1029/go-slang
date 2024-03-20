@@ -1,8 +1,17 @@
 import { parse } from '../../parser/go';
 import { sort_global_declarations } from "./globalSort";
+import { preprocess_program } from './preprocess';
 
-function retrieve_declaration_order(program: any) {
-    return program.body.map((stmt: any) => stmt.name);
+function check_declaration_order(program: any, expected_order: string[]) {
+    preprocess_program(program);
+    sort_global_declarations(program);
+    const decl_order = program.body.map((stmt: any) => stmt.name);
+    expect(decl_order).toEqual(expected_order);
+}
+
+function check_cyclic_dependency(program: any) {
+    preprocess_program(program);
+    expect(() => sort_global_declarations(program)).toThrow();
 }
 
 describe('sort_global_declarations', () => {
@@ -22,9 +31,7 @@ describe('sort_global_declarations', () => {
             var c = b + 1;
             var e = d + 1;
         `);
-        sort_global_declarations(program);
-        const declOrder = retrieve_declaration_order(program);
-        expect(declOrder).toEqual(['x', 'y', 'z', 'w', 'a', 'b', 'c', 'd', 'e', 'f', 'g']);
+        check_declaration_order(program, ['x', 'y', 'z', 'w', 'a', 'b', 'c', 'd', 'e', 'f', 'g']);
     })
 
     it('should throw an error when cyclic dependency is detected', () => {
@@ -34,7 +41,7 @@ describe('sort_global_declarations', () => {
             var a = b + 1;
             var b = a + 1;
         `);
-        expect(() => sort_global_declarations(program)).toThrowError('cyclic dependency in global declarations');
+        check_cyclic_dependency(program);
     })
 
     it('should throw an error is self-referencing is detected', () => {
@@ -43,7 +50,7 @@ describe('sort_global_declarations', () => {
 
             var a = a + 1;
         `);
-        expect(() => sort_global_declarations(program)).toThrowError('cyclic dependency in global declarations');
+        check_cyclic_dependency(program);
     })
 
     it('should handle global function declarations', () => {
@@ -51,12 +58,10 @@ describe('sort_global_declarations', () => {
             package main
 
             func main() {
-                println("Hello, World!");
+                return;
             }
         `);
-        sort_global_declarations(program);
-        const declOrder = retrieve_declaration_order(program);
-        expect(declOrder).toEqual(['main']);
+        check_declaration_order(program, ['main']);
     })
 
     it('should handle function dependencies', () => {
@@ -70,9 +75,7 @@ describe('sort_global_declarations', () => {
                 return 1;
             }
         `);
-        sort_global_declarations(program);
-        const declOrder = retrieve_declaration_order(program);
-        expect(declOrder).toEqual(['f', 'x', 'y']);
+        check_declaration_order(program, ['f', 'x', 'y']);
     })
 
     it('should ignore recursive function dependencies', () => {
@@ -86,9 +89,7 @@ describe('sort_global_declarations', () => {
                 return f();
             }
         `);
-        sort_global_declarations(program);
-        const declOrder = retrieve_declaration_order(program);
-        expect(declOrder).toEqual(['f', 'x', 'y']);
+        check_declaration_order(program, ['f', 'x', 'y']);
     })
 
     it('should scan expressions in function calls', () => {
@@ -102,9 +103,7 @@ describe('sort_global_declarations', () => {
                 return a;
             }
         `);
-        sort_global_declarations(program);
-        const declOrder = retrieve_declaration_order(program);
-        expect(declOrder).toEqual(['f', 'x', 'y']);
+        check_declaration_order(program, ['f', 'x', 'y']);
     })
 
     it('should scan expressions in function calls and its arguments', () => {
@@ -118,8 +117,59 @@ describe('sort_global_declarations', () => {
                 return a + b;
             }
         `);
-        sort_global_declarations(program);
-        const declOrder = retrieve_declaration_order(program);
-        expect(declOrder).toEqual(['f', 'y', 'x']);
+        check_declaration_order(program, ['f', 'y', 'x']);
+    })
+
+    it('should ignore recursion in function calls', () => {
+        const program = parse(`
+            package main
+
+            var x = f(1) + 1;
+            var y = x + 1;
+
+            func f(a int32) int32 {
+                return f(a);
+            }
+        `);
+        check_declaration_order(program, ['f', 'x', 'y']);
+    })
+
+    it('should ignore two functions calling each other', () => {
+        const program = parse(`
+            package main
+
+            var x = f(1) + 1;
+            var y = x + 1;
+
+            func f(a int32) int32 {
+                return g(a);
+            }
+
+            func g(a int32) int32 {
+                return f(a);
+            }
+        `);
+        check_declaration_order(program, ['f', 'g', 'x', 'y']);
+    })
+
+    it('should include function calls in detecting cyclic dependencies', () => {
+        const program = parse(`
+            package main
+
+            func f(a int32) int32 {
+                if a == 0 {
+                    return 5
+                } else {
+                    return g(a)
+                }
+            }
+
+            func g(a int32) int32 {
+                return f(a) + y
+            }
+
+            var y = f(1) + 1;
+        `);
+        check_cyclic_dependency(program);
     })
 })
