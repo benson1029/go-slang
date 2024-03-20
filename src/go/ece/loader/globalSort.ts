@@ -2,16 +2,31 @@
  * Sorts the (variable and function) declarations in the global scope
  * so that the dependencies are satisfied. We only satisfy dependencies
  * for variable declarations. Functions recursively calling each other is
- * not treated as a dependency, unless they reference a global variable
- * and the reference is involved in a cycle of dependencies.
+ * not treated as a dependency, except that these recursive calls can form
+ * part of the dependency cycle. For example, in the following program:
  * 
- * The preprocessor already computes the dependencies as the {@code captures}
- * field of each declaration in {@code program.body}. It then computes the
- * strongly connected components of the dependency graph. There is cyclic
- * dependency if and only if there is a strongly connected component with
- * more than one variable declaration. We then do a topological sort of the
- * strongly connected components. Within each strongly connected component,
- * we place the function declarations before the variable declarations.
+ * ```go
+ * package main
+ * var x = f(1);
+ * func f() int32 { return g(); }
+ * func g() int32 { return f() + x; }
+ * ```
+ * 
+ * The variable `x` depends on `f`, and `f` depends on `g`. However, `g`
+ * also depends on `x`. This forms a cyclic dependency from `x` to itself.
+ * Note that the cycle between `f` and `g` is not treated as a cyclic
+ * dependency.
+ * 
+ * We assume the preprocessor has already computed the dependencies as
+ * the `captures` field of each declaration in `program.body`.
+ * 
+ * We then compute the strongly connected components of the dependency
+ * graph. There is cyclic dependency if and only if there is a strongly
+ * connected component with more than one variable declaration, or with
+ * one variable declaration together with a function declaration. We then
+ * do a topological sort of the strongly connected components. Within each
+ * strongly connected component, we place the function declarations before
+ * the variable declarations.
  */
 function sort_global_declarations(program: any): void {
     // Compute the edges and back edges of the dependency graph.
