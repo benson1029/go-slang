@@ -6,7 +6,7 @@ import { ControlFor } from '../../heap/types/control/for';
 import { PrimitiveBool } from '../../heap/types/primitive/bool';
 import { auto_cast } from '../../heap/types/auto_cast';
 import { ControlForI } from '../../heap/types/control/for_i';
-import { TAG_CONTROL_for_i } from '../../heap/types/tags';
+import { TAG_CONTROL_exit_scope_i, TAG_CONTROL_for_i } from '../../heap/types/tags';
 
 function evaluate_for(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
     const cmd_object = new ControlFor(heap, cmd);
@@ -58,6 +58,9 @@ function evaluate_break(cmd: number, heap: Heap, C: ContextControl, S: ContextSt
     if (top_cmd.get_tag() === TAG_CONTROL_for_i) {
         // Do nothing to finish the breaking
     } else {
+        if (top_cmd.get_tag() === TAG_CONTROL_exit_scope_i) {
+            E.pop_frame();
+        }
         C.push(cmd_object.reference().address);
     }
 }
@@ -71,6 +74,9 @@ function evaluate_continue(cmd: number, heap: Heap, C: ContextControl, S: Contex
         C.push(for_i_cmd.get_condition_address().reference().address);
         C.push(for_i_cmd.get_update_address().reference().address);
     } else {
+        if (top_cmd.get_tag() === TAG_CONTROL_exit_scope_i) {
+            E.pop_frame();
+        }
         C.push(cmd_object.reference().address);
     }
 }

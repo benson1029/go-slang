@@ -1,4 +1,3 @@
-/* eslint-disable no-unreachable */
 import { Heap } from "../../heap";
 import { ContextControl } from "../../heap/types/context/control";
 import { ContextEnv } from "../../heap/types/context/env";
@@ -14,30 +13,19 @@ function load(program: any, C: ContextControl, S: ContextStash, E: ContextEnv, h
     preprocess_program(program);
     sort_global_declarations(program);
 
-    // Stub for loading the main function directly:
-    let main = program.body.filter((x: any) => x.tag === "function" && x.name === "main")[0];
-    const _main_addr = heap.allocate_any(main.body.body)
-    C.push(_main_addr)
-    heap.free_object(_main_addr)
-
-    return;
-
-    // let cmdAddr = {};
-    // program.body.forEach((cmd) => {
-    //     const addr = heap.allocate_any(cmd);
-    //     cmdAddr[cmd.name] = addr;
-    // })
-    // let C_data = []
-    // program.body.forEach((cmd) => {
-    //     if (cmd.tag === 'var') {
-    //         C_data.push(cmdAddr[cmd.name])
-    //     }
-    // })
-    // const main_addr = heap.allocate_any({ tag: "call", name: "main", args: [] });
-    // C_data.push(main_addr);
-    // for (let i = C_data.length - 1; i >= 0; i--) {
-    //     C.push(C_data[i]);
-    // }
+    const main_addr = heap.allocate_any({ tag: "call", name: "main", args: [] });
+    C.push(main_addr);
+    for (let i = program.body.length - 1; i >= 0; i--) {
+        if (program.body[i].tag === "function") {
+            program.body[i] = {
+                tag: "var",
+                name: program.body[i].name,
+                value: program.body[i],
+            }
+        }
+        const addr = heap.allocate_any(program.body[i]);
+        C.push(addr);
+    }
 }
 
 export { load };

@@ -16,6 +16,7 @@ const TAG_CONTROL_pop_i = 0x8001; // 1000 0000 0000 0001
 const TAG_CONTROL_exit_scope_i = 0x8002; // 1000 0000 0000 0010
 const TAG_CONTROL_break = 0x8003; // 1000 0000 0000 0011
 const TAG_CONTROL_continue = 0x8004; // 1000 0000 0000 0100
+const TAG_CONTROL_return_i = 0x8005; // 1000 0000 0000 0101
 
 const TAG_CONTROL_name = 0xC001; // 1100 0000 0000 0001
 const TAG_CONTROL_literal = 0xC002; // 1100 0000 0000 0010
@@ -44,6 +45,8 @@ const TAG_CONTROL_for = 0xC019; // 1100 0000 0001 1001
 const TAG_CONTROL_for_i = 0xC01A; // 1100 0000 0001 1010
 const TAG_CONTROL_if = 0xC01B; // 1100 0000 0001 1011
 const TAG_CONTROL_if_i = 0xC01C; // 1100 0000 0001 1100
+const TAG_CONTROL_call_i = 0xC01D; // 1100 0000 0001 1101
+const TAG_CONTROL_restore_env_i = 0xC01E; // 1100 0000 0001 1110
 
 
 
@@ -94,6 +97,9 @@ const TAGSTRING_CONTROL_assign_i = "assign_i";
 const TAGSTRING_CONTROL_exit_scope_i = "exit-scope_i";
 const TAGSTRING_CONTROL_for_i = "for_i";
 const TAGSTRING_CONTROL_if_i = "if_i";
+const TAGSTRING_CONTROL_call_i = "call_i";
+const TAGSTRING_CONTROL_restore_env_i = "restore-env_i";
+const TAGSTRING_CONTROL_return_i = "return_i";
 
 const TAGSTRING_ENVIRONMENT_frame = "frame";
 
@@ -133,7 +139,10 @@ export {
   TAG_CONTROL_exit_scope_i,
   TAG_CONTROL_for_i,
   TAG_CONTROL_if_i,
+  TAG_CONTROL_call_i,
+  TAG_CONTROL_restore_env_i,
   TAG_CONTROL_return,
+  TAG_CONTROL_return_i,
   TAG_ENVIRONMENT_entry,
   TAG_ENVIRONMENT_frame,
   TAG_ENVIRONMENT_hash_table,
@@ -175,6 +184,9 @@ export {
   TAGSTRING_CONTROL_exit_scope_i,
   TAGSTRING_CONTROL_for_i,
   TAGSTRING_CONTROL_if_i,
+  TAGSTRING_CONTROL_call_i,
+  TAGSTRING_CONTROL_restore_env_i,
   TAGSTRING_CONTROL_return,
+  TAGSTRING_CONTROL_return_i,
   TAGSTRING_ENVIRONMENT_frame,
 };

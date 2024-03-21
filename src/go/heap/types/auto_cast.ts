@@ -15,6 +15,7 @@ import { ControlBinaryI } from "./control/binary_i";
 import { ControlBlock } from "./control/block";
 import { ControlBreak } from "./control/break";
 import { ControlCall } from "./control/call";
+import { ControlCallI } from "./control/call_i";
 import { ControlContinue } from "./control/continue";
 import { ControlExitScopeI } from "./control/exit_scope";
 import { ControlFor } from "./control/for";
@@ -26,6 +27,9 @@ import { ControlLambdaCall } from "./control/lambda_call";
 import { ControlName } from "./control/name";
 import { ControlPopI } from "./control/pop_i";
 import { ControlPostfix } from "./control/postfix";
+import { ControlRestoreEnvI } from "./control/restore_env_i";
+import { ControlReturn } from "./control/return";
+import { ControlReturnI } from "./control/return_i";
 import { ControlSequence } from "./control/sequence";
 import { ControlUnary } from "./control/unary";
 import { ControlUnaryI } from "./control/unary_i";
@@ -82,6 +86,10 @@ import {
   TAG_CONTEXT_stash,
   TAG_CONTEXT_env,
   TAG_ENVIRONMENT_hash_table,
+  TAG_CONTROL_call_i,
+  TAG_CONTROL_restore_env_i,
+  TAG_CONTROL_return,
+  TAG_CONTROL_return_i,
 } from "./tags"
 
 
@@ -156,6 +164,14 @@ function auto_cast(heap: Heap, address: number): HeapObject {
       return new ControlIf(heap, address);
     case TAG_CONTROL_if_i:
       return new ControlIfI(heap, address);
+    case TAG_CONTROL_call_i:
+      return new ControlCallI(heap, address);
+    case TAG_CONTROL_restore_env_i:
+      return new ControlRestoreEnvI(heap, address);
+    case TAG_CONTROL_return:
+      return new ControlReturn(heap, address);
+    case TAG_CONTROL_return_i:
+      return new ControlReturnI(heap, address);
     case TAG_ENVIRONMENT_entry:
       return new EnvironmentEntry(heap, address);
     case TAG_ENVIRONMENT_frame:

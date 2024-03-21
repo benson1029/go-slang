@@ -1,6 +1,7 @@
 import * as block from "./block";
 import * as expression from "./expression";
 import * as control_for from "./for";
+import * as control_function from "./function";
 import * as control_if from "./if";
 import * as sequence from "./sequence";
 import * as control_var from "./var";
@@ -49,6 +50,18 @@ function lookup_microcode(tag: number): Function {
             return control_if.evaluate_if;
         case tags.TAG_CONTROL_if_i:
             return control_if.evaluate_if_i;
+        case tags.TAG_CONTROL_function:
+            return control_function.evaluate_function;
+        case tags.TAG_CONTROL_call:
+            return control_function.evaluate_call;
+        case tags.TAG_CONTROL_call_i:
+            return control_function.evaluate_call_i;
+        case tags.TAG_CONTROL_return:
+            return control_function.evaluate_return;
+        case tags.TAG_CONTROL_return_i:
+            return control_function.evaluate_return_i;
+        case tags.TAG_CONTROL_restore_env_i:
+            return control_function.evaluate_restore_env_i;
         case tags.TAG_PRIMITIVE_nil:
             return (...args: any[]) => {};
         default:

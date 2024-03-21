@@ -46,6 +46,7 @@ import { ControlBinaryI } from "./types/control/binary_i";
 import { ControlBlock } from "./types/control/block";
 import { ControlBreak } from "./types/control/break";
 import { ControlCall } from "./types/control/call";
+import { ControlCallI } from "./types/control/call_i";
 import { ControlContinue } from "./types/control/continue";
 import { ControlExitScopeI } from "./types/control/exit_scope";
 import { ControlFor } from "./types/control/for";
@@ -58,7 +59,9 @@ import { ControlLiteral } from "./types/control/literal";
 import { ControlName } from "./types/control/name";
 import { ControlPopI } from "./types/control/pop_i";
 import { ControlPostfix } from "./types/control/postfix";
+import { ControlRestoreEnvI } from "./types/control/restore_env_i";
 import { ControlReturn } from "./types/control/return";
+import { ControlReturnI } from "./types/control/return_i";
 import { ControlSequence } from "./types/control/sequence";
 import { ControlUnary } from "./types/control/unary";
 import { ControlUnaryI } from "./types/control/unary_i";
@@ -108,7 +111,10 @@ import {
     TAGSTRING_CONTROL_break,
     TAGSTRING_CONTROL_if,
     TAGSTRING_CONTROL_if_i,
-    TAGSTRING_CONTROL_return
+    TAGSTRING_CONTROL_return,
+    TAGSTRING_CONTROL_call_i,
+    TAGSTRING_CONTROL_restore_env_i,
+    TAGSTRING_CONTROL_return_i
 } from "./types/tags";
 
 class Heap {
@@ -740,11 +746,40 @@ class Heap {
 
     /**
      * CONTROL_return
+     * Fields    : Number of children
      * Children  :
      * - 4 bytes address of the value (expression)
      */
     public allocate_CONTROL_return(obj: { tag: string, value: any }): number {
         return ControlReturn.allocate(this, obj.value);
+    }
+
+    /**
+     * CONTROL_call_i
+     * Fields    : number of children
+     * Children  :
+     * - 4 bytes address of the number of arguments (PRIMITIVE_number)
+     */
+    public allocate_CONTROL_call_i(obj: { tag: string, num_args: number }): number {
+        return ControlCallI.allocate(this, obj.num_args);
+    }
+
+    /**
+     * CONTROL_restore_env_i
+     * Fields    : number of children
+     * Children  :
+     * - 4 bytes address of the frame to restore (ENVIRONMENT_frame)
+     */
+    public allocate_CONTROL_restore_env_i(obj: { tag: string, frame: EnvironmentFrame }): number {
+        return ControlRestoreEnvI.allocate(this, obj.frame);
+    }
+
+    /**
+     * CONTROL_return_i
+     * Fields    : none
+     */
+    public allocate_CONTROL_return_i(): number {
+        return ControlReturnI.allocate(this);
     }
 
     /**
@@ -845,6 +880,12 @@ class Heap {
                 return this.allocate_CONTROL_if_i(obj);
             case TAGSTRING_CONTROL_return:
                 return this.allocate_CONTROL_return(obj);
+            case TAGSTRING_CONTROL_call_i:
+                return this.allocate_CONTROL_call_i(obj);
+            case TAGSTRING_CONTROL_restore_env_i:
+                return this.allocate_CONTROL_restore_env_i(obj);
+            case TAGSTRING_CONTROL_return_i:
+                return this.allocate_CONTROL_return_i();
             case TAGSTRING_ENVIRONMENT_frame:
                 return this.allocate_ENVIRONMENT_frame(obj);
             default:
