@@ -35,6 +35,7 @@
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { BuddyAllocator, WORD_SIZE } from "./alloc";
+import { auto_cast } from "./types/auto_cast";
 import { ComplexLinkedList } from "./types/complex/linked_list";
 import { ComplexPointer } from "./types/complex/pointer";
 import { ComplexString } from "./types/complex/string";
@@ -112,6 +113,12 @@ import {
 
 class Heap {
     private alloc: BuddyAllocator;
+
+    public check_all_free(): boolean {
+        return this.alloc.check_all_free(
+            (address: number) => auto_cast(this, address).stringify()
+        );
+    }
 
     public allocate_object(tag: number, fields: number, children: number): number {
         const words = 2 + fields + children;
@@ -238,12 +245,16 @@ class Heap {
     }
 
     public set_cannnot_be_freed(address: number, value: boolean): void {
+        // if (value === this.alloc.get_cannnot_be_freed(address)) {
+        //     console.log("Warning: Setting cannnot_be_freed to the same value " + auto_cast(this, address).stringify());
+        // }
         this.alloc.set_cannnot_be_freed(address, value);
     }
 
     public free_object(address: number): void {
         this.decrement_reference_count(address);
         if (this.get_reference_count(address) === 0) {
+            // console.log("Freeing object: ", auto_cast(this, address).stringify());
             // Free the children
             const num_children = this.get_number_of_children(address);
             for (let i = 0; i < num_children; i++) {
@@ -758,8 +769,8 @@ class Heap {
     }
 
     public allocate_any(obj: any): number {
-        if (obj === null || obj === undefined) {
-            return 0;
+        if (obj == null) {
+            obj = 0;
         }
         if (typeof obj === "number") {
             // obj is a pointer to somewhere already in the alloc

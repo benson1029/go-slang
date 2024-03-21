@@ -54,7 +54,14 @@ class ECE {
     }
 
     const result = auto_cast(this.heap, S.pop()) as unknown as Primitive;
-    return result.get_value();
+    // console.log("Result:", result);
+    const result_value = result.get_value();
+    result.free();
+    thread.free();
+
+    // console.log("Check all objects are freed:", this.heap.check_all_free());
+
+    return result_value;
   }
 }
 

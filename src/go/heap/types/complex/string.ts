@@ -22,15 +22,28 @@ function hash_string(str: string): number {
 
 class ComplexString extends HeapObject {
   public get_string(): string {
+    if (this.get_tag() !== TAG_COMPLEX_string) {
+      throw new Error("ComplexString.get_string: Invalid tag");
+    }
     let str = "";
-    for (let i = 0; i < this.get_number_of_children(); i++) {
+    for (let i = 0; i < this.get_length(); i++) {
       const rune = new PrimitiveRune(this.heap, this.get_child(i));
       str += String.fromCodePoint(rune.get_value());
     }
     return str;
   }
 
+  public get_length(): number {
+    if (this.get_tag() !== TAG_COMPLEX_string) {
+      throw new Error("ComplexString.get_length: Invalid tag");
+    }
+    return this.get_number_of_children();
+  }
+
   public get_hash(): number {
+    if (this.get_tag() !== TAG_COMPLEX_string) {
+      throw new Error("ComplexString.get_hash: Invalid tag");
+    }
     return this.get_field(1);
   }
 
@@ -39,7 +52,7 @@ class ComplexString extends HeapObject {
     heap.set_cannnot_be_freed(address, true);
 
     for (let i = 0; i < str.length; i++) {
-      const rune = heap.allocate_PRIMITIVE_rune(str.codePointAt(i));
+      const rune = PrimitiveRune.allocate(heap, str.codePointAt(i));
       heap.set_child(address, i, rune);
     }
 

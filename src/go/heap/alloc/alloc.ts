@@ -92,6 +92,10 @@ class BuddyAllocator {
     return this.memory_get_bit(address, 5);
   }
 
+  public get_cannot_be_freed(address: number): boolean {
+    return this.memory_get_bit(address, 6);
+  }
+
   public set_cannnot_be_freed(address: number, value: boolean): void {
     this.memory_set_bit(address, 6, value);
   }
@@ -451,6 +455,20 @@ class BuddyAllocator {
     }
   }
 
+  public check_all_free(stringify_object: (address: number) => string): boolean {
+    let result = true;
+    this.iterate_non_free((node: number, bucket: number, address: number) => {
+      result = false;
+      // console.log("Not freed: " + stringify_object(address));
+
+      const allocated_bucket = this.read_bucket_value(address);
+      address += this.bucket_to_words(allocated_bucket) * WORD_SIZE;
+
+      return { node: node, bucket: bucket, address: address };
+    });
+    return result;
+  }
+
   public mark_all_cannot_be_freed(mark_dfs: (address: number) => void): void {
     this.iterate_non_free((node: number, bucket: number, address: number) => {
       if (this.get_cannnot_be_freed(address)) {
@@ -464,6 +482,7 @@ class BuddyAllocator {
     });
   }
 
+  
   // Free all nodes with mark/sweep bit 0
   public sweep_and_free(): void {
     // console.log("Sweep and free");

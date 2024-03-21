@@ -156,7 +156,9 @@ class EnvironmentHashTable extends HeapObject {
 
     const table = this.get_table_address();
     if (table.is_nil()) {
-      this.rehash(INITIAL_CAPACITY);
+      this.set_cannnot_be_freed(true);
+      this.set_child(0, ComplexArray.allocate(this.heap, INITIAL_CAPACITY));
+      this.set_cannnot_be_freed(false);
     } else if (this.should_grow()) {
       this.rehash(this.get_table_capacity() * 2);
     }

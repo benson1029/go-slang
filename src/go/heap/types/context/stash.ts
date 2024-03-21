@@ -8,6 +8,7 @@
 import { Heap } from "../../heap";
 import { ComplexLinkedList } from "../complex/linked_list";
 import { HeapObject } from "../objects";
+import { PrimitiveNil } from "../primitive/nil";
 import { TAG_CONTEXT_stash } from "../tags";
 
 /**
@@ -16,6 +17,9 @@ import { TAG_CONTEXT_stash } from "../tags";
  */
 class ContextStash extends HeapObject {
   private get_stash(): ComplexLinkedList {
+    if (this.get_tag() !== TAG_CONTEXT_stash) {
+      throw new Error("ContextStash.get_stash: Invalid tag");
+    }
     return new ComplexLinkedList(this.heap, this.get_child(0));
   }
 
@@ -25,20 +29,27 @@ class ContextStash extends HeapObject {
    * @param value The address to push onto the stash.
    */
   public push(value: number): void {
+    if (this.get_tag() !== TAG_CONTEXT_stash) {
+      throw new Error("ContextStash.push: Invalid tag");
+    }
     this.set_child(0, this.get_stash().insert_before(value).address);
   }
 
   /**
    * Pops the top element of the stash.
+   * Important: This method returns a reference() to the value.
    *
    * @returns The top element of the stash.
    */
   public pop(): number {
+    if (this.get_tag() !== TAG_CONTEXT_stash) {
+      throw new Error("ContextStash.pop: Invalid tag");
+    }
     if (this.get_stash().is_nil()) {
-      return undefined;
+      return PrimitiveNil.allocate();
     }
     const stash = this.get_stash();
-    const value = stash.get_value_address().address;
+    const value = stash.get_value_address().reference().address;
     this.set_child(0, stash.remove_current_node().address);
     return value;
   }

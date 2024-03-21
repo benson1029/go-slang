@@ -10,10 +10,16 @@ import { TAG_PRIMITIVE_rune } from "../tags";
 
 class PrimitiveRune extends Primitive {
   public get_type(): string {
+    if (this.get_tag() !== TAG_PRIMITIVE_rune) {
+      throw new Error("PrimitiveRune.get_type: Invalid tag");
+    }
     return "rune";
   }
 
   public get_value(): number {
+    if (this.get_tag() !== TAG_PRIMITIVE_rune) {
+      throw new Error("PrimitiveRune.get_value: Invalid tag");
+    }
     return this.get_field(0);
   }
 

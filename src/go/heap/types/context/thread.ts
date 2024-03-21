@@ -16,14 +16,23 @@ import { ContextStash } from "./stash";
 
 class ContextThread extends HeapObject {
   public control(): ContextControl {
+    if (this.get_tag() !== TAG_CONTEXT_thread) {
+      throw new Error("ContextThread.control: Invalid tag");
+    }
     return new ContextControl(this.heap, this.get_child(0));
   }
 
   public stash(): ContextStash {
+    if (this.get_tag() !== TAG_CONTEXT_thread) {
+      throw new Error("ContextThread.stash: Invalid tag");
+    }
     return new ContextStash(this.heap, this.get_child(1));
   }
 
   public env(): ContextEnv {
+    if (this.get_tag() !== TAG_CONTEXT_thread) {
+      throw new Error("ContextThread.env: Invalid tag");
+    }
     return new ContextEnv(this.heap, this.get_child(2));
   }
 

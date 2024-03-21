@@ -18,18 +18,33 @@ import { TAG_COMPLEX_function } from "../tags";
 
 class ComplexFunction extends HeapObject {
   public get_body_address(): HeapObject {
+    if (this.get_tag() !== TAG_COMPLEX_function) {
+      throw new Error("ComplexFunction.get_body_address: Invalid tag");
+    }
     return auto_cast(this.heap, this.get_child(0));
   }
 
   public get_environment_address(): EnvironmentFrame {
-    return auto_cast(this.heap, this.get_child(1)) as EnvironmentFrame;
+    if (this.get_tag() !== TAG_COMPLEX_function) {
+      throw new Error("ComplexFunction.get_environment_address: Invalid tag");
+    }
+    return new EnvironmentFrame(this.heap, this.get_child(1));
   }
 
   public get_param_name_address(index: number): ComplexString {
-    return auto_cast(this.heap, this.get_child(2 + index)) as ComplexString;
+    if (this.get_tag() !== TAG_COMPLEX_function) {
+      throw new Error("ComplexFunction.get_param_name_address: Invalid tag");
+    }
+    if (index < 0 || index >= this.get_number_of_params()) {
+      throw new Error("ComplexFunction.get_param_name_address: Index out of range");
+    }
+    return new ComplexString(this.heap, this.get_child(2 + index));
   }
 
   public get_number_of_params(): number {
+    if (this.get_tag() !== TAG_COMPLEX_function) {
+      throw new Error("ComplexFunction.get_number_of_params: Invalid tag");
+    }
     return this.get_field(1);
   }
 
@@ -55,12 +70,14 @@ class ComplexFunction extends HeapObject {
       2,
       2 + control_function.get_number_of_params()
     );
+
     heap.set_cannnot_be_freed(address, true);
     heap.set_field(address, 1, control_function.get_number_of_params());
 
-    const body_address = control_function.get_body_address();
-    heap.set_child(address, 0, body_address.reference().address);
+    // Transfer the body
+    heap.set_child(address, 0, control_function.get_body_address().reference().address);
 
+    // Create a new environment for the captures
     const environment_address = EnvironmentFrame.allocate(
       heap,
       PrimitiveNil.allocate()

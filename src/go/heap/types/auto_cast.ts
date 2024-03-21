@@ -33,6 +33,7 @@ import { ControlVar } from "./control/var";
 import { ControlVarI } from "./control/var_i";
 import { EnvironmentEntry } from "./environment/entry";
 import { EnvironmentFrame } from "./environment/frame";
+import { EnvironmentHashTable } from "./environment/hash_table";
 import { HeapObject } from "./objects";
 import { PrimitiveBool } from "./primitive/bool";
 import { PrimitiveFloat32 } from "./primitive/float32";
@@ -80,6 +81,7 @@ import {
   TAG_CONTEXT_control,
   TAG_CONTEXT_stash,
   TAG_CONTEXT_env,
+  TAG_ENVIRONMENT_hash_table,
 } from "./tags"
 
 
@@ -158,6 +160,8 @@ function auto_cast(heap: Heap, address: number): HeapObject {
       return new EnvironmentEntry(heap, address);
     case TAG_ENVIRONMENT_frame:
       return new EnvironmentFrame(heap, address);
+    case TAG_ENVIRONMENT_hash_table:
+      return new EnvironmentHashTable(heap, address);
     case TAG_CONTEXT_thread:
       return new ContextThread(heap, address);
     case TAG_CONTEXT_control:
@@ -167,8 +171,7 @@ function auto_cast(heap: Heap, address: number): HeapObject {
     case TAG_CONTEXT_env:
       return new ContextEnv(heap, address);
     default:
-      console.log(tag);
-      throw new Error("Unknown tag");
+      throw new Error("Unknown tag " + tag.toString());
   }
 }
 

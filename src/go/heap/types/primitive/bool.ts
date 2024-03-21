@@ -10,10 +10,16 @@ import { TAG_PRIMITIVE_bool } from "../tags";
 
 class PrimitiveBool extends Primitive {
   public get_type(): string {
+    if (this.get_tag() !== TAG_PRIMITIVE_bool) {
+      throw new Error("PrimitiveBool.get_type: Invalid tag");
+    }
     return "bool";
   }
 
   public get_value(): boolean {
+    if (this.get_tag() !== TAG_PRIMITIVE_bool) {
+      throw new Error("PrimitiveBool.get_value: Invalid tag");
+    }
     return this.get_field(0) === 1;
   }
 

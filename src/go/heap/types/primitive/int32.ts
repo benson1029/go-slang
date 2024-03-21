@@ -23,10 +23,16 @@ class PrimitiveInt32 extends Primitive {
   }
 
   public get_type(): string {
+    if (this.get_tag() !== TAG_PRIMITIVE_int32) {
+      throw new Error("PrimitiveInt32.get_type: Invalid tag");
+    }
     return "int32";
   }
 
   public get_value(): number {
+    if (this.get_tag() !== TAG_PRIMITIVE_int32) {
+      throw new Error("PrimitiveInt32.get_value: Invalid tag");
+    }
     return PrimitiveInt32.word_to_int32(this.heap.get_field(this.address, 0));
   }
 

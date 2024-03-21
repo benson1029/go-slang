@@ -11,13 +11,16 @@ import { TAG_COMPLEX_pointer } from "../tags";
 
 class ComplexPointer extends HeapObject {
   public get_value(): HeapObject {
+    if (this.get_tag() !== TAG_COMPLEX_pointer) {
+      throw new Error("ComplexPointer.get_value: Invalid tag");
+    }
     return auto_cast(this.heap, this.get_child(0));
   }
 
   public static allocate(heap: Heap, value: number): number {
     const address = heap.allocate_object(TAG_COMPLEX_pointer, 1, 1);
-    const value_address = new HeapObject(heap, value).reference();
-    heap.set_child(address, 0, value_address.address);
+    const value_address = new HeapObject(heap, value);
+    heap.set_child(address, 0, value_address.reference().address);
     return address;
   }
 

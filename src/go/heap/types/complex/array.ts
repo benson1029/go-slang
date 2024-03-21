@@ -11,17 +11,38 @@ import { HeapObject } from "../objects";
 import { TAG_COMPLEX_array } from "../tags";
 
 class ComplexArray extends HeapObject {
+  /**
+   * Important: This method will call reference() on the value and free() the old value.
+   * 
+   * @param index 
+   * @param value 
+   */
   public set_value_address(index: number, value: HeapObject): void {
+    if (this.get_tag() !== TAG_COMPLEX_array) {
+      throw new Error("ComplexArray.set_value_address: Invalid tag");
+    }
+    if (index < 0 || index >= this.get_length()) {
+      throw new Error("ComplexArray.set_value_address: Index out of range");
+    }
     const current_value_address = this.get_value_address(index);    
     this.set_child(index, value.reference().address);
     current_value_address.free();
   }
 
   public get_value_address(index: number): HeapObject {
+    if (this.get_tag() !== TAG_COMPLEX_array) {
+      throw new Error("ComplexArray.get_value_address: Invalid tag");
+    }
+    if (index < 0 || index >= this.get_length()) {
+      throw new Error("ComplexArray.get_value_address: Index out of range");
+    }
     return auto_cast(this.heap, this.get_child(index));
   }
 
   public get_length(): number {
+    if (this.get_tag() !== TAG_COMPLEX_array) {
+      throw new Error("ComplexArray.get_length: Invalid tag");
+    }
     return this.get_number_of_children();
   }
 

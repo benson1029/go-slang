@@ -23,10 +23,16 @@ class PrimitiveFloat32 extends Primitive {
   }
 
   public get_type(): string {
+    if (this.get_tag() !== TAG_PRIMITIVE_float32) {
+      throw new Error("PrimitiveFloat32.get_type: Invalid tag");
+    }
     return "float32";
   }
 
   public get_value(): number {
+    if (this.get_tag() !== TAG_PRIMITIVE_float32) {
+      throw new Error("PrimitiveFloat32.get_value: Invalid tag");
+    }
     return PrimitiveFloat32.word_to_float32(this.heap.get_field(this.address, 0));
   }
 
