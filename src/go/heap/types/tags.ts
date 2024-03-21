@@ -30,7 +30,7 @@ const TAG_CONTROL_sequence = 0xC008; // 1100 0000 0000 1000
 // const TAG_CONTROL_break             = 0xC00C; // 1100 0000 0000 1100
 // const TAG_CONTROL_continue          = 0xC00D; // 1100 0000 0000 1101
 // const TAG_CONTROL_defer             = 0xC00E; // 1100 0000 0000 1110
-// const TAG_CONTROL_return            = 0xC00F; // 1100 0000 0000 1111
+const TAG_CONTROL_return            = 0xC00F; // 1100 0000 0000 1111
 const TAG_CONTROL_function = 0xC010; // 1100 0000 0001 0000
 const TAG_CONTROL_call = 0xC011; // 1100 0000 0001 0001
 const TAG_CONTROL_lambda_call = 0xC012; // 1100 0000 0001 0010
@@ -43,6 +43,8 @@ const TAG_CONTROL_for = 0xC019; // 1100 0000 0001 1001
 const TAG_CONTROL_for_i = 0xC01A; // 1100 0000 0001 1010
 const TAG_CONTROL_if = 0xC01B; // 1100 0000 0001 1011
 const TAG_CONTROL_if_i = 0xC01C; // 1100 0000 0001 1100
+
+
 
 const TAG_ENVIRONMENT_entry = 0xC100; // 1100 0001 0000 0000
 const TAG_ENVIRONMENT_frame = 0xC101; // 1100 0001 0000 0001
@@ -81,6 +83,7 @@ const TAGSTRING_CONTROL_for = "for";
 const TAGSTRING_CONTROL_break = "break";
 const TAGSTRING_CONTROL_continue = "continue";
 const TAGSTRING_CONTROL_if = "if";
+const TAGSTRING_CONTROL_return = "return";
 
 const TAGSTRING_CONTROL_unary_i = "unary_i";
 const TAGSTRING_CONTROL_binary_i = "binary_i";
@@ -128,6 +131,7 @@ export {
   TAG_CONTROL_exit_scope_i,
   TAG_CONTROL_for_i,
   TAG_CONTROL_if_i,
+  TAG_CONTROL_return,
   TAG_ENVIRONMENT_entry,
   TAG_ENVIRONMENT_frame,
   TAG_ENVIRONMENT_hash_table,
@@ -169,5 +173,6 @@ export {
   TAGSTRING_CONTROL_exit_scope_i,
   TAGSTRING_CONTROL_for_i,
   TAGSTRING_CONTROL_if_i,
+  TAGSTRING_CONTROL_return,
   TAGSTRING_ENVIRONMENT_frame,
 };

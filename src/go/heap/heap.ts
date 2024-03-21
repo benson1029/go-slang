@@ -57,6 +57,7 @@ import { ControlLiteral } from "./types/control/literal";
 import { ControlName } from "./types/control/name";
 import { ControlPopI } from "./types/control/pop_i";
 import { ControlPostfix } from "./types/control/postfix";
+import { ControlReturn } from "./types/control/return";
 import { ControlSequence } from "./types/control/sequence";
 import { ControlUnary } from "./types/control/unary";
 import { ControlUnaryI } from "./types/control/unary_i";
@@ -105,7 +106,8 @@ import {
     TAGSTRING_CONTROL_continue,
     TAGSTRING_CONTROL_break,
     TAGSTRING_CONTROL_if,
-    TAGSTRING_CONTROL_if_i
+    TAGSTRING_CONTROL_if_i,
+    TAGSTRING_CONTROL_return
 } from "./types/tags";
 
 class Heap {
@@ -510,11 +512,6 @@ class Heap {
         return ControlSequence.allocate(this, obj.body);
     }
 
-    // { tag: "function", name: "foo", params: [ { name: "x", type: "int" }, ... ], returnType: "int", body: {...}  } // body must be a block, all types are optional
-    // { tag: "call", name: "foo", args: [ {...}, ... ] }
-    // // args is an array of objects
-    // { tag: "lambda-call", func: {...}, args: [ {...}, ... ] } // body must be a block, all types are optional, func is a lambda declaration
-
     /**
      * CONTROL_function
      * Fields    : number of children, number of parameters
@@ -525,9 +522,10 @@ class Heap {
      * @param obj control object
      * @returns address of the object
      */
-    public allocate_CONTROL_function(obj: { tag: string, name: string, params: any[], returnType: string, body: any }): number {
+    public allocate_CONTROL_function(obj: { tag: string, name: string, params: any[], captures: any[], returnType: string, body: any }): number {
         const param_names: string[] = obj.params.map(param => param.name);
-        return ControlFunction.allocate(this, obj.name, param_names, obj.body);
+        const capture_names: string[] = obj.captures.map(capture => capture.name);
+        return ControlFunction.allocate(this, obj.name, param_names, capture_names, obj.body);
     }
 
     /**
@@ -703,6 +701,15 @@ class Heap {
     }
 
     /**
+     * CONTROL_return
+     * Children  :
+     * - 4 bytes address of the value (expression)
+     */
+    public allocate_CONTROL_return(obj: { tag: string, value: any }): number {
+        return ControlReturn.allocate(this, obj.value);
+    }
+
+    /**
      * ENVIRONMENT_frame
      * Fields    : number of children
      * Children  :
@@ -798,10 +805,12 @@ class Heap {
                 return this.allocate_CONTROL_if(obj);
             case TAGSTRING_CONTROL_if_i:
                 return this.allocate_CONTROL_if_i(obj);
+            case TAGSTRING_CONTROL_return:
+                return this.allocate_CONTROL_return(obj);
             case TAGSTRING_ENVIRONMENT_frame:
                 return this.allocate_ENVIRONMENT_frame(obj);
             default:
-                throw new Error("Unknown tag");
+                throw new Error("Unknown tag " + obj.tag);
         }
     }
 }
