@@ -253,9 +253,9 @@ class EnvironmentFrame extends HeapObject {
   public stringify_i(): string {
     let result = "";
     result += this.address.toString() + " (environment frame): ";
-    result += "parent: " + this.get_parent_frame_address().toString();
-    result += ", current: " + this.get_lookup_hash_table_address().toString();
-    result += ", cache: " + this.get_cache_hash_table_address().toString();
+    result += "parent: " + this.get_parent_frame_address().stringify();
+    result += ", current: " + this.get_lookup_hash_table_address().stringify();
+    result += ", cache: " + this.get_cache_hash_table_address().stringify();
     return result;
   }
 }

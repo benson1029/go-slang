@@ -47,13 +47,20 @@ class ContextStash extends HeapObject {
     if (this.get_tag() !== TAG_CONTEXT_stash) {
       throw new Error("ContextStash.pop: Invalid tag");
     }
-    if (this.get_stash().is_nil()) {
+    if (this.empty()) {
       return PrimitiveNil.allocate();
     }
     const stash = this.get_stash();
     const value = stash.get_value_address().reference().address;
     this.set_child(0, stash.remove_current_node().address);
     return value;
+  }
+
+  public empty(): boolean {
+    if (this.get_tag() !== TAG_CONTEXT_stash) {
+      throw new Error("ContextStash.empty: Invalid tag");
+    }
+    return this.get_stash().is_nil();
   }
 
   public static allocate(heap: Heap): number {

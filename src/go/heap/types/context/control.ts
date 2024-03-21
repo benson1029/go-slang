@@ -33,13 +33,12 @@ class ContextControl extends HeapObject {
     if (this.get_tag() !== TAG_CONTEXT_control) {
       throw new Error("ContextControl.pop: Invalid tag");
     }
-    if (this.length() === 0) {
+    if (this.empty()) {
       return PrimitiveNil.allocate();
     }
     const control_stack = this.get_control();
     const cmd = control_stack.get_value_address().reference().address;
     this.set_child(0, control_stack.remove_current_node().address);
-    this.set_field(1, this.length() - 1);
     return cmd;
   }
 
@@ -55,7 +54,6 @@ class ContextControl extends HeapObject {
     }
     const control_stack = this.get_control();
     this.set_child(0, control_stack.insert_before(cmd).address);
-    this.set_field(1, this.length() + 1);
   }
 
   /**
@@ -68,27 +66,22 @@ class ContextControl extends HeapObject {
     if (this.get_tag() !== TAG_CONTEXT_control) {
       throw new Error("ContextControl.peek: Invalid tag");
     }
-    if (this.length() === 0) {
+    if (this.empty()) {
       return PrimitiveNil.allocate();
     }
     return this.get_control().get_value_address().address;
   }
 
-  /**
-   * Returns the length of the control stack.
-   *
-   * @returns The length of the control stack.
-   */
-  public length(): number {
+
+  public empty(): boolean {
     if (this.get_tag() !== TAG_CONTEXT_control) {
       throw new Error("ContextControl.length: Invalid tag");
     }
-    return this.get_field(1);
+    return this.get_control().is_nil();
   }
 
   public static allocate(heap: Heap): number {
-    const address = heap.allocate_object(TAG_CONTEXT_control, 2, 1);
-    heap.set_field(address, 1, 0);
+    const address = heap.allocate_object(TAG_CONTEXT_control, 1, 1);
     return address;
   }
 

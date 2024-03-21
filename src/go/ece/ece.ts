@@ -52,16 +52,17 @@ class ECE {
     }
 
     // Evaluate the program.
-    while (true) {
-      if (C.length() === 0) {
-        break;
-      }
-
+    while (!C.empty()) {
       const cmd = C.pop();
       const microcode = lookup_microcode(this.heap.get_tag(cmd));
       microcode(cmd, this.heap, C, S, E, output);
       this.heap.free_object(cmd);
     }
+
+    // console.log(S.stringify());
+    // if (!S.empty()) {
+    //   throw new Error("ECE.evaluate: Stash not empty after program execution");
+    // }
 
     thread.free();
 
