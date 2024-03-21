@@ -25,7 +25,6 @@ function evaluate_var_i(cmd: number, heap: Heap, C: ContextControl, S: ContextSt
     E.get_frame().insert_new_variable(name.address);
     const value = auto_cast(heap, S.pop()) as unknown as Primitive;
     E.get_frame().set_variable_value_address(name.address, value.address);
-    S.push(value.address);
     value.free();
 }
 
@@ -50,7 +49,6 @@ function evaluate_assign_i(cmd: number, heap: Heap, C: ContextControl, S: Contex
     const name = assign_i_object.get_name_address();
     const value = auto_cast(heap, S.pop()) as unknown as Primitive;
     E.get_frame().set_variable_value_address(name.address, value.address);
-    S.push(value.address);
     value.free();
 }
 
