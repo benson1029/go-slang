@@ -135,7 +135,7 @@ const microcode_preprocess = {
       if (comp.type === null) {
         throw new Error(`VariableObject ${comp.name} must have a type.`);
       }
-      
+
     } else {
       preprocess(comp.value, scope);
     }
@@ -304,6 +304,14 @@ const microcode_preprocess = {
     scope.popFrame();
     scope.function_declaration_stack.pop();
     scope.popFrame();
+
+    // Postprocess captures
+    // Remove duplicates
+    let captures = new Map();
+    for (let c of comp.captures) {
+      captures.set(c.name, c);
+    }
+    comp.captures = Array.from(captures.values());
   },
 
   call: (
