@@ -29,7 +29,7 @@ function parseAndExecute(code: string, heapSize: number): string {
             return `Execution error: ${error.message}\n${error.stack}`;
         }
     }
-    return JSON.stringify(result);
+    return result;
 }
 
 /**

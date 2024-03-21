@@ -8,7 +8,7 @@ function evaluateExpression(expression) {
     import "fmt"
     
     func main() {
-        var x = ${expression};
+        fmt.Println(${expression});
     }
     `
     const parsed_program = parse(program);
@@ -18,53 +18,53 @@ function evaluateExpression(expression) {
 
 describe('Evaluating expressions', () => {
     it('should support + -', () => {
-        expect(evaluateExpression('1 + 2')).toBe(3);
-        expect(evaluateExpression('1 - 2')).toBe(-1);
+        expect(evaluateExpression('1 + 2')).toBe("3\n");
+        expect(evaluateExpression('1 - 2')).toBe("-1\n");
     }),
 
     it('should support operator precedence', () => {
-        expect(evaluateExpression('1 + 2 * 3')).toBe(7);
+        expect(evaluateExpression('1 + 2 * 3')).toBe("7\n");
     }),
 
     it('should support parentheses', () => {
-        expect(evaluateExpression('(1 + 2) * 3')).toBe(9);
+        expect(evaluateExpression('(1 + 2) * 3')).toBe("9\n");
     }),
 
     it('should support * / %', () => {
-        expect(evaluateExpression('2 * 3')).toBe(6);
-        expect(evaluateExpression('7 / 3')).toBe(2);
-        expect(evaluateExpression('7 % 3')).toBe(1);
+        expect(evaluateExpression('2 * 3')).toBe("6\n");
+        expect(evaluateExpression('7 / 3')).toBe("2\n");
+        expect(evaluateExpression('7 % 3')).toBe("1\n");
     }),
 
     it('should support unary operators', () => {
-        expect(evaluateExpression('-3')).toBe(-3);
-        expect(evaluateExpression('+3')).toBe(3);
+        expect(evaluateExpression('-3')).toBe("-3\n");
+        expect(evaluateExpression('+3')).toBe("3\n");
     }),
 
     it('should support comparisons', () => {
-        expect(evaluateExpression('1 < 2')).toBe(true);
-        expect(evaluateExpression('1 > 2')).toBe(false);
-        expect(evaluateExpression('1 <= 2')).toBe(true);
-        expect(evaluateExpression('1 >= 2')).toBe(false);
-        expect(evaluateExpression('1 == 2')).toBe(false);
-        expect(evaluateExpression('1 != 2')).toBe(true);
+        expect(evaluateExpression('1 < 2')).toBe("true\n");
+        expect(evaluateExpression('1 > 2')).toBe("false\n");
+        expect(evaluateExpression('1 <= 2')).toBe("true\n");
+        expect(evaluateExpression('1 >= 2')).toBe("false\n");
+        expect(evaluateExpression('1 == 2')).toBe("false\n");
+        expect(evaluateExpression('1 != 2')).toBe("true\n");
     }),
 
     it('should support logical operators', () => {
-        expect(evaluateExpression('true && false')).toBe(false);
-        expect(evaluateExpression('true || false')).toBe(true);
-        expect(evaluateExpression('!true')).toBe(false);
+        expect(evaluateExpression('true && false')).toBe("false\n");
+        expect(evaluateExpression('true || false')).toBe("true\n");
+        expect(evaluateExpression('!true')).toBe("false\n");
     }),
 
     it('should support floating point operations', () => {
-        expect(evaluateExpression('1 / 2')).toBe(0);
-        expect(evaluateExpression('1.0 / 2')).toBe(0.5);
-        expect(evaluateExpression('1 / 2.0')).toBe(0.5);
-        expect(evaluateExpression('1.0 / 2.0')).toBe(0.5);
+        expect(evaluateExpression('1 / 2')).toBe("0\n");
+        expect(evaluateExpression('1.0 / 2')).toBe("0.5\n");
+        expect(evaluateExpression('1 / 2.0')).toBe("0.5\n");
+        expect(evaluateExpression('1.0 / 2.0')).toBe("0.5\n");
     }),
 
     it('should support complex expressions', () => {
-        expect(evaluateExpression('1 + 2 * 3 == 7 && 1 < 2')).toBe(true);
-        expect(evaluateExpression('1 + 2 * 3 != 9 || 1 > 2 && 3 - 5 < -8')).toBe(true);
+        expect(evaluateExpression('1 + 2 * 3 == 7 && 1 < 2')).toBe("true\n");
+        expect(evaluateExpression('1 + 2 * 3 != 9 || 1 > 2 && 3 - 5 < -8')).toBe("true\n");
     })
 })

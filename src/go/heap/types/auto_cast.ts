@@ -1,5 +1,6 @@
 import { Heap } from "../heap";
 import { ComplexArray } from "./complex/array";
+import { ComplexBuiltin } from "./complex/builtin";
 import { ComplexFunction } from "./complex/function";
 import { ComplexLinkedList } from "./complex/linked_list";
 import { ComplexPointer } from "./complex/pointer";
@@ -90,6 +91,7 @@ import {
   TAG_CONTROL_restore_env_i,
   TAG_CONTROL_return,
   TAG_CONTROL_return_i,
+  TAG_COMPLEX_builtin,
 } from "./tags"
 
 
@@ -116,6 +118,8 @@ function auto_cast(heap: Heap, address: number): HeapObject {
       return new ComplexArray(heap, address);
     case TAG_COMPLEX_function:
       return new ComplexFunction(heap, address);
+    case TAG_COMPLEX_builtin:
+      return new ComplexBuiltin(heap, address);
     case TAG_CONTROL_name:
       return new ControlName(heap, address);
     case TAG_CONTROL_literal:

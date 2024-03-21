@@ -7,10 +7,12 @@ import { ComplexFunction } from '../../heap/types/complex/function';
 import { auto_cast } from '../../heap/types/auto_cast';
 import { ControlCall } from '../../heap/types/control/call';
 import { ControlCallI } from '../../heap/types/control/call_i';
-import { TAG_CONTROL_exit_scope_i } from '../../heap/types/tags';
+import { TAG_COMPLEX_builtin, TAG_COMPLEX_function, TAG_CONTROL_exit_scope_i } from '../../heap/types/tags';
 import { ControlReturn } from '../../heap/types/control/return';
 import { ControlReturnI } from '../../heap/types/control/return_i';
 import { ControlRestoreEnvI } from '../../heap/types/control/restore_env_i';
+import { evaluate_builtin } from './builtin';
+import { ComplexBuiltin } from '../../heap/types/complex/builtin';
 
 function evaluate_function(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
     const cmd_object = auto_cast(heap, cmd) as ControlFunction;
@@ -25,8 +27,14 @@ function evaluate_call(cmd: number, heap: Heap, C: ContextControl, S: ContextSta
 
     S.push(function_object.address);
 
-    if (function_object.get_number_of_params() !== cmd_object.get_number_of_args()) {
-        throw new Error("Number of parameters does not match");
+    if (function_object.get_tag() === TAG_COMPLEX_function) {
+        if (function_object.get_number_of_params() !== cmd_object.get_number_of_args()) {
+            throw new Error("Number of parameters does not match");
+        }
+    } else if (function_object.get_tag() === TAG_COMPLEX_builtin) {
+        // Do nothing
+    } else {
+        throw new Error("Object is not callable");
     }
 
     const call_i_cmd = heap.allocate_any({ tag: "call_i", num_args: cmd_object.get_number_of_args() });
@@ -38,7 +46,7 @@ function evaluate_call(cmd: number, heap: Heap, C: ContextControl, S: ContextSta
     }
 }
 
-function evaluate_call_i(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
+function evaluate_call_i(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv, output: Function): void {
     const cmd_object = auto_cast(heap, cmd) as ControlCallI;
 
     // Pop arguments from the stash
@@ -48,6 +56,12 @@ function evaluate_call_i(cmd: number, heap: Heap, C: ContextControl, S: ContextS
     }
 
     const function_object = auto_cast(heap, S.pop()) as ComplexFunction;
+
+    if (function_object.get_tag() === TAG_COMPLEX_builtin) {
+        const name = (function_object as unknown as ComplexBuiltin).get_name();
+        evaluate_builtin(name, heap, C, S, E, output, args);
+        return;
+    }
 
     // Push restore environment command
     const E_copy = E.get_frame().reference();

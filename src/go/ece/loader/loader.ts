@@ -9,9 +9,9 @@ import { preprocess_program } from "./preprocess";
  * Performs checking on the program and loads the program into the ECE
  * environment.
  */
-function load(program: any, C: ContextControl, S: ContextStash, E: ContextEnv, heap: Heap) {
-    preprocess_program(program);
-    sort_global_declarations(program);
+function load(program: any, C: ContextControl, S: ContextStash, E: ContextEnv, heap: Heap, imports: any[]) {
+    preprocess_program(program, imports);
+    sort_global_declarations(program, imports);
 
     // // Stub for loading the main function directly:
     // let main = program.body.filter((x: any) => x.tag === "function" && x.name === "main")[0];

@@ -1,9 +1,8 @@
 import { Heap } from "../heap";
 import { lookup_microcode } from "./microcode";
-import { auto_cast } from "../heap/types/auto_cast";
-import { Primitive } from "../heap/types/primitive";
 import { load } from "./loader";
 import { ContextThread } from "../heap/types/context/thread";
+import { link_imports } from "./microcode/builtin";
 
 /**
  * Represents the main logic of the Explicit Control Evaluator.
@@ -38,8 +37,19 @@ class ECE {
     let S = thread.stash();
     let E = thread.env();
 
-    E.create_global_environment(this.program.imports);
-    load(this.program, C, S, E, this.heap);
+    // Link imports
+    let imports = []
+    for (let imp of this.program.imports) {
+      imports = imports.concat(link_imports(imp));
+    }
+    E.create_global_environment(imports);
+    load(this.program, C, S, E, this.heap, imports);
+
+    // Create output buffer
+    let output_buffer = ``
+    let output = (value: any) => {
+      output_buffer += value;
+    }
 
     // Evaluate the program.
     while (true) {
@@ -49,19 +59,15 @@ class ECE {
 
       const cmd = C.pop();
       const microcode = lookup_microcode(this.heap.get_tag(cmd));
-      microcode(cmd, this.heap, C, S, E);
+      microcode(cmd, this.heap, C, S, E, output);
       this.heap.free_object(cmd);
     }
 
-    const result = auto_cast(this.heap, S.pop()) as unknown as Primitive;
-    // console.log("Result:", result);
-    const result_value = result.get_value();
-    result.free();
     thread.free();
 
     // console.log("Check all objects are freed:", this.heap.check_all_free());
 
-    return result_value;
+    return output_buffer;
   }
 }
 
