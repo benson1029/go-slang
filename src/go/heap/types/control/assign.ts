@@ -51,6 +51,10 @@ class ControlAssign extends HeapObject {
 
     return address;
   }
+
+  public stringify_i(): string {
+    return this.address.toString() + " (assign): " + this.get_name_address().stringify();
+  }
 }
 
 export { ControlAssign };

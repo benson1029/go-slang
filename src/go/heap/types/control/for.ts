@@ -60,6 +60,16 @@ class ControlFor extends HeapObject {
 
         return address;
     }
+
+    public stringify_i(): string {
+        let result = "";
+        result += this.address.toString() + " (for): ";
+        result += "init: " + this.get_init_address().stringify() + ", ";
+        result += "condition: " + this.get_condition_address().stringify() + ", ";
+        result += "update: " + this.get_update_address().stringify() + ", ";
+        result += "body: " + this.get_body_address().stringify();
+        return result;
+    }
 }
 
 export { ControlFor };

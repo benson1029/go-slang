@@ -29,6 +29,20 @@ class ComplexArray extends HeapObject {
     const address = heap.allocate_object(TAG_COMPLEX_array, 1, array_length);
     return address;
   }
+
+  public stringify_i(): string {
+    let result = "";
+    result += this.address.toString() + " (array): ";
+    result += "[";
+    for (let i = 0; i < this.get_length(); i++) {
+      result += this.get_value_address(i).stringify();
+      if (i < this.get_length() - 1) {
+        result += ", ";
+      }
+    }
+    result += "]";
+    return result;
+  }
 }
 
 export { ComplexArray };

@@ -11,6 +11,10 @@ class ControlBreak extends HeapObject {
     public static allocate(heap: Heap): number {
         return heap.allocate_object(TAG_CONTROL_break, 0, 0);
     }
+
+    public stringify_i(): string {
+        return this.address.toString() + " (break)";
+    }
 }
 
 export { ControlBreak };

@@ -22,6 +22,10 @@ class PrimitiveNil extends Primitive {
   public static allocate(): number {
     return 0;
   }
+
+  public stringify_i(): string {
+    return this.address.toString() + " (nil)";
+  }
 }
 
 export { PrimitiveNil };

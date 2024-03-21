@@ -1,4 +1,5 @@
 import { Heap } from "../heap"
+import { auto_cast } from "./auto_cast";
 import { TAG_PRIMITIVE_nil, TAG_PRIMITIVE_undefined } from "./tags";
 
 class HeapObject {
@@ -62,6 +63,14 @@ class HeapObject {
   public copy(): HeapObject {
     const copy_address = this.heap.copy_object(this.address);
     return new HeapObject(this.heap, copy_address);
+  }
+
+  public stringify(): string {
+    return auto_cast(this.heap, this.address).stringify_i();
+  }
+
+  public stringify_i(): string {
+    return "Not implemented";
   }
 }
 

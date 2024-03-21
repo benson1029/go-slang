@@ -50,6 +50,15 @@ class EnvironmentEntry extends HeapObject {
   public static allocate_nil(heap: Heap): EnvironmentEntry {
     return new EnvironmentEntry(heap, PrimitiveNil.allocate());
   }
+
+  public stringify_i(): string {
+    let result = "";
+    result += this.address.toString() + " (environment entry): ";
+    result += this.get_key_address().stringify();
+    result += " -> ";
+    result += this.get_value_address().stringify();
+    return result;
+  }
 }
 
 export { EnvironmentEntry };

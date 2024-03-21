@@ -123,6 +123,29 @@ class ControlFunction extends HeapObject {
 
     return address;
   }
+
+  public stringify_i(): string {
+    let result = "";
+    result += this.address.toString() + " (function): ";
+    result += "name: " + this.get_name_address().stringify() + ", ";
+    result += "body: " + this.get_body_address().stringify() + ", ";
+    result += "params: [";
+    for (let i = 0; i < this.get_number_of_params(); i++) {
+      if (i > 0) {
+        result += ", ";
+      }
+      result += this.get_param_name_address(i).stringify();
+    }
+    result += "], captures: [";
+    for (let i = 0; i < this.get_number_of_captures(); i++) {
+      if (i > 0) {
+        result += ", ";
+      }
+      result += this.get_capture_name_address(i).stringify();
+    }
+    result += "]";
+    return result;
+  }
 }
 
 export { ControlFunction };

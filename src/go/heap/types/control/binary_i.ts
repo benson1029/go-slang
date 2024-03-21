@@ -25,6 +25,13 @@ class ControlBinaryI extends HeapObject {
         heap.set_child(address, 0, operator.reference().address);
         return address;
     }
+
+    public stringify_i(): string {
+        let result = "";
+        result += this.address.toString() + " (binary_i): ";
+        result += this.get_operator_address().stringify();
+        return result;
+    }
 }
 
 export { ControlBinaryI };

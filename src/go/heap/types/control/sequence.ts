@@ -29,6 +29,10 @@ class ControlSequence extends HeapObject {
 
     return address;
   }
+
+  public stringify_i(): string {
+    return this.address.toString() + " (sequence): " + this.get_linked_list_address().stringify();
+  }
 }
 
 export { ControlSequence };

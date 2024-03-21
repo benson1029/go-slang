@@ -30,6 +30,10 @@ class ControlBlock extends HeapObject {
 
         return address;
     }
+
+    public stringify_i(): string {
+        return this.address.toString() + " (block): " + this.get_body_address().stringify();
+    }
 }
 
 export { ControlBlock };

@@ -49,6 +49,10 @@ class ContextEnv extends HeapObject {
     const address = heap.allocate_object(TAG_CONTEXT_env, 1, 1);
     return address;
   }
+
+  public stringify_i(): string {
+    return this.address.toString() + " (env): " + this.get_frame().stringify();
+  }
 }
 
 export { ContextEnv };

@@ -49,6 +49,10 @@ class ComplexString extends HeapObject {
     heap.set_cannnot_be_freed(address, false);
     return address;
   }
+
+  public stringify_i(): string {
+    return this.address.toString() + " (string): " + this.get_string();
+  }
 }
 
 export { ComplexString };

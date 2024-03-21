@@ -11,6 +11,10 @@ class ControlPopI extends HeapObject {
     public static allocate(heap: Heap): number {
         return heap.allocate_object(TAG_CONTROL_pop_i, 0, 0);
     }
+
+    public stringify_i(): string {
+        return this.address.toString() + " (pop_i)";
+    }
 }
 
 export { ControlPopI };

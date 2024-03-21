@@ -24,6 +24,10 @@ class ControlVarI extends HeapObject {
     heap.set_child(address, 0, name.reference().address);
     return address;
   }
+
+  public stringify_i(): string {
+    return this.address.toString() + " (var_i): " + this.get_name();
+  }
 }
 
 export { ControlVarI };

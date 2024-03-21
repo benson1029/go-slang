@@ -47,6 +47,10 @@ class ContextStash extends HeapObject {
     const address = heap.allocate_object(TAG_CONTEXT_stash, 1, 1);
     return address;
   }
+
+  public stringify_i(): string {
+    return this.address.toString() + " (stash): " + this.get_stash().stringify();
+  }
 }
 
 export { ContextStash };

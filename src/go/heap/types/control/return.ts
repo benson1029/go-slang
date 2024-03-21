@@ -29,6 +29,10 @@ class ControlReturn extends HeapObject {
 
     return address;
   }
+
+  public stringify_i(): string {
+    return this.address.toString() + " (return): " + this.get_expression_address().stringify();
+  }
 }
 
 export { ControlReturn };

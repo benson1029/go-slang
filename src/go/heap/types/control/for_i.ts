@@ -34,6 +34,15 @@ class ControlForI extends HeapObject {
 
         return address;
     }
+
+    public stringify_i(): string {
+        let result = "";
+        result += this.address.toString() + " (for_i): ";
+        result += "condition: " + this.get_condition_address().stringify() + ", ";
+        result += "update: " + this.get_update_address().stringify() + ", ";
+        result += "body: " + this.get_body_address().stringify();
+        return result;
+    }
 }
 
 export { ControlForI };

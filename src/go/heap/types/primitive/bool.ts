@@ -22,6 +22,10 @@ class PrimitiveBool extends Primitive {
     heap.set_field(address, 0, value ? 1 : 0);
     return address;
   }
+
+  public stringify_i(): string {
+    return this.address.toString() + " (bool): " + (this.get_value() ? "true" : "false");
+  }
 }
 
 export { PrimitiveBool };

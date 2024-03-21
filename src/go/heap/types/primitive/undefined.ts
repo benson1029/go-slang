@@ -23,6 +23,10 @@ class PrimitiveUndefined extends Primitive {
   public static allocate(): number {
     return 2 * WORD_SIZE;
   }
+
+  public stringify_i(): string {
+    return this.address.toString() + " (undefined)";
+  }
 }
 
 export { PrimitiveUndefined };

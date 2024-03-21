@@ -35,6 +35,10 @@ class PrimitiveFloat32 extends Primitive {
     heap.set_field(address, 0, PrimitiveFloat32.float32_to_word(value));
     return address;
   }
+
+  public stringify_i(): string {
+    return this.address.toString() + " (float32): " + this.get_value().toString();
+  }
 }
 
 export { PrimitiveFloat32 };

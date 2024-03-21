@@ -187,6 +187,16 @@ class EnvironmentHashTable extends HeapObject {
     heap.set_child(address, 0, 0);
     return address;
   }
+
+  public stringify_i(): string {
+    let result = "";
+    result += this.address.toString() + " (environment hash table): ";
+    result += "size: " + this.get_table_size().toString();
+    result += ", capacity: " + this.get_table_capacity().toString();
+    result += ", table: ";
+    result += this.get_table_address().stringify();
+    return result;
+  }
 }
 
 export { EnvironmentHashTable };

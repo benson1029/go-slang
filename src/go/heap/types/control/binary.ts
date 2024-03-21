@@ -56,6 +56,15 @@ class ControlBinary extends HeapObject {
 
     return address;
   }
+
+  public stringify_i(): string {
+    let result = "";
+    result += this.address.toString() + " (binary): ";
+    result += this.get_operator() + " ";
+    result += this.get_left_operand_address().stringify() + " ";
+    result += this.get_right_operand_address().stringify();
+    return result;
+  }
 }
 
 export { ControlBinary };

@@ -43,6 +43,19 @@ class ContextThread extends HeapObject {
     heap.set_cannnot_be_freed(address, false);
     return address;
   }
+
+  public stringify_i(): string {
+    let result = "";
+    result += this.address.toString() + " (thread): ";
+    result += "C[";
+    result += this.control().stringify();
+    result += "], S[";
+    result += this.stash().stringify();
+    result += "], E[";
+    result += this.env().stringify();
+    result += "]";
+    return result;
+  }
 }
 
 export { ContextThread };

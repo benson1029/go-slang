@@ -20,6 +20,10 @@ class ControlLambdaCall extends HeapObject {
     return new HeapObject(this.heap, this.get_child(index + 1));
   }
 
+  public get_number_of_args(): number {
+    return this.get_number_of_children() - 1;
+  }
+
   public static allocate(heap: Heap, func: any, args: any[]): number {
     const address = heap.allocate_object(TAG_CONTROL_lambda_call, 2, 1 + args.length);
     heap.set_cannnot_be_freed(address, true);
@@ -43,6 +47,21 @@ class ControlLambdaCall extends HeapObject {
     }
 
     return address;
+  }
+
+  public stringify_i(): string {
+    let result = "";
+    result += this.address.toString() + " (call): ";
+    result += "func: " + this.get_func_address().stringify() + ", ";
+    result += "args: [";
+    for (let i = 0; i < this.get_number_of_args(); i++) {
+      result += this.get_arg_address(i).stringify();
+      if (i < this.get_number_of_args() - 1) {
+        result += ", ";
+      }
+    }
+    result += "]";
+    return result;
   }
 }
 

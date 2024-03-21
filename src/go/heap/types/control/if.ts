@@ -49,6 +49,15 @@ class ControlIf extends HeapObject {
 
         return address;
     }
+
+    public stringify_i(): string {
+        let result = "";
+        result += this.address.toString() + " (if): ";
+        result += "condition: " + this.get_condition_address().stringify() + ", ";
+        result += "then_body: " + this.get_then_body_address().stringify() + ", ";
+        result += "else_body: " + this.get_else_body_address().stringify();
+        return result;
+    }
 }
 
 export { ControlIf };

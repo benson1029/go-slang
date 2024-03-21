@@ -35,6 +35,10 @@ class ControlName extends HeapObject {
 
     return address;
   }
+
+  public stringify_i(): string {
+    return this.address.toString() + " (name): " + this.get_name();
+  }
 }
 
 export { ControlName };

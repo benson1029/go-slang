@@ -35,6 +35,10 @@ class PrimitiveInt32 extends Primitive {
     heap.set_field(address, 0, PrimitiveInt32.int32_to_word(value));
     return address;
   }
+
+  public stringify_i(): string {
+    return this.address.toString() + " (int32): " + this.get_value().toString();
+  }
 }
 
 export { PrimitiveInt32 };

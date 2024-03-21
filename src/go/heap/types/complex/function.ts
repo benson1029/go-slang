@@ -14,7 +14,7 @@ import { ControlFunction } from "../control/function";
 import { EnvironmentFrame } from "../environment/frame";
 import { HeapObject } from "../objects";
 import { PrimitiveNil } from "../primitive/nil";
-import { TAG_COMPLEX_function, TAG_CONTROL_function } from "../tags";
+import { TAG_COMPLEX_function } from "../tags";
 
 class ComplexFunction extends HeapObject {
   public get_body_address(): HeapObject {
@@ -91,6 +91,26 @@ class ComplexFunction extends HeapObject {
     heap.set_cannnot_be_freed(address, false);
 
     return address;
+  }
+
+  public stringify_i(): string {
+    let result = "";
+    result += this.address.toString() + " (function): ";
+    result += "function(";
+    for (let i = 0; i < this.get_number_of_params(); i++) {
+      result += this.get_param_name_address(i).stringify();
+      if (i < this.get_number_of_params() - 1) {
+        result += ", ";
+      }
+    }
+    result += ")";
+    result += " [";
+    result += this.get_environment_address().stringify();
+    result += "]";
+    result += " {";
+    result += this.get_body_address().stringify();
+    result += "}";
+    return result;
   }
 }
 

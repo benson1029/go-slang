@@ -72,6 +72,10 @@ class ContextControl extends HeapObject {
     heap.set_field(address, 1, 0);
     return address;
   }
+
+  public stringify_i(): string {
+    return this.address.toString() + " (control): " + this.get_control().stringify();
+  }
 }
 
 export { ContextControl };

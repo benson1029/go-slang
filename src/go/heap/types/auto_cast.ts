@@ -1,7 +1,13 @@
 import { Heap } from "../heap";
+import { ComplexArray } from "./complex/array";
+import { ComplexFunction } from "./complex/function";
 import { ComplexLinkedList } from "./complex/linked_list";
 import { ComplexPointer } from "./complex/pointer";
 import { ComplexString } from "./complex/string";
+import { ContextControl } from "./context/control";
+import { ContextEnv } from "./context/env";
+import { ContextStash } from "./context/stash";
+import { ContextThread } from "./context/thread";
 import { ControlAssign } from "./control/assign";
 import { ControlAssignI } from "./control/assign_i";
 import { ControlBinary } from "./control/binary";
@@ -68,6 +74,12 @@ import {
   TAG_CONTROL_if,
   TAG_CONTROL_if_i,
   TAG_CONTROL_assign_i,
+  TAG_COMPLEX_array,
+  TAG_COMPLEX_function,
+  TAG_CONTEXT_thread,
+  TAG_CONTEXT_control,
+  TAG_CONTEXT_stash,
+  TAG_CONTEXT_env,
 } from "./tags"
 
 
@@ -90,6 +102,10 @@ function auto_cast(heap: Heap, address: number): HeapObject {
       return new ComplexLinkedList(heap, address);
     case TAG_COMPLEX_pointer:
       return new ComplexPointer(heap, address);
+    case TAG_COMPLEX_array:
+      return new ComplexArray(heap, address);
+    case TAG_COMPLEX_function:
+      return new ComplexFunction(heap, address);
     case TAG_CONTROL_name:
       return new ControlName(heap, address);
     case TAG_CONTROL_literal:
@@ -142,6 +158,14 @@ function auto_cast(heap: Heap, address: number): HeapObject {
       return new EnvironmentEntry(heap, address);
     case TAG_ENVIRONMENT_frame:
       return new EnvironmentFrame(heap, address);
+    case TAG_CONTEXT_thread:
+      return new ContextThread(heap, address);
+    case TAG_CONTEXT_control:
+      return new ContextControl(heap, address);
+    case TAG_CONTEXT_stash:
+      return new ContextStash(heap, address);
+    case TAG_CONTEXT_env:
+      return new ContextEnv(heap, address);
     default:
       console.log(tag);
       throw new Error("Unknown tag");

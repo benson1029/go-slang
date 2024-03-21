@@ -46,6 +46,10 @@ class ControlPostfix extends HeapObject {
 
     return address;
   }
+
+  public stringify_i(): string {
+    return this.address.toString() + " (postfix): " + this.get_operator() + " " + this.get_operand_address().stringify();
+  }
 }
 
 export { ControlPostfix };

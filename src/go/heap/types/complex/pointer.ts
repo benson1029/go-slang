@@ -20,6 +20,10 @@ class ComplexPointer extends HeapObject {
     heap.set_child(address, 0, value_address.address);
     return address;
   }
+
+  public stringify_i(): string {
+    return this.address.toString() + " (pointer): " + this.get_value().stringify();
+  }
 }
 
 export { ComplexPointer };

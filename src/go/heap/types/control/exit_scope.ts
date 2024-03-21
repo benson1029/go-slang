@@ -11,6 +11,10 @@ class ControlExitScopeI extends HeapObject {
     public static allocate(heap: Heap): number {
         return heap.allocate_object(TAG_CONTROL_exit_scope_i, 0, 0);
     }
+
+    public stringify_i(): string {
+        return this.address.toString() + " (exit_scope)";
+    }
 }
 
 export { ControlExitScopeI };

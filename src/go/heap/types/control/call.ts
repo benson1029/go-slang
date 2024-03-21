@@ -25,6 +25,10 @@ class ControlCall extends HeapObject {
     return new HeapObject(this.heap, this.get_child(index + 1));
   }
 
+  public get_number_of_args(): number {
+    return this.get_number_of_children() - 1;
+  }
+
   public static allocate(heap: Heap, name: string | null, args: any[]): number {
     const address = heap.allocate_object(TAG_CONTROL_call, 2, 1 + args.length);
     heap.set_cannnot_be_freed(address, true);
@@ -48,6 +52,21 @@ class ControlCall extends HeapObject {
     }
 
     return address;
+  }
+
+  public stringify_i(): string {
+    let result = "";
+    result += this.address.toString() + " (call): ";
+    result += this.get_name_address().stringify();
+    result += "(";
+    for (let i = 0; i < this.get_number_of_args(); i++) {
+      if (i > 0) {
+        result += ", ";
+      }
+      result += this.get_arg_address(i).stringify();
+    }
+    result += ")";
+    return result;
   }
 }
 

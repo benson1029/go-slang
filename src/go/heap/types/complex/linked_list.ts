@@ -99,6 +99,17 @@ class ComplexLinkedList extends HeapObject {
 
     return head;
   }
+
+  public stringify_i(): string {
+    let result = "";
+    result += this.address.toString() + " (linked_list): ";
+    result += "[";
+    result += this.get_value_address().stringify();
+    result += ", ";
+    result += this.get_next_address().stringify();
+    result += "]";
+    return result;
+  }
 }
 
 export { ComplexLinkedList };

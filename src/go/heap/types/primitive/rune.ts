@@ -22,6 +22,10 @@ class PrimitiveRune extends Primitive {
     heap.set_field(address, 0, value);
     return address;
   }
+
+  public stringify_i(): string {
+    return this.address.toString() + " (rune): " + String.fromCodePoint(this.get_value());
+  }
 }
 
 export { PrimitiveRune };
