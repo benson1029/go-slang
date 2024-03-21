@@ -459,7 +459,7 @@ class BuddyAllocator {
     let result = true;
     this.iterate_non_free((node: number, bucket: number, address: number) => {
       result = false;
-      // console.log("Not freed: " + stringify_object(address));
+      console.log("Not freed: " + stringify_object(address));
 
       const allocated_bucket = this.read_bucket_value(address);
       address += this.bucket_to_words(allocated_bucket) * WORD_SIZE;

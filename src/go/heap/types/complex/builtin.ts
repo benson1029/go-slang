@@ -12,11 +12,17 @@ import { TAG_COMPLEX_builtin } from "../tags";
 
 class ComplexBuiltin extends HeapObject {
   public get_name_address(): ComplexString {
+    if (this.get_tag() !== TAG_COMPLEX_builtin) {
+      throw new Error("Invalid tag for ComplexBuiltin");
+    }
     // Guarantee: name is not nil
     return new ComplexString(this.heap, this.get_child(0));
   }
 
   public get_name(): string {
+    if (this.get_tag() !== TAG_COMPLEX_builtin) {
+      throw new Error("Invalid tag for ComplexBuiltin");
+    }
     return this.get_name_address().get_string();
   }
 

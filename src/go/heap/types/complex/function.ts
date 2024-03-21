@@ -124,9 +124,6 @@ class ComplexFunction extends HeapObject {
     result += " [";
     result += this.get_environment_address().stringify();
     result += "]";
-    result += " {";
-    result += this.get_body_address().stringify();
-    result += "}";
     return result;
   }
 }

@@ -68,8 +68,8 @@ class EnvironmentEntry extends HeapObject {
     let result = "";
     result += this.address.toString() + " (environment entry): ";
     result += this.get_key_address().stringify();
-    result += " -> ";
-    result += this.get_value_address().stringify();
+    // result += " -> ";
+    // result += this.get_value_address().stringify();
     return result;
   }
 }

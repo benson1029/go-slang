@@ -46,6 +46,9 @@ class ComplexLinkedList extends HeapObject {
    * and returns the next node (with reference count increased).
    */
   public remove_current_node(): ComplexLinkedList {
+    if (this.get_tag() !== TAG_COMPLEX_linked_list) {
+      throw new Error("ComplexLinkedList.remove_current_node: Invalid tag");
+    }
     const next = this.get_next_address().reference() as ComplexLinkedList;
     this.free();
     return next;

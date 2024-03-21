@@ -128,7 +128,6 @@ class ControlFunction extends HeapObject {
     let result = "";
     result += this.address.toString() + " (function): ";
     result += "name: " + this.get_name_address().stringify() + ", ";
-    result += "body: " + this.get_body_address().stringify() + ", ";
     result += "params: [";
     for (let i = 0; i < this.get_number_of_params(); i++) {
       if (i > 0) {

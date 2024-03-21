@@ -18,6 +18,7 @@ function evaluate_function(cmd: number, heap: Heap, C: ContextControl, S: Contex
     const cmd_object = auto_cast(heap, cmd) as ControlFunction;
     const function_object = ComplexFunction.allocate(heap, cmd_object.address, E.get_frame().address);
     S.push(function_object);
+    heap.free_object(function_object);
 }
 
 function evaluate_call(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
@@ -39,6 +40,7 @@ function evaluate_call(cmd: number, heap: Heap, C: ContextControl, S: ContextSta
 
     const call_i_cmd = heap.allocate_any({ tag: "call_i", num_args: cmd_object.get_number_of_args() });
     C.push(call_i_cmd);
+    heap.free_object(call_i_cmd);
 
     for (let i = 0; i < cmd_object.get_number_of_args(); i++) {
         const arg = cmd_object.get_arg_address(i);
@@ -57,9 +59,18 @@ function evaluate_call_i(cmd: number, heap: Heap, C: ContextControl, S: ContextS
 
     const function_object = auto_cast(heap, S.pop()) as ComplexFunction;
 
+    // We need to free args[] and function_object later
+    const deferred_free = () => {
+        function_object.free();
+        for (let arg of args) {
+            heap.free_object(arg);
+        }
+    };
+
     if (function_object.get_tag() === TAG_COMPLEX_builtin) {
         const name = (function_object as unknown as ComplexBuiltin).get_name();
         evaluate_builtin(name, heap, C, S, E, output, args);
+        deferred_free();
         return;
     }
 
@@ -67,6 +78,7 @@ function evaluate_call_i(cmd: number, heap: Heap, C: ContextControl, S: ContextS
     const E_copy = E.get_frame().reference();
     const restore_env_cmd = heap.allocate_any({ tag: "restore-env_i", frame: E_copy });
     C.push(restore_env_cmd);
+    heap.free_object(restore_env_cmd);
 
     // Set the environment
     E.set_frame(function_object.get_environment_address());
@@ -81,27 +93,31 @@ function evaluate_call_i(cmd: number, heap: Heap, C: ContextControl, S: ContextS
 
     // Push the body
     C.push(function_object.get_body_address().address);
+
+    deferred_free();
 }
 
 function evaluate_return(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
     const cmd_object = auto_cast(heap, cmd) as ControlReturn;
     const return_i_cmd = heap.allocate_any({ tag: "return_i" });
     C.push(return_i_cmd);
+    heap.free_object(return_i_cmd);
     const value = cmd_object.get_expression_address();
     C.push(value.address);
 }
 
 function evaluate_return_i(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
     const cmd_object = auto_cast(heap, cmd) as ControlReturnI;
-    const top_cmd = auto_cast(heap, C.pop());
+    const top_cmd = auto_cast(heap, C.pop()); // owner
     if (top_cmd.get_tag() === TAG_CONTROL_exit_scope_i) {
-        C.push(top_cmd.reference().address);
+        C.push(top_cmd.address);
     } else {
         if (top_cmd.get_tag() === TAG_CONTROL_exit_scope_i) {
             E.pop_frame();
         }
-        C.push(cmd_object.reference().address);
+        C.push(cmd_object.address);
     }
+    top_cmd.free();
 }
 
 function evaluate_restore_env_i(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {

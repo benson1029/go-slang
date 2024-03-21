@@ -66,6 +66,7 @@ class HeapObject {
   }
 
   public stringify(): string {
+    // console.log("stringify ", this.get_tag());
     return auto_cast(this.heap, this.address).stringify_i();
   }
 
