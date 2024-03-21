@@ -27,6 +27,14 @@ class ContextEnv extends HeapObject {
     return new EnvironmentFrame(this.heap, this.get_child(0));
   }
 
+  /**
+   * Set the environment frame object.
+   * Does not free the old environment frame.
+   */
+  public set_frame(env: EnvironmentFrame): void {
+    this.set_child(0, env.address);
+  }
+
   public pop_frame(): void {
     const env = this.get_frame();
     this.set_child(0, env.pop_frame().address);

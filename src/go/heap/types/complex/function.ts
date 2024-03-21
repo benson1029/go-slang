@@ -17,6 +17,22 @@ import { PrimitiveNil } from "../primitive/nil";
 import { TAG_COMPLEX_function, TAG_CONTROL_function } from "../tags";
 
 class ComplexFunction extends HeapObject {
+  public get_body_address(): HeapObject {
+    return auto_cast(this.heap, this.get_child(0));
+  }
+
+  public get_environment_address(): EnvironmentFrame {
+    return auto_cast(this.heap, this.get_child(1)) as EnvironmentFrame;
+  }
+
+  public get_param_name_address(index: number): ComplexString {
+    return auto_cast(this.heap, this.get_child(2 + index)) as ComplexString;
+  }
+
+  public get_number_of_params(): number {
+    return this.get_field(1);
+  }
+
   public static allocate(
     heap: Heap,
     control_function_address: number,
@@ -40,6 +56,7 @@ class ComplexFunction extends HeapObject {
       2 + control_function.get_number_of_params()
     );
     heap.set_cannnot_be_freed(address, true);
+    heap.set_field(address, 1, control_function.get_number_of_params());
 
     const body_address = control_function.get_body_address();
     heap.set_child(address, 0, body_address.reference().address);
