@@ -314,8 +314,35 @@ class Heap {
         }
     }
 
-    public mark_and_sweep(): void {
+    public set_root(address: number): void {
+        this.alloc.set_root_address(address);
+    }
 
+    public get_root(): number {
+        return this.alloc.get_root_address();
+    }
+
+    private mark_dfs(address: number): void {
+        if (!this.alloc.is_user_address(address)) {
+            return;
+        }
+        if (this.alloc.get_mark_and_sweep(address)) {
+            return;
+        }
+        this.alloc.set_mark_and_sweep(address, true);
+        if (this.has_children(address)) {
+            const num_children = this.get_number_of_children(address);
+            for (let i = 0; i < num_children; i++) {
+                this.mark_dfs(this.get_child(address, i));
+            }
+        }
+    }
+
+    public mark_and_sweep(): void {
+        const root = this.get_root();
+        this.mark_dfs(root);
+        this.alloc.mark_all_cannot_be_freed(this.mark_dfs);
+        this.alloc.sweep_and_free();
     }
 
     /**

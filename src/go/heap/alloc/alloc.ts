@@ -6,7 +6,8 @@ const MIN_ALLOC = 2 ** MIN_ALLOC_LOG2;
 const MAX_ALLOC_LOG2 = 31;
 const MAX_ALLOC = 2 ** MAX_ALLOC_LOG2;
 
-const NUM_SPECIAL_VALUE = 2; // [null, undefined]
+const NUM_SPECIAL_VALUE = 3; // [null, undefined, root]
+const ROOT_ADDRESS = (NUM_SPECIAL_VALUE - 1) * WORD_SIZE * MIN_ALLOC;
 
 class BuddyAllocator {
   private data: ArrayBuffer;
@@ -218,6 +219,18 @@ class BuddyAllocator {
     return bucket;
   }
 
+  public set_root_address(address: number): void {
+    this.memory_set_word(ROOT_ADDRESS + WORD_SIZE, address);
+  }
+
+  public get_root_address(): number {
+    return this.memory_get_word(ROOT_ADDRESS + WORD_SIZE);
+  }
+
+  public is_user_address(address: number): boolean {
+    return this.baseUser <= address && address < this.endUser;
+  }
+
   constructor(words: number) {
     if (words > MAX_ALLOC) {
       throw new Error("Memory limit too high. Cannot allocate memory.");
@@ -361,8 +374,7 @@ class BuddyAllocator {
 
   public deallocate(address: number): void {
     if (address === null ||
-      address < this.baseUser ||
-      address >= this.endUser ||
+      !this.is_user_address(address) ||
       this.get_cannnot_be_freed(address)
     ) {
       return;
@@ -390,10 +402,10 @@ class BuddyAllocator {
     }
   }
 
-  // Free all nodes with mark/sweep bit 0
-  public sweep_and_free(): void {
-    // console.log("Sweep and free");
-
+  private iterate_non_free(processor:
+    (node: number, bucket: number, address: number) =>
+    { node: number, bucket: number, address: number }
+  ): void {
     let node = 1;
     let bucket = 0;
     let address = this.node_to_pointer(node, bucket);
@@ -419,26 +431,10 @@ class BuddyAllocator {
 
       // current address is allocated
       if (bucket === this.numNodesLog2) {
-        if (this.get_mark_and_sweep(address) || this.get_cannnot_be_freed(address)) {
-          // already marked, this node is alive
-          // we reset the mark bit
-          this.set_mark_and_sweep(address, false);
-          const allocated_bucket = this.read_bucket_value(address);
-          address += this.bucket_to_words(allocated_bucket) * WORD_SIZE;
-        } else {
-          // not marked, this node is dead
-          // we deallocate this node
-          this.deallocate(address);
-
-          // address deallocated, we need which level it got put in free list
-          while (!this.is_self_free(node)) {
-            node = (node - (node % 2)) / 2;
-            bucket -= 1;
-          }
-
-          // node is in the free list, we move to something after this node
-          address = this.node_to_pointer(node, bucket) + this.bucket_to_words(bucket) * WORD_SIZE;
-        }
+        const p = processor(node, bucket, address);
+        node = p.node;
+        bucket = p.bucket;
+        address = p.address;
       } else {
         // need to check whether address is allocated or not
         const nodeAddressMiddle = this.node_to_pointer(node * 2 + 1, bucket + 1);
@@ -453,6 +449,48 @@ class BuddyAllocator {
         }
       }
     }
+  }
+
+  public mark_all_cannot_be_freed(mark_dfs: (address: number) => void): void {
+    this.iterate_non_free((node: number, bucket: number, address: number) => {
+      if (this.get_cannnot_be_freed(address)) {
+        mark_dfs(address);
+      }
+
+      const allocated_bucket = this.read_bucket_value(address);
+      address += this.bucket_to_words(allocated_bucket) * WORD_SIZE;
+
+      return { node: node, bucket: bucket, address: address };
+    });
+  }
+
+  // Free all nodes with mark/sweep bit 0
+  public sweep_and_free(): void {
+    // console.log("Sweep and free");
+    this.iterate_non_free((node: number, bucket: number, address: number) => {
+      if (this.get_mark_and_sweep(address) || this.get_cannnot_be_freed(address)) {
+        // already marked, this node is alive
+        // we reset the mark bit
+        this.set_mark_and_sweep(address, false);
+        const allocated_bucket = this.read_bucket_value(address);
+        address += this.bucket_to_words(allocated_bucket) * WORD_SIZE;
+      } else {
+        // not marked, this node is dead
+        // we deallocate this node
+        this.deallocate(address);
+
+        // address deallocated, we need which level it got put in free list
+        while (!this.is_self_free(node)) {
+          node = (node - (node % 2)) / 2;
+          bucket -= 1;
+        }
+
+        // node is in the free list, we move to something after this node
+        address = this.node_to_pointer(node, bucket) + this.bucket_to_words(bucket) * WORD_SIZE;
+      }
+
+      return { node: node, bucket: bucket, address: address };
+    });
   }
 }
 

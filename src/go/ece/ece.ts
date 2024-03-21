@@ -32,6 +32,8 @@ class ECE {
       ContextThread.allocate(this.heap)
     );
 
+    this.heap.set_root(thread.address);
+
     let C = thread.control();
     let S = thread.stash();
     let E = thread.env();
