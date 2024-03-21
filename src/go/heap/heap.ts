@@ -62,6 +62,7 @@ import { ControlUnary } from "./types/control/unary";
 import { ControlUnaryI } from "./types/control/unary_i";
 import { ControlVar } from "./types/control/var";
 import { ControlVarI } from "./types/control/var_i";
+import { default_value } from "./types/default_value";
 import { EnvironmentFrame } from "./types/environment/frame";
 import { PrimitiveBool } from "./types/primitive/bool";
 import { PrimitiveFloat32 } from "./types/primitive/float32";
@@ -437,7 +438,7 @@ class Heap {
      * @returns address of the object
      */
     public allocate_CONTROL_var(obj: { tag: string, name: string, type: string, value: any }): number {
-        return ControlVar.allocate(this, obj.name, obj.value);
+        return ControlVar.allocate(this, obj.name, default_value(this, obj.type, obj.value));
     }
 
     /**
@@ -520,7 +521,7 @@ class Heap {
      * Children  :
      * - 4 bytes address of the function name (COMPLEX_string)
      * - 4 bytes * num_parameters address of the parameter names (COMPLEX_string)
-     * 
+     *
      * @param obj control object
      * @returns address of the object
      */
@@ -535,7 +536,7 @@ class Heap {
      * Children  :
      * - 4 bytes address of the called function name (COMPLEX_string)
      * - 4 bytes * num_arguments address of the arguments (expression)
-     * 
+     *
      * @param obj control object
      * @returns address of the object
      */
@@ -549,7 +550,7 @@ class Heap {
      * Children  :
      * - 4 bytes address of the called function (CONTROL_function)
      * - 4 bytes * num_arguments address of the arguments (expression)
-     * 
+     *
      * @param obj control object
      * @returns address of the object
      */
@@ -562,7 +563,7 @@ class Heap {
      * Fields    : number of children
      * Children  :
      * - 4 bytes address of the operator (COMPLEX_string)
-     * 
+     *
      * @param obj control object
      * @returns address of the object
      */
@@ -575,7 +576,7 @@ class Heap {
      * Fields    : number of children
      * Children  :
      * - 4 bytes address of the operator (COMPLEX_string)
-     * 
+     *
      * @param obj control object
      * @returns address of the object
      */
@@ -598,7 +599,7 @@ class Heap {
      * Fields    : number of children
      * Children  :
      * - 4 bytes address of the name (COMPLEX_string)
-     * 
+     *
      * @param obj control object
      * @returns address of the object
      */
@@ -611,14 +612,14 @@ class Heap {
      * Fields    : number of children
      * Children  :
      * - 4 bytes address of the name (COMPLEX_string)
-     * 
+     *
      * @param obj control object
      * @returns address of the object
      */
     public allocate_CONTROL_assign_i(obj: { tag: string, name: ComplexString }): number {
         return ControlAssignI.allocate(this, obj.name);
     }
-    
+
     /**
      * CONTROL_block
      * Fields    : number of children
@@ -700,7 +701,7 @@ class Heap {
     public allocate_CONTROL_if_i(obj: { tag: string, then_body: any, else_body: any }): number {
         return ControlIfI.allocate(this, obj.then_body, obj.else_body);
     }
-    
+
     /**
      * ENVIRONMENT_frame
      * Fields    : number of children
