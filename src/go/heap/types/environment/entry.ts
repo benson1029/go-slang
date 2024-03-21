@@ -15,15 +15,28 @@ import { TAG_ENVIRONMENT_entry } from "../tags";
 
 class EnvironmentEntry extends HeapObject {
   public get_key_address(): ComplexString {
+    if (this.get_tag() !== TAG_ENVIRONMENT_entry) {
+      throw new Error("EnvironmentEntry.get_key_address: Invalid tag");
+    }
     // Guarantee: key is not null
     return new ComplexString(this.heap, this.get_child(0));
   }
 
   public get_value_address(): HeapObject {
+    if (this.get_tag() !== TAG_ENVIRONMENT_entry) {
+      throw new Error("EnvironmentEntry.get_value_address: Invalid tag");
+    }
     return auto_cast(this.heap, this.get_child(1));
   }
-
+  
+  /**
+   * Important: This method will call reference() on the value and free() the old value.
+   * @param value_address 
+   */
   public set_value_address(value_address: number): void {
+    if (this.get_tag() !== TAG_ENVIRONMENT_entry) {
+      throw new Error("EnvironmentEntry.set_value_address: Invalid tag");
+    }
     const value = auto_cast(this.heap, value_address);
     const old_value = this.get_value_address();
     this.set_child(1, value.reference().address);
@@ -34,15 +47,15 @@ class EnvironmentEntry extends HeapObject {
     const key = new ComplexString(heap, key_address);
     const value = auto_cast(heap, value_address);
 
-    heap.set_cannnot_be_freed(key.address, true);
-    heap.set_cannnot_be_freed(value.address, true);
+    key.set_cannnot_be_freed(true);
+    value.set_cannnot_be_freed(true);
 
     const address = heap.allocate_object(TAG_ENVIRONMENT_entry, 1, 2);
     heap.set_child(address, 0, key.reference().address);
     heap.set_child(address, 1, value.reference().address);
 
-    heap.set_cannnot_be_freed(key.address, false);
-    heap.set_cannnot_be_freed(value.address, false);
+    key.set_cannnot_be_freed(false);
+    value.set_cannnot_be_freed(false);
 
     return address;
   }
