@@ -292,7 +292,6 @@ function peg$parse(input, options) {
   var peg$r6 = /^[!+\-]/;
   var peg$r7 = /^[%*\/]/;
   var peg$r8 = /^[+\-]/;
-  var peg$r9 = /^[ \t]/;
 
   var peg$e0 = peg$otherExpectation("whitespace");
   var peg$e1 = peg$classExpectation([["\t", "\n"], " "], false, false);
@@ -372,12 +371,11 @@ function peg$parse(input, options) {
   var peg$e75 = peg$otherExpectation("return");
   var peg$e76 = peg$otherExpectation("postfix");
   var peg$e77 = peg$literalExpectation(";", false);
-  var peg$e78 = peg$classExpectation([" ", "\t"], false, false);
-  var peg$e79 = peg$otherExpectation("if");
-  var peg$e80 = peg$otherExpectation("statement");
-  var peg$e81 = peg$otherExpectation("for");
-  var peg$e82 = peg$otherExpectation("break");
-  var peg$e83 = peg$otherExpectation("continue");
+  var peg$e78 = peg$otherExpectation("if");
+  var peg$e79 = peg$otherExpectation("statement");
+  var peg$e80 = peg$otherExpectation("for");
+  var peg$e81 = peg$otherExpectation("break");
+  var peg$e82 = peg$otherExpectation("continue");
 
   var peg$f0 = function() { return makeLiteral("int32", parseInt(text(), 10)); };
   var peg$f1 = function() { return makeLiteral("float32", parseFloat(text(), 10)); };
@@ -4256,35 +4254,11 @@ function peg$parse(input, options) {
       s1 = peg$parse__();
       s2 = peg$parseStatement();
       if (s2 !== peg$FAILED) {
-        s3 = [];
-        s4 = input.charAt(peg$currPos);
-        if (peg$r9.test(s4)) {
-          peg$currPos++;
-        } else {
-          s4 = peg$FAILED;
-          if (peg$silentFails === 0) { peg$fail(peg$e78); }
-        }
-        while (s4 !== peg$FAILED) {
-          s3.push(s4);
-          s4 = input.charAt(peg$currPos);
-          if (peg$r9.test(s4)) {
-            peg$currPos++;
-          } else {
-            s4 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$e78); }
-          }
-        }
-        s4 = peg$parseLineTerminator();
+        s3 = peg$parse__();
+        s4 = peg$parseStatementList();
         if (s4 !== peg$FAILED) {
-          s5 = peg$parse__();
-          s6 = peg$parseStatementList();
-          if (s6 !== peg$FAILED) {
-            peg$savedPos = s0;
-            s0 = peg$f79(s2, s6);
-          } else {
-            peg$currPos = s0;
-            s0 = peg$FAILED;
-          }
+          peg$savedPos = s0;
+          s0 = peg$f79(s2, s4);
         } else {
           peg$currPos = s0;
           s0 = peg$FAILED;
@@ -4553,7 +4527,7 @@ function peg$parse(input, options) {
     peg$silentFails--;
     if (s0 === peg$FAILED) {
       s1 = peg$FAILED;
-      if (peg$silentFails === 0) { peg$fail(peg$e79); }
+      if (peg$silentFails === 0) { peg$fail(peg$e78); }
     }
 
     return s0;
@@ -4577,7 +4551,7 @@ function peg$parse(input, options) {
     peg$silentFails--;
     if (s0 === peg$FAILED) {
       s1 = peg$FAILED;
-      if (peg$silentFails === 0) { peg$fail(peg$e80); }
+      if (peg$silentFails === 0) { peg$fail(peg$e79); }
     }
 
     return s0;
@@ -4601,7 +4575,7 @@ function peg$parse(input, options) {
     peg$silentFails--;
     if (s0 === peg$FAILED) {
       s1 = peg$FAILED;
-      if (peg$silentFails === 0) { peg$fail(peg$e80); }
+      if (peg$silentFails === 0) { peg$fail(peg$e79); }
     }
 
     return s0;
@@ -4689,7 +4663,7 @@ function peg$parse(input, options) {
     peg$silentFails--;
     if (s0 === peg$FAILED) {
       s1 = peg$FAILED;
-      if (peg$silentFails === 0) { peg$fail(peg$e81); }
+      if (peg$silentFails === 0) { peg$fail(peg$e80); }
     }
 
     return s0;
@@ -4715,7 +4689,7 @@ function peg$parse(input, options) {
     peg$silentFails--;
     if (s0 === peg$FAILED) {
       s1 = peg$FAILED;
-      if (peg$silentFails === 0) { peg$fail(peg$e82); }
+      if (peg$silentFails === 0) { peg$fail(peg$e81); }
     }
 
     return s0;
@@ -4741,7 +4715,7 @@ function peg$parse(input, options) {
     peg$silentFails--;
     if (s0 === peg$FAILED) {
       s1 = peg$FAILED;
-      if (peg$silentFails === 0) { peg$fail(peg$e83); }
+      if (peg$silentFails === 0) { peg$fail(peg$e82); }
     }
 
     return s0;
