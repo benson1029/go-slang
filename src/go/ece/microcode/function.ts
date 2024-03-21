@@ -14,7 +14,7 @@ import { ControlRestoreEnvI } from '../../heap/types/control/restore_env_i';
 
 function evaluate_function(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
     const cmd_object = auto_cast(heap, cmd) as ControlFunction;
-    const function_object = ComplexFunction.allocate(heap, cmd_object.address, E.address);
+    const function_object = ComplexFunction.allocate(heap, cmd_object.address, E.get_frame().address);
     S.push(function_object);
 }
 
