@@ -325,7 +325,7 @@ PostfixStatement "postfix"
 
 StatementList
     = __ stmt:Statement __ ";" __ stmts:StatementList { return { tag: "sequence", body: [stmt].concat(stmts.body) }; }
-    / __ stmt:Statement [ \t]* LineTerminator __ stmts:StatementList { return { tag: "sequence", body: [stmt].concat(stmts.body) }; }
+    / __ stmt:Statement __ stmts:StatementList { return { tag: "sequence", body: [stmt].concat(stmts.body) }; }
     / __ stmt:Statement __ ";" { return { tag: "sequence", body: [stmt] }; }
     / __ stmt:Statement __ { return { tag: "sequence", body: [stmt] }; }
     / __ { return { tag: "sequence", body: [] }; }
