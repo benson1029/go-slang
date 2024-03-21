@@ -10,6 +10,7 @@ const TAG_COMPLEX_array = 0x4001; // 0100 0000 0000 0001
 const TAG_COMPLEX_string = 0x4003; // 0100 0000 0000 0011
 const TAG_COMPLEX_linked_list = 0x4004; // 0100 0000 0000 0100
 const TAG_COMPLEX_pointer = 0x4006; // 0100 0000 0000 0110
+const TAG_COMPLEX_function = 0x4007; // 0100 0000 0000 0111
 
 const TAG_CONTROL_pop_i = 0x8001; // 1000 0000 0000 0001
 const TAG_CONTROL_exit_scope_i = 0x8002; // 1000 0000 0000 0010
@@ -107,6 +108,7 @@ export {
   TAG_COMPLEX_string,
   TAG_COMPLEX_linked_list,
   TAG_COMPLEX_pointer,
+  TAG_COMPLEX_function,
   TAG_CONTROL_name,
   TAG_CONTROL_literal,
   TAG_CONTROL_var,

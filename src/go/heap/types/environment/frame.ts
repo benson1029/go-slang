@@ -3,7 +3,7 @@
  * Fields    : number of children
  * Children  :
  * - parent frame (ENVIRONMENT_frame)
- * - hash table of entries for fast lookup (ENVIRONMENT_hash_table)
+ * - hash table of entries for fast lookup_entry (ENVIRONMENT_hash_table)
  * - hash table of all entries, including parent frames, for caching (ENVIRONMENT_hash_table)
  */
 
@@ -72,7 +72,7 @@ class EnvironmentFrame extends HeapObject {
    * @param key address of the variable name (COMPLEX_string)
    * @returns address of the environment entry
    */
-  private lookup(key_address: number): EnvironmentEntry {
+  public lookup_entry(key_address: number): EnvironmentEntry {
     { // try to find the variable in the current frame
       const entry = this.lookup_current_frame(key_address);
       if (!entry.is_nil()) {
@@ -93,9 +93,22 @@ class EnvironmentFrame extends HeapObject {
     return new EnvironmentEntry(this.heap, PrimitiveNil.allocate());
   }
 
+  public insert_entry(new_entry: EnvironmentEntry): EnvironmentEntry {
+    // Insert to the current scope lookup_entry hash table
+    this.set_cannnot_be_freed(true);
+
+    if (this.get_lookup_hash_table_address().is_nil()) {
+      this.set_child(CUR_HASH_TABLE, EnvironmentHashTable.allocate(this.heap));
+    }
+    this.get_lookup_hash_table_address().insert_new_variable(new_entry.address);
+
+    this.set_cannnot_be_freed(false);
+    return new_entry;
+  }
+
   /**
    * Modifies the environment frame by adding a new entry (variable name).
-   * 
+   *
    * @param key_address address of the variable name (COMPLEX_string)
    * @returns address of the environment entry
    */
@@ -106,16 +119,12 @@ class EnvironmentFrame extends HeapObject {
     }
 
     this.set_cannnot_be_freed(true);
-    const new_entry = EnvironmentEntry.allocate(this.heap, key_address, PrimitiveNil.allocate());
-
-    // Insert to the current scope lookup hash table
-    if (this.get_lookup_hash_table_address().is_nil()) {
-      this.set_child(CUR_HASH_TABLE, EnvironmentHashTable.allocate(this.heap));
-    }
-    this.get_lookup_hash_table_address().insert_new_variable(new_entry);
-
+    const new_entry_address = EnvironmentEntry.allocate(this.heap, key_address, PrimitiveNil.allocate());
+    const new_entry = new EnvironmentEntry(this.heap, new_entry_address);
     this.set_cannnot_be_freed(false);
-    return new EnvironmentEntry(this.heap, new_entry);
+
+    this.insert_entry(new_entry);
+    return new_entry;
   }
 
   /**
@@ -124,7 +133,7 @@ class EnvironmentFrame extends HeapObject {
    * @param value_address address of the value (any)
    */
   public set_variable_value_address(key_address: number, value_address: number): void {
-    const entry = this.lookup(key_address);
+    const entry = this.lookup_entry(key_address);
     if (entry.is_nil()) {
       throw new Error("Variable does not exist in current scope.");
     }
@@ -137,7 +146,7 @@ class EnvironmentFrame extends HeapObject {
    * @returns address of the value (any)
    */
   public get_variable_value_address(key_address: number): HeapObject {
-    const entry = this.lookup(key_address);
+    const entry = this.lookup_entry(key_address);
     if (entry.is_nil()) {
       throw new Error("Variable does not exist in current scope.");
     }
