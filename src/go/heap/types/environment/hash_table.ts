@@ -1,17 +1,17 @@
 /**
  * ENVIRONMENT_hash_table
- * Fields    : 
+ * Fields    :
  * - number of children
  * - number of inserted elements
  * Children  :
  * - address of underlying table (COMPLEX_array)
- * 
+ *
  * The hash table is on (string, any) pairs.
  * We can represent this with an ENVIRONMENT_frame object for tha pairs.
- * 
+ *
  * We use an open addressing scheme with Robin Hood linear probing.
  * When load factor exceeds 0.6, we rehash the table with twice the size.
- * 
+ *
  * Based on https://github.com/TheNumbat/hashtables/blob/main/code/robin_hood_with_deletion.h.
  */
 
@@ -19,6 +19,7 @@ import { Heap } from "../../heap";
 import { ComplexArray } from "../complex/array";
 import { ComplexString } from "../complex/string";
 import { HeapObject } from "../objects";
+import { PrimitiveNil } from "../primitive/nil";
 import { TAG_ENVIRONMENT_hash_table } from "../tags";
 import { EnvironmentEntry } from "./entry";
 
@@ -27,18 +28,34 @@ const INITIAL_CAPACITY = 8;
 
 class EnvironmentHashTable extends HeapObject {
   private increment_table_size(): void {
+    if (this.get_tag() !== TAG_ENVIRONMENT_hash_table) {
+      throw new Error("EnvironmentHashTable.increment_table_size: Invalid tag");
+    }
     this.set_field(1, this.get_table_size() + 1);
+    if (this.get_table_size() > this.get_table_capacity()) {
+      throw new Error("EnvironmentHashTable.increment_table_size: Invalid size");
+    }
   }
 
   private should_grow(): boolean {
+    if (this.get_tag() !== TAG_ENVIRONMENT_hash_table) {
+      throw new Error("EnvironmentHashTable.should_grow: Invalid tag");
+    }
     return this.get_table_size() >= LOAD_FACTOR * this.get_table_capacity();
   }
 
-  private fast_mod(hash: number): number {
+  private to_index(hash: number): number {
+    if (this.get_tag() !== TAG_ENVIRONMENT_hash_table) {
+      throw new Error("EnvironmentHashTable.to_index: Invalid tag");
+    }
     return hash & (this.get_table_capacity() - 1);
   }
 
   private rehash(new_capacity: number): void {
+    if (this.get_tag() !== TAG_ENVIRONMENT_hash_table) {
+      throw new Error("EnvironmentHashTable.rehash: Invalid tag");
+    }
+
     this.set_cannnot_be_freed(true);
 
     const old_table = this.get_table_address().reference() as ComplexArray;
@@ -64,8 +81,17 @@ class EnvironmentHashTable extends HeapObject {
     old_table.free();
   }
 
-  // Returns nil if the key is not found.
+  /**
+   * Find the index of the entry in the table.
+   *
+   * @param variable_name_address
+   * @returns index of the entry in the table, or null if not found.
+   */
   private find_internal(variable_name_address: number): number | null {
+    if (this.get_tag() !== TAG_ENVIRONMENT_hash_table) {
+      throw new Error("EnvironmentHashTable.find_internal: Invalid tag");
+    }
+
     const table = this.get_table_address();
     if (table.is_nil()) {
       return null;
@@ -75,7 +101,7 @@ class EnvironmentHashTable extends HeapObject {
     const str = variable_name.get_string();
 
     let dist = 0;
-    let index = this.fast_mod(variable_name.get_hash());
+    let index = this.to_index(variable_name.get_hash());
 
     while (true) {
       const current_entry = table.get_value_address(index) as EnvironmentEntry;
@@ -87,25 +113,36 @@ class EnvironmentHashTable extends HeapObject {
         return index;
       }
 
-      const desired = this.fast_mod(current_entry.get_key_address().get_hash());
-      const current_dist = this.fast_mod(index + this.get_table_capacity() - desired);
+      const desired = this.to_index(current_entry.get_key_address().get_hash());
+      const current_dist = this.to_index(index + this.get_table_capacity() - desired);
 
       if (current_dist < dist) {
         return null;
       }
 
       dist++;
-      index = this.fast_mod(index + 1);
+      index = this.to_index(index + 1);
     }
   }
 
-  // Guarantee: there is no entry with the same key in the table.
+  /**
+   * Insert a new entry to the table.
+   * Guaranteed: there is no entry with the same key in the table.
+   * Guaranteed: the table has enough capacity.
+   * Important: this method will call reference() on the new_entry.
+   *
+   * @param new_entry
+   */
   private insert_internal(new_entry: EnvironmentEntry): void {
+    if (this.get_tag() !== TAG_ENVIRONMENT_hash_table) {
+      throw new Error("EnvironmentHashTable.insert_internal: Invalid tag");
+    }
+
     this.increment_table_size();
     const table = this.get_table_address();
 
     let dist = 0;
-    let index = this.fast_mod(new_entry.get_key_address().get_hash());
+    let index = this.to_index(new_entry.get_key_address().get_hash());
     while (true) {
       const current_entry = table.get_value_address(index) as EnvironmentEntry;
       if (current_entry.is_nil()) {
@@ -113,8 +150,8 @@ class EnvironmentHashTable extends HeapObject {
         return;
       }
 
-      const desired = this.fast_mod(current_entry.get_key_address().get_hash());
-      const current_dist = this.fast_mod(index + this.get_table_capacity() - desired);
+      const desired = this.to_index(current_entry.get_key_address().get_hash());
+      const current_dist = this.to_index(index + this.get_table_capacity() - desired);
 
       if (current_dist < dist) {
         const temp = current_entry.reference() as EnvironmentEntry;
@@ -124,23 +161,35 @@ class EnvironmentHashTable extends HeapObject {
       }
 
       dist++;
-      index = this.fast_mod(index + 1);
+      index = this.to_index(index + 1);
     }
   }
 
   private contains(variable_name_address: number): boolean {
+    if (this.get_tag() !== TAG_ENVIRONMENT_hash_table) {
+      throw new Error("EnvironmentHashTable.contains: Invalid tag");
+    }
     return this.find_internal(variable_name_address) !== null;
   }
 
   private get_table_address(): ComplexArray {
+    if (this.get_tag() !== TAG_ENVIRONMENT_hash_table) {
+      throw new Error("EnvironmentHashTable.get_table_address: Invalid tag");
+    }
     return new ComplexArray(this.heap, this.get_child(0));
   }
 
   private get_table_size(): number {
+    if (this.get_tag() !== TAG_ENVIRONMENT_hash_table) {
+      throw new Error("EnvironmentHashTable.get_table_size: Invalid tag");
+    }
     return this.get_field(1);
   }
 
   private get_table_capacity(): number {
+    if (this.get_tag() !== TAG_ENVIRONMENT_hash_table) {
+      throw new Error("EnvironmentHashTable.get_table_capacity: Invalid tag");
+    }
     const table = this.get_table_address();
     if (table.is_nil()) {
       return 0;
@@ -148,14 +197,21 @@ class EnvironmentHashTable extends HeapObject {
     return table.get_length();
   }
 
+  /**
+   * Important: this method will call reference() on the entry.
+   * @param entry_address
+   */
   public insert_new_variable(entry_address: number): void {
+    if (this.get_tag() !== TAG_ENVIRONMENT_hash_table) {
+      throw new Error("EnvironmentHashTable.insert_new_variable: Invalid tag");
+    }
+
     const entry = new EnvironmentEntry(this.heap, entry_address);
     if (this.contains(entry.get_key_address().address)) {
       throw new Error("Variable already exists in current scope.");
     }
 
-    const table = this.get_table_address();
-    if (table.is_nil()) {
+    if (this.get_table_address().is_nil()) {
       this.set_cannnot_be_freed(true);
       this.set_child(0, ComplexArray.allocate(this.heap, INITIAL_CAPACITY));
       this.set_cannnot_be_freed(false);
@@ -167,16 +223,26 @@ class EnvironmentHashTable extends HeapObject {
   }
 
   public find_variable(variable_name_address: number): EnvironmentEntry {
-    const index = this.find_internal(variable_name_address);
-    if (index === null) {
-      return new EnvironmentEntry(this.heap, 0);
+    if (this.get_tag() !== TAG_ENVIRONMENT_hash_table) {
+      throw new Error("EnvironmentHashTable.find_variable: Invalid tag");
     }
-    return new EnvironmentEntry(this.heap, this.get_table_address().get_value_address(index).address);
+    const index = this.find_internal(variable_name_address);
+    if (index == null) {
+      return EnvironmentEntry.allocate_nil(this.heap);
+    }
+    return this.get_table_address().get_value_address(index) as EnvironmentEntry;
   }
 
+  /**
+   * Important: this method will call reference() on the entry.
+   * @param entry
+   */
   public force_insert(entry: EnvironmentEntry): void {
+    if (this.get_tag() !== TAG_ENVIRONMENT_hash_table) {
+      throw new Error("EnvironmentHashTable.force_insert: Invalid tag");
+    }
     const index = this.find_internal(entry.get_key_address().address);
-    if (index === null) {
+    if (index == null) {
       this.insert_new_variable(entry.address);
     } else {
       this.get_table_address().set_value_address(index, entry);
@@ -186,7 +252,7 @@ class EnvironmentHashTable extends HeapObject {
   public static allocate(heap: Heap): number {
     const address = heap.allocate_object(TAG_ENVIRONMENT_hash_table, 2, 1);
     heap.set_field(address, 1, 0);
-    heap.set_child(address, 0, 0);
+    heap.set_child(address, 0, PrimitiveNil.allocate());
     return address;
   }
 

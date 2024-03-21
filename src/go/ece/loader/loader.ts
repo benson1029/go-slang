@@ -13,6 +13,11 @@ function load(program: any, C: ContextControl, S: ContextStash, E: ContextEnv, h
     preprocess_program(program, imports);
     sort_global_declarations(program, imports);
 
+    // // Stub for loading the main function directly:
+    // let main = program.body.filter((x: any) => x.tag === "function" && x.name === "main")[0];
+    // const _main_addr = heap.allocate_any(main.body.body)
+    // C.push(_main_addr)
+
     const main_addr = heap.allocate_any({ tag: "call", name: "main", args: [] });
     C.push(main_addr);
     for (let i = program.body.length - 1; i >= 0; i--) {
