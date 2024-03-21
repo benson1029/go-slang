@@ -28,22 +28,26 @@
  * strongly connected component, we place the function declarations before
  * the variable declarations.
  */
-function sort_global_declarations(program: any): void {
+function sort_global_declarations(program: any, imports: any[]): void {
     // Compute the edges and back edges of the dependency graph.
     let edges: { [key: string]: string[] } = {};
     let back_edges: { [key: string]: string[] } = {};
 
     for (let stmt of program.body) {
         edges[stmt.name] = [];
+        back_edges[stmt.name] = [];
     }
 
     for (let stmt of program.body) {
-        back_edges[stmt.name] = stmt.captures.map((ref: any) => ref.name);
         for (let ref of stmt.captures) {
+            if (imports.filter((imp) => imp.name === ref.name).length > 0) {
+                continue;
+            }
             if (ref.name === stmt.name && stmt.tag === 'var') {
                 throw new Error(`cyclic dependency in global declarations: ` +
                     `${stmt.name} refers to itself`);
             }
+            back_edges[stmt.name].push(ref.name);
             edges[ref.name].push(stmt.name);
         }
     }

@@ -11,6 +11,7 @@ const TAG_COMPLEX_string = 0x4003; // 0100 0000 0000 0011
 const TAG_COMPLEX_linked_list = 0x4004; // 0100 0000 0000 0100
 const TAG_COMPLEX_pointer = 0x4006; // 0100 0000 0000 0110
 const TAG_COMPLEX_function = 0x4007; // 0100 0000 0000 0111
+const TAG_COMPLEX_builtin = 0x4008; // 0100 0000 0000 1000
 
 const TAG_CONTROL_pop_i = 0x8001; // 1000 0000 0000 0001
 const TAG_CONTROL_exit_scope_i = 0x8002; // 1000 0000 0000 0010
@@ -70,6 +71,7 @@ const TAGSTRING_COMPLEX_string = "string";
 const TAGSTRING_COMPLEX_linked_list = "linked_list";
 const TAGSTRING_COMPLEX_pointer = "pointer";
 const TAGSTRING_COMPLEX_hash_table = "hash_table";
+const TAGSTRING_COMPLEX_builtin = "builtin";
 
 const TAGSTRING_CONTROL_name = "name";
 const TAGSTRING_CONTROL_literal = "literal";
@@ -115,6 +117,7 @@ export {
   TAG_COMPLEX_linked_list,
   TAG_COMPLEX_pointer,
   TAG_COMPLEX_function,
+  TAG_COMPLEX_builtin,
   TAG_CONTROL_name,
   TAG_CONTROL_literal,
   TAG_CONTROL_var,
@@ -160,6 +163,7 @@ export {
   TAGSTRING_COMPLEX_linked_list,
   TAGSTRING_COMPLEX_pointer,
   TAGSTRING_COMPLEX_hash_table,
+  TAGSTRING_COMPLEX_builtin,
   TAGSTRING_CONTROL_name,
   TAGSTRING_CONTROL_literal,
   TAGSTRING_CONTROL_var,

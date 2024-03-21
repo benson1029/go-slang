@@ -36,6 +36,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { BuddyAllocator, WORD_SIZE } from "./alloc";
 import { auto_cast } from "./types/auto_cast";
+import { ComplexBuiltin } from "./types/complex/builtin";
 import { ComplexLinkedList } from "./types/complex/linked_list";
 import { ComplexPointer } from "./types/complex/pointer";
 import { ComplexString } from "./types/complex/string";
@@ -114,7 +115,8 @@ import {
     TAGSTRING_CONTROL_return,
     TAGSTRING_CONTROL_call_i,
     TAGSTRING_CONTROL_restore_env_i,
-    TAGSTRING_CONTROL_return_i
+    TAGSTRING_CONTROL_return_i,
+    TAGSTRING_COMPLEX_builtin
 } from "./types/tags";
 
 class Heap {
@@ -447,6 +449,16 @@ class Heap {
      */
     public allocate_COMPLEX_pointer(value: number): number {
         return ComplexPointer.allocate(this, value);
+    }
+
+    /**
+     * COMPLEX_builtin
+     * Fields    : number of children
+     * Children  :
+     * - 4 bytes address of the function name (COMPLEX_string)
+     */
+    public allocate_COMPLEX_builtin(obj: { tag: string, name: string }): number {
+        return ComplexBuiltin.allocate(this, obj.name);
     }
 
     /**
@@ -830,6 +842,8 @@ class Heap {
                 return this.allocate_COMPLEX_linked_list(obj);
             case TAGSTRING_COMPLEX_pointer:
                 return this.allocate_COMPLEX_pointer(obj);
+            case TAGSTRING_COMPLEX_builtin:
+                return this.allocate_COMPLEX_builtin(obj);
             case TAGSTRING_CONTROL_name:
                 return this.allocate_CONTROL_name(obj);
             case TAGSTRING_CONTROL_literal:

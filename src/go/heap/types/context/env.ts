@@ -14,11 +14,17 @@ import { TAG_CONTEXT_env } from "../tags";
  * The environment of the ECE. The content is stored inside the heap.
  */
 class ContextEnv extends HeapObject {
-  public create_global_environment(imports: Array<string>) {
+  public create_global_environment(imports: { name: string; value: any }[]): void {
     if (this.get_tag() !== TAG_CONTEXT_env) {
       throw new Error("ContextEnv.create_global_environment: Invalid tag");
     }
     this.push_frame();
+    for (const imp of imports) {
+      const name = this.heap.allocate_COMPLEX_string(imp.name);
+      const value = this.heap.allocate_any(imp.value);
+      this.get_frame().insert_new_variable(name);
+      this.get_frame().set_variable_value_address(name, value);
+    }
   }
 
   /**
