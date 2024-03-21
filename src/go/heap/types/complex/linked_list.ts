@@ -70,10 +70,6 @@ class ComplexLinkedList extends HeapObject {
   }
 
   public static allocate_from_array(heap: Heap, values: any[]): number {
-    if (values.length === 0) {
-      return PrimitiveNil.allocate();
-    }
-
     let head = PrimitiveNil.allocate();
     for (let i = values.length - 1; i >= 0; i--) {
       const value_address = heap.allocate_any(values[i]);

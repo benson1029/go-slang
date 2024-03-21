@@ -1,8 +1,10 @@
 import { Heap } from "../heap";
-import { PrimitiveBool } from "./primitive/bool";
-import { PrimitiveFloat32 } from "./primitive/float32";
-import { PrimitiveInt32 } from "./primitive/int32";
-import { PrimitiveRune } from "./primitive/rune";
+import {
+  TAGSTRING_PRIMITIVE_bool,
+  TAGSTRING_PRIMITIVE_float32,
+  TAGSTRING_PRIMITIVE_int32,
+  TAGSTRING_PRIMITIVE_rune,
+} from "./tags";
 
 function default_value(heap: Heap, type: string, value: any) {
   if (value != null) {
@@ -10,14 +12,14 @@ function default_value(heap: Heap, type: string, value: any) {
   }
 
   switch (type) {
-    case "int32":
-      return PrimitiveInt32.allocate(heap, 0);
-    case "float32":
-      return PrimitiveFloat32.allocate(heap, 0);
-    case "rune":
-      return PrimitiveRune.allocate(heap, 0);
-    case "bool":
-      return PrimitiveBool.allocate(heap, false);
+    case TAGSTRING_PRIMITIVE_int32:
+      return { tag: "literal", type: type, value: 0 };
+    case TAGSTRING_PRIMITIVE_float32:
+      return { tag: "literal", type: type, value: 0.0 };
+    case TAGSTRING_PRIMITIVE_rune:
+      return { tag: "literal", type: type, value: 0 };
+    case TAGSTRING_PRIMITIVE_bool:
+      return { tag: "literal", type: type, value: false };
     default:
       throw new Error(`Unknown type: ${type}`);
   }

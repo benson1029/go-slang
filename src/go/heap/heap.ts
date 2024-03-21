@@ -120,11 +120,6 @@ import {
 class Heap {
     private alloc: BuddyAllocator;
 
-    public check_all_free(): boolean {
-        return this.alloc.check_all_free(
-            (address: number) => auto_cast(this, address).stringify()
-        );
-    }
 
     public allocate_object(tag: number, fields: number, children: number): number {
         const words = 2 + fields + children;
@@ -255,6 +250,12 @@ class Heap {
         //     console.log("Warning: Setting cannnot_be_freed to the same value " + auto_cast(this, address).stringify());
         // }
         this.alloc.set_cannnot_be_freed(address, value);
+    }
+
+    public check_all_free(): boolean {
+        return this.alloc.check_all_free(
+            (address: number) => auto_cast(this, address).stringify() + " reference count: " + this.get_reference_count(address)
+        );
     }
 
     public free_object(address: number): void {

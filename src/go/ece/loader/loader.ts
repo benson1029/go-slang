@@ -15,8 +15,9 @@ function load(program: any, C: ContextControl, S: ContextStash, E: ContextEnv, h
 
     // // Stub for loading the main function directly:
     // let main = program.body.filter((x: any) => x.tag === "function" && x.name === "main")[0];
-    // const _main_addr = heap.allocate_any(main.body.body)
-    // C.push(_main_addr)
+    // const _main_addr = heap.allocate_any(main.body.body);
+    // C.push(_main_addr);
+    // heap.free_object(_main_addr);
 
     const main_addr = heap.allocate_any({ tag: "call", name: "main", args: [] });
     C.push(main_addr);

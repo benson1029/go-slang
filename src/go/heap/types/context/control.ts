@@ -25,6 +25,7 @@ class ContextControl extends HeapObject {
   /**
    * Pops the top element of the control stack.
    * Important: This method returns a reference() to the value.
+   * Important: This method calls free() on the top element of the control stack.
    *
    * @returns The top element of the control stack.
    */
@@ -44,7 +45,8 @@ class ContextControl extends HeapObject {
 
   /**
    * Pushes a new element onto the control stack.
-   *
+   * Important: This method calls reference() on the value.
+   * 
    * @param cmd The element to push onto the control stack.
    */
   public push(cmd: number): void {

@@ -12,10 +12,11 @@ import { ContextStash } from '../../heap/types/context/stash';
 
 function evaluate_var(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
     const var_object = new ControlVar(heap, cmd);
-    const expression = var_object.get_expression().reference();
+    const expression = var_object.get_expression();
     const var_i_addr = heap.allocate_any({ tag: "var_i", name: var_object.get_name_address() });
     C.push(var_i_addr);
     C.push(expression.address);
+    heap.free_object(var_i_addr);
 }
 
 function evaluate_var_i(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
@@ -25,21 +26,23 @@ function evaluate_var_i(cmd: number, heap: Heap, C: ContextControl, S: ContextSt
     const value = auto_cast(heap, S.pop()) as unknown as Primitive;
     E.get_frame().set_variable_value_address(name.address, value.address);
     S.push(value.address);
+    value.free();
 }
 
 function evaluate_name(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
     const name_object = new ControlName(heap, cmd);
     const name = name_object.get_name_address();
-    const value = E.get_frame().get_variable_value_address(name.address).reference();
+    const value = E.get_frame().get_variable_value_address(name.address);
     S.push(value.address);
 }
 
 function evaluate_assign(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
     const assign_object = new ControlAssign(heap, cmd);
-    const expression = assign_object.get_expression().reference();
+    const expression = assign_object.get_expression();
     const assign_i_addr = heap.allocate_any({ tag: "assign_i", name: assign_object.get_name_address() });
     C.push(assign_i_addr);
     C.push(expression.address);
+    heap.free_object(assign_i_addr);
 }
 
 function evaluate_assign_i(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
@@ -48,6 +51,7 @@ function evaluate_assign_i(cmd: number, heap: Heap, C: ContextControl, S: Contex
     const value = auto_cast(heap, S.pop()) as unknown as Primitive;
     E.get_frame().set_variable_value_address(name.address, value.address);
     S.push(value.address);
+    value.free();
 }
 
 export {

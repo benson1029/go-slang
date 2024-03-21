@@ -17,7 +17,6 @@ import { HeapObject } from '../../heap/types/objects';
 
 function evaluate_literal(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
     const cmd_object = new HeapObject(heap, cmd);
-    cmd_object.reference();
     S.push(cmd_object.address);
 }
 

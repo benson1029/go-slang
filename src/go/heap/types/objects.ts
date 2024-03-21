@@ -62,7 +62,7 @@ class HeapObject {
 
   public copy(): HeapObject {
     const copy_address = this.heap.copy_object(this.address);
-    return new HeapObject(this.heap, copy_address);
+    return auto_cast(this.heap, copy_address);
   }
 
   public stringify(): string {

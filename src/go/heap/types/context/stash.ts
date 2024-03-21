@@ -25,6 +25,7 @@ class ContextStash extends HeapObject {
 
   /**
    * Pushes a new value onto the stash.
+   * Important: This method calls reference() on the value.
    *
    * @param value The address to push onto the stash.
    */
@@ -38,6 +39,7 @@ class ContextStash extends HeapObject {
   /**
    * Pops the top element of the stash.
    * Important: This method returns a reference() to the value.
+   * Important: This method calls free() on the top element of the stash.
    *
    * @returns The top element of the stash.
    */
