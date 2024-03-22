@@ -24,6 +24,8 @@ class ContextEnv extends HeapObject {
       const value = this.heap.allocate_any(imp.value);
       this.get_frame().insert_new_variable(name);
       this.get_frame().set_variable_value_address(name, value);
+      this.heap.free_object(name);
+      this.heap.free_object(value);
     }
   }
 

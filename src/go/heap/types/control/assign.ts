@@ -27,7 +27,7 @@ class ControlAssign extends HeapObject {
     return this.get_child(1);
   }
 
-  public get_expression(): any {
+  public get_expression(): HeapObject {
     return auto_cast(this.heap, this.get_expression_address());
   }
 

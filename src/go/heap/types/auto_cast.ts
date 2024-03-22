@@ -187,7 +187,7 @@ function auto_cast(heap: Heap, address: number): HeapObject {
     case TAG_CONTEXT_env:
       return new ContextEnv(heap, address);
     default:
-      throw new Error("Unknown tag " + tag.toString());
+      throw new Error("Unknown tag " + tag.toString() + " at address " + address.toString());
   }
 }
 

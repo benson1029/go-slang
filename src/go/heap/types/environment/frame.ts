@@ -191,7 +191,7 @@ class EnvironmentFrame extends HeapObject {
     }
     const entry = this.lookup_entry(key_address);
     if (entry.is_nil()) {
-      throw new Error("Variable does not exist in current scope.");
+      throw new Error("Variable " + auto_cast(this.heap, key_address).stringify() + " does not exist in current scope.");
     }
     entry.set_value_address(value_address);
   }
@@ -207,7 +207,7 @@ class EnvironmentFrame extends HeapObject {
     }
     const entry = this.lookup_entry(key_address);
     if (entry.is_nil()) {
-      throw new Error("Variable does not exist in current scope.");
+      throw new Error("Variable " + auto_cast(this.heap, key_address).stringify() + " does not exist in current scope.");
     }
     return entry.get_value_address();
   }
@@ -255,7 +255,7 @@ class EnvironmentFrame extends HeapObject {
     result += this.address.toString() + " (environment frame): ";
     result += "parent: " + this.get_parent_frame_address().stringify();
     result += ", current: " + this.get_lookup_hash_table_address().stringify();
-    result += ", cache: " + this.get_cache_hash_table_address().stringify();
+    // result += ", cache: " + this.get_cache_hash_table_address().stringify();
     return result;
   }
 }

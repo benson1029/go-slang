@@ -76,14 +76,14 @@ function evaluate_call_i(cmd: number, heap: Heap, C: ContextControl, S: ContextS
     }
 
     // Push restore environment command
-    const E_copy = E.get_frame().reference();
-    const restore_env_cmd = heap.allocate_any({ tag: "restore-env_i", frame: E_copy });
+    const restore_env_cmd = heap.allocate_any({ tag: "restore-env_i", frame: E.get_frame() });
     C.push(restore_env_cmd);
     heap.free_object(restore_env_cmd);
 
     // Push dummy return command
     const return_cmd = heap.allocate_any({ tag: "return", value: 0 });
     C.push(return_cmd);
+    heap.free_object(return_cmd);
 
     // Set the environment
     E.set_frame(function_object.get_environment_address());

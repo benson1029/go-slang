@@ -78,6 +78,7 @@ class ComplexLinkedList extends HeapObject {
       const value_address = heap.allocate_any(values[i]);
       const new_head = ComplexLinkedList.allocate(heap, value_address, head);
       heap.free_object(value_address);
+      heap.free_object(head);
       head = new_head;
     }
 

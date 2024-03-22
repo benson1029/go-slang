@@ -83,17 +83,13 @@ class ControlFunction extends HeapObject {
       name === null
         ? PrimitiveNil.allocate()
         : ComplexString.allocate(heap, name);
-    heap.set_cannnot_be_freed(name_address, true);
+    heap.set_child(address, 0, name_address);
 
     const body_address = heap.allocate_any(body);
-    heap.set_cannnot_be_freed(body_address, true);
-
-    heap.set_child(address, 0, name_address);
     heap.set_child(address, 1, body_address);
 
     for (let i = 0; i < param_names.length; i++) {
       const param_name_address = ComplexString.allocate(heap, param_names[i]);
-      heap.set_cannnot_be_freed(param_name_address, true);
       heap.set_child(address, i + 2, param_name_address);
     }
 
@@ -102,24 +98,11 @@ class ControlFunction extends HeapObject {
         heap,
         capture_names[i]
       );
-      heap.set_cannnot_be_freed(capture_name_address, true);
       heap.set_child(address, i + 2 + param_names.length, capture_name_address);
     }
 
     // Unmark cannot-be-free
     heap.set_cannnot_be_freed(address, false);
-    heap.set_cannnot_be_freed(name_address, false);
-    for (let i = 0; i < param_names.length; i++) {
-      const param_name_address = heap.get_child(address, i + 2);
-      heap.set_cannnot_be_freed(param_name_address, false);
-    }
-    for (let i = 0; i < capture_names.length; i++) {
-      const capture_name_address = heap.get_child(
-        address,
-        i + 2 + param_names.length
-      );
-      heap.set_cannnot_be_freed(capture_name_address, false);
-    }
 
     return address;
   }

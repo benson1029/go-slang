@@ -222,13 +222,13 @@ const microcode_preprocess = {
     comp: {
       tag: string;
       condition: any;
-      if_body: any;
+      then_body: any;
       else_body: any;
     },
     scope: Scope
   ) => {
     preprocess(comp.condition, scope);
-    preprocess(comp.if_body, scope);
+    preprocess(comp.then_body, scope);
     preprocess(comp.else_body, scope);
   },
 

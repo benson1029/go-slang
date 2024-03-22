@@ -15,6 +15,7 @@ function evaluate_for(cmd: number, heap: Heap, C: ContextControl, S: ContextStas
     E.push_frame();
     const exit_scope_cmd = heap.allocate_any({ tag: "exit-scope_i" });
     C.push(exit_scope_cmd);
+    heap.free_object(exit_scope_cmd);
 
     // Push for loop body
     const for_i_cmd = heap.allocate_any({
@@ -24,32 +25,34 @@ function evaluate_for(cmd: number, heap: Heap, C: ContextControl, S: ContextStas
         body: cmd_object.get_body_address(),
     });
     C.push(for_i_cmd);
+    heap.free_object(for_i_cmd);
 
     // Push the condition
-    const condition = cmd_object.get_condition_address().reference();
+    const condition = cmd_object.get_condition_address();
     C.push(condition.address);
 
     // Evaluate the initializer
-    const init = cmd_object.get_init_address().reference();
+    const init = cmd_object.get_init_address();
     C.push(init.address);
 }
 
 function evaluate_for_i(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
     const cmd_object = new ControlForI(heap, cmd);
-    const condition = cmd_object.get_condition_address().reference();
-    const update = cmd_object.get_update_address().reference();
-    const body = cmd_object.get_body_address().reference();
+    const condition = cmd_object.get_condition_address();
+    const update = cmd_object.get_update_address();
+    const body = cmd_object.get_body_address();
 
     const condition_value = auto_cast(heap, S.pop()) as unknown as PrimitiveBool;
     if (condition_value.get_value()) {
         // Do one iteration
-        C.push(cmd_object.reference().address);
+        C.push(cmd_object.address);
         C.push(condition.address);
         C.push(update.address);
         C.push(body.address);
     } else {
         // Do nothing to terminate the loop
     }
+    condition_value.free();
 }
 
 function evaluate_break(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
@@ -61,8 +64,9 @@ function evaluate_break(cmd: number, heap: Heap, C: ContextControl, S: ContextSt
         if (top_cmd.get_tag() === TAG_CONTROL_exit_scope_i) {
             E.pop_frame();
         }
-        C.push(cmd_object.reference().address);
+        C.push(cmd_object.address);
     }
+    top_cmd.free();
 }
 
 function evaluate_continue(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
@@ -70,15 +74,16 @@ function evaluate_continue(cmd: number, heap: Heap, C: ContextControl, S: Contex
     const top_cmd = auto_cast(heap, C.pop());
     if (top_cmd.get_tag() === TAG_CONTROL_for_i) {
         const for_i_cmd = top_cmd as ControlForI;
-        C.push(for_i_cmd.reference().address);
-        C.push(for_i_cmd.get_condition_address().reference().address);
-        C.push(for_i_cmd.get_update_address().reference().address);
+        C.push(for_i_cmd.address);
+        C.push(for_i_cmd.get_condition_address().address);
+        C.push(for_i_cmd.get_update_address().address);
     } else {
         if (top_cmd.get_tag() === TAG_CONTROL_exit_scope_i) {
             E.pop_frame();
         }
-        C.push(cmd_object.reference().address);
+        C.push(cmd_object.address);
     }
+    top_cmd.free();
 }
 
 export {

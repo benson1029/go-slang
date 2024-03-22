@@ -66,10 +66,11 @@ function apply_unary_operator(operator: string, operand: Primitive): any {
 function evaluate_unary(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
     const cmd_object = new ControlUnary(heap, cmd);
     const operator = cmd_object.get_operator_address();
-    const operand = cmd_object.get_operand_address().reference();
+    const operand = cmd_object.get_operand_address();
     const unary_i_addr = heap.allocate_any({ tag: "unary_i", operator: operator });
     C.push(unary_i_addr);
     C.push(operand.address);
+    heap.free_object(unary_i_addr);
 }
 
 function evaluate_unary_i(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
@@ -79,6 +80,7 @@ function evaluate_unary_i(cmd: number, heap: Heap, C: ContextControl, S: Context
     const result = apply_unary_operator(operator, operand);
     const address = heap.allocate_any(result);
     S.push(address);
+    heap.free_object(address);
     operand.free();
 }
 
@@ -175,12 +177,13 @@ function binary_operator(operator: string, left: Primitive, right: Primitive): a
 function evaluate_binary(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
     const cmd_object = new ControlBinary(heap, cmd);
     const operator = cmd_object.get_operator_address();
-    const left = cmd_object.get_left_operand_address().reference();
-    const right = cmd_object.get_right_operand_address().reference();
+    const left = cmd_object.get_left_operand_address();
+    const right = cmd_object.get_right_operand_address();
     const binary_i_addr = heap.allocate_any({ tag: "binary_i", operator: operator });
     C.push(binary_i_addr);
     C.push(left.address);
     C.push(right.address);
+    heap.free_object(binary_i_addr);
 }
 
 function evaluate_binary_i(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
@@ -193,6 +196,7 @@ function evaluate_binary_i(cmd: number, heap: Heap, C: ContextControl, S: Contex
     S.push(address);
     left.free();
     right.free();
+    heap.free_object(address);
 }
 
 export {

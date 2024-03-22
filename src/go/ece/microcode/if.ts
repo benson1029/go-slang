@@ -9,7 +9,7 @@ import { PrimitiveBool } from '../../heap/types/primitive/bool';
 
 function evaluate_if(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
     const cmd_object = new ControlIf(heap, cmd);
-    const condition = cmd_object.get_condition_address().reference();
+    const condition = cmd_object.get_condition_address();
     const then_body = cmd_object.get_then_body_address();
     const else_body = cmd_object.get_else_body_address();
     const if_i_cmd = heap.allocate_any({
@@ -20,6 +20,7 @@ function evaluate_if(cmd: number, heap: Heap, C: ContextControl, S: ContextStash
     });
     C.push(if_i_cmd);
     C.push(condition.address);
+    heap.free_object(if_i_cmd);
 }
 
 function evaluate_if_i(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
@@ -28,10 +29,11 @@ function evaluate_if_i(cmd: number, heap: Heap, C: ContextControl, S: ContextSta
     const else_body = cmd_object.get_else_body_address();
     const condition_value = auto_cast(heap, S.pop()) as unknown as PrimitiveBool;
     if (condition_value.get_value()) {
-        C.push(then_body.reference().address);
+        C.push(then_body.address);
     } else {
-        C.push(else_body.reference().address);
+        C.push(else_body.address);
     }
+    condition_value.free();
 }
 
 export {

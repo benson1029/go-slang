@@ -66,7 +66,7 @@ class ECE {
 
     thread.free();
 
-    // console.log("Check all objects are freed:", this.heap.check_all_free());
+    console.log("Check all objects are freed:", this.heap.check_all_free());
 
     return output_buffer;
   }

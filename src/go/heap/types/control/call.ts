@@ -34,17 +34,12 @@ class ControlCall extends HeapObject {
     heap.set_child(address, 0, func_address);
     for (let i = 0; i < args.length; i++) {
       const arg_address = heap.allocate_any(args[i]);
-      heap.set_cannnot_be_freed(arg_address, true);
       heap.set_child(address, i + 1, arg_address);
     }
 
     // Unmark cannot-be-free
     heap.set_cannnot_be_freed(address, false);
     heap.set_cannnot_be_freed(func_address, false);
-    for (let i = 0; i < args.length; i++) {
-      const arg_address = heap.get_child(address, i + 1);
-      heap.set_cannnot_be_freed(arg_address, false);
-    }
 
     return address;
   }
