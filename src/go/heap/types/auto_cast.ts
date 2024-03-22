@@ -24,6 +24,8 @@ import { ControlForI } from "./control/for_i";
 import { ControlFunction } from "./control/function";
 import { ControlIf } from "./control/if";
 import { ControlIfI } from "./control/if_i";
+import { ControlLogicalI } from "./control/logical_i";
+import { ControlLogicalImmI } from "./control/logical_imm_i";
 import { ControlName } from "./control/name";
 import { ControlPopI } from "./control/pop_i";
 import { ControlPostfix } from "./control/postfix";
@@ -90,6 +92,8 @@ import {
   TAG_CONTROL_return,
   TAG_CONTROL_return_i,
   TAG_COMPLEX_builtin,
+  TAG_CONTROL_logical_i,
+  TAG_CONTROL_logical_imm_i,
 } from "./tags"
 
 
@@ -172,6 +176,10 @@ function auto_cast(heap: Heap, address: number): HeapObject {
       return new ControlReturn(heap, address);
     case TAG_CONTROL_return_i:
       return new ControlReturnI(heap, address);
+    case TAG_CONTROL_logical_i:
+      return new ControlLogicalI(heap, address);
+    case TAG_CONTROL_logical_imm_i:
+      return new ControlLogicalImmI(heap, address);
     case TAG_ENVIRONMENT_entry:
       return new EnvironmentEntry(heap, address);
     case TAG_ENVIRONMENT_frame:

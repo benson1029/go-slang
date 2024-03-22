@@ -56,6 +56,8 @@ import { ControlFunction } from "./types/control/function";
 import { ControlIf } from "./types/control/if";
 import { ControlIfI } from "./types/control/if_i";
 import { ControlLiteral } from "./types/control/literal";
+import { ControlLogicalI } from "./types/control/logical_i";
+import { ControlLogicalImmI } from "./types/control/logical_imm_i";
 import { ControlName } from "./types/control/name";
 import { ControlPopI } from "./types/control/pop_i";
 import { ControlPostfix } from "./types/control/postfix";
@@ -114,7 +116,9 @@ import {
     TAGSTRING_CONTROL_call_i,
     TAGSTRING_CONTROL_restore_env_i,
     TAGSTRING_CONTROL_return_i,
-    TAGSTRING_COMPLEX_builtin
+    TAGSTRING_COMPLEX_builtin,
+    TAGSTRING_CONTROL_logical_i,
+    TAGSTRING_CONTROL_logical_imm_i
 } from "./types/tags";
 
 class Heap {
@@ -780,6 +784,27 @@ class Heap {
     }
 
     /**
+     * CONTROL_logical_i
+     * Fields    : number of children
+     * Children  :
+     * - 4 bytes address of the operator (PRIMITIVE_string)
+     */
+    public allocate_CONTROL_logical_i(obj: { tag: string, operator: number }): number {
+        return ControlLogicalI.allocate(this, obj.operator);
+    }
+
+    /**
+     * CONTROL_logical_imm_i
+     * Fields    : number of children
+     * Children  :
+     * - 4 bytes address of the right expression (expression)
+     * - 4 bytes address of the operator (PRIMITIVE_string)
+     */
+    public allocate_CONTROL_logical_imm_i(obj: { tag: string, operator: number, right: number }): number {
+        return ControlLogicalImmI.allocate(this, obj.right, obj.operator);
+    }
+
+    /**
      * ENVIRONMENT_frame
      * Fields    : number of children
      * Children  :
@@ -883,6 +908,10 @@ class Heap {
                 return this.allocate_CONTROL_restore_env_i(obj);
             case TAGSTRING_CONTROL_return_i:
                 return this.allocate_CONTROL_return_i();
+            case TAGSTRING_CONTROL_logical_i:
+                return this.allocate_CONTROL_logical_i(obj);
+            case TAGSTRING_CONTROL_logical_imm_i:
+                return this.allocate_CONTROL_logical_imm_i(obj);
             case TAGSTRING_ENVIRONMENT_frame:
                 return this.allocate_ENVIRONMENT_frame(obj);
             default:
