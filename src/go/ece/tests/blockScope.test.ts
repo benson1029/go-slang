@@ -15,10 +15,10 @@ function checkSequence(sequence: string, hasError: boolean = false): void {
     const heapSize = 8196;
 
     if (hasError) {
-        expect(() => (new ECE(heapSize, parsed_program)).evaluate()).toThrow();
+        expect(() => (new ECE(heapSize, parsed_program)).evaluate(true)).toThrow();
     } else {
-        const result = (new ECE(heapSize, parsed_program)).evaluate();
-        expect(result).toBeDefined();
+        const result = (new ECE(heapSize, parsed_program)).evaluate(true);
+        expect(result).toBe("");
     }
 }
 

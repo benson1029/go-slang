@@ -24,7 +24,7 @@ class ECE {
     this.program = program;
   }
 
-  public evaluate() {
+  public evaluate(check_all_free: boolean = false) {
     // Initialize the control, stash and environment.
     let thread = new ContextThread(
       this.heap,
@@ -64,9 +64,21 @@ class ECE {
     //   throw new Error("ECE.evaluate: Stash not empty after program execution");
     // }
 
+    if (check_all_free) {
+      if (S.empty() === false) {
+        throw new Error("ECE.evaluate: Stash not empty after program execution");
+      }
+    }
+
     thread.free();
 
-    console.log("Check all objects are freed:", this.heap.check_all_free());
+    if (check_all_free) {
+      if (this.heap.check_all_free() === false) {
+        throw new Error("ECE.evaluate: Not all objects are freed after program execution");
+      }
+    }
+
+    //console.log("Check all objects are freed:", this.heap.check_all_free());
 
     return output_buffer;
   }
