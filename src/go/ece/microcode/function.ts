@@ -13,6 +13,7 @@ import { ControlReturnI } from '../../heap/types/control/return_i';
 import { ControlRestoreEnvI } from '../../heap/types/control/restore_env_i';
 import { evaluate_builtin } from './builtin';
 import { ComplexBuiltin } from '../../heap/types/complex/builtin';
+import { ControlCallStmt } from '../../heap/types/control/call_stmt';
 
 function evaluate_function(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
     const cmd_object = auto_cast(heap, cmd) as ControlFunction;
@@ -140,6 +141,20 @@ function evaluate_restore_env_i(cmd: number, heap: Heap, C: ContextControl, S: C
     E.set_frame(env);
 }
 
+function evaluate_call_stmt(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
+    const cmd_object = auto_cast(heap, cmd) as ControlCallStmt;
+    const body = cmd_object.get_body_address();
+    const pop_i_cmd = heap.allocate_any({ tag: "pop_i" });
+    C.push(pop_i_cmd);
+    C.push(body.address);
+    heap.free_object(pop_i_cmd);
+}
+
+function evaluate_pop_i(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
+    const obj = auto_cast(heap, S.pop());
+    obj.free();
+}
+
 export {
     evaluate_function,
     evaluate_call,
@@ -147,4 +162,6 @@ export {
     evaluate_return,
     evaluate_return_i,
     evaluate_restore_env_i,
+    evaluate_call_stmt,
+    evaluate_pop_i,
 };

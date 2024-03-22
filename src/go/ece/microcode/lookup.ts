@@ -62,6 +62,14 @@ function lookup_microcode(tag: number): Function {
             return control_function.evaluate_return_i;
         case tags.TAG_CONTROL_restore_env_i:
             return control_function.evaluate_restore_env_i;
+        case tags.TAG_CONTROL_logical_i:
+            return expression.evaluate_logical_i;
+        case tags.TAG_CONTROL_logical_imm_i:
+            return expression.evaluate_logical_imm_i;
+        case tags.TAG_CONTROL_call_stmt:
+            return control_function.evaluate_call_stmt;
+        case tags.TAG_CONTROL_pop_i:
+            return control_function.evaluate_pop_i;
         case tags.TAG_PRIMITIVE_nil:
             return (...args: any[]) => {};
         default:

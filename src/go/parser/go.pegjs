@@ -286,7 +286,7 @@ Assignment
 Statement
     = VariableDeclaration
     / GoFunctionCall
-    / CallExpression
+    / FunctionCall
     / PostfixStatement
     / Assignment
     / Block
@@ -382,15 +382,16 @@ FunctionArgList
     / __ arg0:Expression __ { return [arg0]; }
     / __ { return []; }
 
-// FunctionCall
-//     = name:IdentifierWithPackage __ "(" __ args:FunctionArgList __ ")" { return buildFunctionCall(name, args); }
+FunctionCall
+    = func:CallExpression { return { tag: "call-stmt", body: func }; }
 
 AnonymousFunctionDeclaration
     = "func" __ "(" __ params:FunctionParamList __ ")" __ returnType:Type __ body:Block { return buildFunctionDeclaration(null, params, returnType, body); }
     / "func" __ "(" __ params:FunctionParamList __ ")" __ body:Block { return buildFunctionDeclaration(null, params, null, body); }
 
 GoFunctionCall
-    = "go" WhiteSpace __ func:CallExpression { func.tag = "go-call"; return func; }
+    = "go" WhiteSpace __ func:CallExpression { return { tag: "go-call-stmt", body: func }; }
+
 
 // ===== 6. Program =====
 

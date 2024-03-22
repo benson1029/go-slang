@@ -48,14 +48,18 @@ import { ControlBlock } from "./types/control/block";
 import { ControlBreak } from "./types/control/break";
 import { ControlCall } from "./types/control/call";
 import { ControlCallI } from "./types/control/call_i";
+import { ControlCallStmt } from "./types/control/call_stmt";
 import { ControlContinue } from "./types/control/continue";
 import { ControlExitScopeI } from "./types/control/exit_scope";
 import { ControlFor } from "./types/control/for";
 import { ControlForI } from "./types/control/for_i";
 import { ControlFunction } from "./types/control/function";
+import { ControlGoCallStmt } from "./types/control/go_call_stmt";
 import { ControlIf } from "./types/control/if";
 import { ControlIfI } from "./types/control/if_i";
 import { ControlLiteral } from "./types/control/literal";
+import { ControlLogicalI } from "./types/control/logical_i";
+import { ControlLogicalImmI } from "./types/control/logical_imm_i";
 import { ControlName } from "./types/control/name";
 import { ControlPopI } from "./types/control/pop_i";
 import { ControlPostfix } from "./types/control/postfix";
@@ -114,7 +118,11 @@ import {
     TAGSTRING_CONTROL_call_i,
     TAGSTRING_CONTROL_restore_env_i,
     TAGSTRING_CONTROL_return_i,
-    TAGSTRING_COMPLEX_builtin
+    TAGSTRING_COMPLEX_builtin,
+    TAGSTRING_CONTROL_logical_i,
+    TAGSTRING_CONTROL_logical_imm_i,
+    TAGSTRING_CONTROL_call_stmt,
+    TAGSTRING_CONTROL_go_call_stmt
 } from "./types/tags";
 
 class Heap {
@@ -780,6 +788,47 @@ class Heap {
     }
 
     /**
+     * CONTROL_logical_i
+     * Fields    : number of children
+     * Children  :
+     * - 4 bytes address of the operator (PRIMITIVE_string)
+     */
+    public allocate_CONTROL_logical_i(obj: { tag: string, operator: number }): number {
+        return ControlLogicalI.allocate(this, obj.operator);
+    }
+
+    /**
+     * CONTROL_logical_imm_i
+     * Fields    : number of children
+     * Children  :
+     * - 4 bytes address of the right expression (expression)
+     * - 4 bytes address of the operator (PRIMITIVE_string)
+     */
+    public allocate_CONTROL_logical_imm_i(obj: { tag: string, operator: number, right: number }): number {
+        return ControlLogicalImmI.allocate(this, obj.right, obj.operator);
+    }
+
+    /**
+     * CONTROL_call_stmt
+     * Fields    : number of children
+     * Children  :
+     * - 4 bytes address of the call expression (CONTROL_call)
+     */
+    public allocate_CONTROL_call_stmt(obj: { tag: string, body: number }): number {
+        return ControlCallStmt.allocate(this, obj.body);
+    }
+
+    /**
+     * CONTROL_go_call_stmt
+     * Fields    : number of children
+     * Children  :
+     * - 4 bytes address of the call expression (CONTROL_call)
+     */
+    public allocate_CONTROL_go_call_stmt(obj: { tag: string, body: number }): number {
+        return ControlGoCallStmt.allocate(this, obj.body);
+    }
+
+    /**
      * ENVIRONMENT_frame
      * Fields    : number of children
      * Children  :
@@ -883,6 +932,14 @@ class Heap {
                 return this.allocate_CONTROL_restore_env_i(obj);
             case TAGSTRING_CONTROL_return_i:
                 return this.allocate_CONTROL_return_i();
+            case TAGSTRING_CONTROL_logical_i:
+                return this.allocate_CONTROL_logical_i(obj);
+            case TAGSTRING_CONTROL_logical_imm_i:
+                return this.allocate_CONTROL_logical_imm_i(obj);
+            case TAGSTRING_CONTROL_call_stmt:
+                return this.allocate_CONTROL_call_stmt(obj);
+            case TAGSTRING_CONTROL_go_call_stmt:
+                return this.allocate_CONTROL_go_call_stmt(obj);
             case TAGSTRING_ENVIRONMENT_frame:
                 return this.allocate_ENVIRONMENT_frame(obj);
             default:

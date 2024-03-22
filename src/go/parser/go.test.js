@@ -27,18 +27,21 @@ test(
                             tag: "sequence",
                             body: [
                                 {
-                                    tag: "call",
-                                    func: {
-                                        tag: "name",
-                                        name: "fmt.Println"
-                                    },
-                                    args: [
-                                        {
-                                            tag: "literal",
-                                            type: "string",
-                                            value: "Hello, World!"
-                                        }
-                                    ]
+                                    tag: "call-stmt",
+                                    body: {
+                                        tag: "call",
+                                        func: {
+                                            tag: "name",
+                                            name: "fmt.Println"
+                                        },
+                                        args: [
+                                            {
+                                                tag: "literal",
+                                                type: "string",
+                                                value: "Hello, World!"
+                                            }
+                                        ]
+                                    }
                                 }
                             ]
                         }
