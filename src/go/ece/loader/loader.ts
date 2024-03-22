@@ -26,7 +26,10 @@ function load(
   // C.push(_main_addr);
   // heap.free_object(_main_addr);
 
-  const main_addr = heap.allocate_any({ tag: "call", func: { tag: "name", name: "main" }, args: [] });
+  const main_addr = heap.allocate_any({
+    tag: "call-stmt",
+    body: { tag: "call", func: { tag: "name", name: "main" }, args: [] }
+  });
   C.push(main_addr);
   heap.free_object(main_addr);
   for (let phase = 0; phase < 2; phase++) {

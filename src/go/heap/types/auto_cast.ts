@@ -17,11 +17,13 @@ import { ControlBlock } from "./control/block";
 import { ControlBreak } from "./control/break";
 import { ControlCall } from "./control/call";
 import { ControlCallI } from "./control/call_i";
+import { ControlCallStmt } from "./control/call_stmt";
 import { ControlContinue } from "./control/continue";
 import { ControlExitScopeI } from "./control/exit_scope";
 import { ControlFor } from "./control/for";
 import { ControlForI } from "./control/for_i";
 import { ControlFunction } from "./control/function";
+import { ControlGoCallStmt } from "./control/go_call_stmt";
 import { ControlIf } from "./control/if";
 import { ControlIfI } from "./control/if_i";
 import { ControlLogicalI } from "./control/logical_i";
@@ -94,6 +96,8 @@ import {
   TAG_COMPLEX_builtin,
   TAG_CONTROL_logical_i,
   TAG_CONTROL_logical_imm_i,
+  TAG_CONTROL_call_stmt,
+  TAG_CONTROL_go_call_stmt,
 } from "./tags"
 
 
@@ -180,6 +184,10 @@ function auto_cast(heap: Heap, address: number): HeapObject {
       return new ControlLogicalI(heap, address);
     case TAG_CONTROL_logical_imm_i:
       return new ControlLogicalImmI(heap, address);
+    case TAG_CONTROL_call_stmt:
+      return new ControlCallStmt(heap, address);
+    case TAG_CONTROL_go_call_stmt:
+      return new ControlGoCallStmt(heap, address);
     case TAG_ENVIRONMENT_entry:
       return new EnvironmentEntry(heap, address);
     case TAG_ENVIRONMENT_frame:

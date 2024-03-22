@@ -314,6 +314,28 @@ const microcode_preprocess = {
     comp.captures = Array.from(captures.values());
   },
 
+  "call-stmt":
+    (
+      comp: {
+        tag: string;
+        body: any;
+      },
+      scope: Scope
+    ) => {
+      preprocess(comp.body, scope);
+    },
+
+    "go-call-stmt":
+    (
+      comp: {
+        tag: string;
+        body: any;
+      },
+      scope: Scope
+    ) => {
+      preprocess(comp.body, scope);
+    },
+
   call: (
     comp: {
       tag: string;

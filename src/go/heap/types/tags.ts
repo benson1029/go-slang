@@ -49,7 +49,8 @@ const TAG_CONTROL_call_i = 0xC01D; // 1100 0000 0001 1101
 const TAG_CONTROL_restore_env_i = 0xC01E; // 1100 0000 0001 1110
 const TAG_CONTROL_logical_i = 0xC020; // 1100 0000 0010 0000
 const TAG_CONTROL_logical_imm_i = 0xC021; // 1100 0000 0010 0001
-
+const TAG_CONTROL_call_stmt = 0xC022; // 1100 0000 0010 0010
+const TAG_CONTROL_go_call_stmt = 0xC023; // 1100 0000 0010 0011
 
 
 const TAG_ENVIRONMENT_entry = 0xC100; // 1100 0001 0000 0000
@@ -90,6 +91,8 @@ const TAGSTRING_CONTROL_break = "break";
 const TAGSTRING_CONTROL_continue = "continue";
 const TAGSTRING_CONTROL_if = "if";
 const TAGSTRING_CONTROL_return = "return";
+const TAGSTRING_CONTROL_call_stmt = "call-stmt";
+const TAGSTRING_CONTROL_go_call_stmt = "go-call-stmt";
 
 const TAGSTRING_CONTROL_unary_i = "unary_i";
 const TAGSTRING_CONTROL_binary_i = "binary_i";
@@ -149,6 +152,8 @@ export {
   TAG_CONTROL_return_i,
   TAG_CONTROL_logical_i,
   TAG_CONTROL_logical_imm_i,
+  TAG_CONTROL_call_stmt,
+  TAG_CONTROL_go_call_stmt,
   TAG_ENVIRONMENT_entry,
   TAG_ENVIRONMENT_frame,
   TAG_ENVIRONMENT_hash_table,
@@ -196,5 +201,7 @@ export {
   TAGSTRING_CONTROL_return_i,
   TAGSTRING_CONTROL_logical_i,
   TAGSTRING_CONTROL_logical_imm_i,
+  TAGSTRING_CONTROL_call_stmt,
+  TAGSTRING_CONTROL_go_call_stmt,
   TAGSTRING_ENVIRONMENT_frame,
 };
