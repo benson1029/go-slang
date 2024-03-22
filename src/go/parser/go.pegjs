@@ -30,17 +30,9 @@ function buildFunctionDeclaration(name, params, returnType, body) {
     };
 }
 
-function buildFunctionCall(name, args) {
+function buildFunctionCall(func, args) {
     return {
         tag: "call",
-        name: name,
-        args: args
-    };
-}
-
-function buildAnonymousFunctionCall(func, args) {
-    return {
-        tag: "lambda-call",
         func: func,
         args: args
     };
@@ -128,6 +120,9 @@ IdentifierWithPackage "identifier"
 Name "name"
     = identifier:Identifier { return { tag: "name", name: identifier }; }
 
+NameWithPackage
+    = identifier:IdentifierWithPackage { return { tag: "name", name: identifier }; }
+
 FunctionTypeList "functionTypeList"
     = __ param0:Type __ params:((__ "," __ Type)*) __ { return [param0].concat(params.map(x => x[3])); }
     / __ param0:Type __ { return [param0]; }
@@ -185,11 +180,30 @@ PrimaryExpression
     / expr:PrimaryExpressionWithoutArray { return expr; }
 
 PrimaryExpressionWithoutArray "PrimaryExpression"
-    = AnonymousFunctionCall
-    / FunctionCall
-    / Literal
+    = Literal
+    / NameWithPackage
     / Name
     / ArrayConstructor
+    / "(" __ exp:Expression __ ")" { return exp; }
+
+CallOperator
+    = "(" __ args:FunctionArgList __ ")" { return args; }
+
+CallExpression "Function call"
+    = exp:PrimaryExpression __ calls:(CallOperator)+ {
+        return calls.reduce(function(result, element) {
+            return buildFunctionCall(result, element);
+        }, exp);
+    }
+    / exp:AnonymousFunctionDeclaration __ calls:(CallOperator)+ {
+        return calls.reduce(function(result, element) {
+            return buildFunctionCall(result, element);
+        }, exp);
+    }
+
+CallExpressionOptional "Function call"
+    = CallExpression
+    / exp:PrimaryExpression { return exp; }
     / "(" __ exp:Expression __ ")" { return exp; }
 
 PostfixOperator
@@ -200,7 +214,7 @@ UnaryOperator
 
 UnaryExpression
     = operator:UnaryOperator __ exp:UnaryExpression { return { tag: "unary", operator: operator, operand: exp }; }
-    / exp:PrimaryExpression { return exp; }
+    / exp:CallExpressionOptional { return exp; }
     / "(" __ exp:Expression __ ")" { return exp; }
 
 MultiplicativeOperator
@@ -271,10 +285,8 @@ Assignment
 
 Statement
     = VariableDeclaration
-    / GoAnomymousFunctionCall
     / GoFunctionCall
-    / AnonymousFunctionCall
-    / FunctionCall
+    / CallExpression
     / PostfixStatement
     / Assignment
     / Block
@@ -370,21 +382,15 @@ FunctionArgList
     / __ arg0:Expression __ { return [arg0]; }
     / __ { return []; }
 
-FunctionCall
-    = name:IdentifierWithPackage __ "(" __ args:FunctionArgList __ ")" { return buildFunctionCall(name, args); }
+// FunctionCall
+//     = name:IdentifierWithPackage __ "(" __ args:FunctionArgList __ ")" { return buildFunctionCall(name, args); }
 
 AnonymousFunctionDeclaration
     = "func" __ "(" __ params:FunctionParamList __ ")" __ returnType:Type __ body:Block { return buildFunctionDeclaration(null, params, returnType, body); }
     / "func" __ "(" __ params:FunctionParamList __ ")" __ body:Block { return buildFunctionDeclaration(null, params, null, body); }
 
-AnonymousFunctionCall
-    = func:AnonymousFunctionDeclaration __ "(" __ args:FunctionArgList __ ")" { return buildAnonymousFunctionCall(func, args); }
-
 GoFunctionCall
-    = "go" WhiteSpace __ func:FunctionCall { func.tag = "go-call"; return func; }
-
-GoAnomymousFunctionCall
-    = "go" WhiteSpace __ func:AnonymousFunctionCall { func.tag = "go-lambda-call"; return func; }
+    = "go" WhiteSpace __ func:CallExpression { func.tag = "go-call"; return func; }
 
 // ===== 6. Program =====
 

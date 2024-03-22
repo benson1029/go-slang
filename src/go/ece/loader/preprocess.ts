@@ -317,20 +317,6 @@ const microcode_preprocess = {
   call: (
     comp: {
       tag: string;
-      name: string;
-      args: any[];
-    },
-    scope: Scope
-  ) => {
-    preprocess({ tag: "name", name: comp.name }, scope);
-    for (let arg of comp.args) {
-      preprocess(arg, scope);
-    }
-  },
-
-  "lambda-call": (
-    comp: {
-      tag: string;
       func: any;
       args: any[];
     },

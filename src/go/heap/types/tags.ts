@@ -36,7 +36,6 @@ const TAG_CONTROL_sequence = 0xC008; // 1100 0000 0000 1000
 const TAG_CONTROL_return            = 0xC00F; // 1100 0000 0000 1111
 const TAG_CONTROL_function = 0xC010; // 1100 0000 0001 0000
 const TAG_CONTROL_call = 0xC011; // 1100 0000 0001 0001
-const TAG_CONTROL_lambda_call = 0xC012; // 1100 0000 0001 0010
 const TAG_CONTROL_unary_i = 0xC013; // 1100 0000 0001 0011
 const TAG_CONTROL_binary_i = 0xC014; // 1100 0000 0001 0100
 const TAG_CONTROL_var_i = 0xC016; // 1100 0000 0001 0110
@@ -83,7 +82,6 @@ const TAGSTRING_CONTROL_binary = "binary";
 const TAGSTRING_CONTROL_sequence = "sequence";
 const TAGSTRING_CONTROL_function = "function";
 const TAGSTRING_CONTROL_call = "call";
-const TAGSTRING_CONTROL_lambda_call = "lambda-call";
 const TAGSTRING_CONTROL_block = "block";
 const TAGSTRING_CONTROL_for = "for";
 const TAGSTRING_CONTROL_break = "break";
@@ -128,7 +126,6 @@ export {
   TAG_CONTROL_sequence,
   TAG_CONTROL_function,
   TAG_CONTROL_call,
-  TAG_CONTROL_lambda_call,
   TAG_CONTROL_block,
   TAG_CONTROL_for,
   TAG_CONTROL_break,
@@ -174,7 +171,6 @@ export {
   TAGSTRING_CONTROL_sequence,
   TAGSTRING_CONTROL_function,
   TAGSTRING_CONTROL_call,
-  TAGSTRING_CONTROL_lambda_call,
   TAGSTRING_CONTROL_block,
   TAGSTRING_CONTROL_for,
   TAGSTRING_CONTROL_break,

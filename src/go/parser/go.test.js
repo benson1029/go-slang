@@ -28,7 +28,10 @@ test(
                             body: [
                                 {
                                     tag: "call",
-                                    name: "fmt.Println",
+                                    func: {
+                                        tag: "name",
+                                        name: "fmt.Println"
+                                    },
                                     args: [
                                         {
                                             tag: "literal",

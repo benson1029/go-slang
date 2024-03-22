@@ -24,7 +24,6 @@ import { ControlForI } from "./control/for_i";
 import { ControlFunction } from "./control/function";
 import { ControlIf } from "./control/if";
 import { ControlIfI } from "./control/if_i";
-import { ControlLambdaCall } from "./control/lambda_call";
 import { ControlName } from "./control/name";
 import { ControlPopI } from "./control/pop_i";
 import { ControlPostfix } from "./control/postfix";
@@ -64,7 +63,6 @@ import {
   TAG_CONTROL_sequence,
   TAG_CONTROL_call,
   TAG_CONTROL_function,
-  TAG_CONTROL_lambda_call,
   TAG_CONTROL_unary_i,
   TAG_CONTROL_binary_i,
   TAG_CONTROL_pop_i,
@@ -142,8 +140,6 @@ function auto_cast(heap: Heap, address: number): HeapObject {
       return new ControlFunction(heap, address);
     case TAG_CONTROL_call:
       return new ControlCall(heap, address);
-    case TAG_CONTROL_lambda_call:
-      return new ControlLambdaCall(heap, address);
     case TAG_CONTROL_unary_i:
       return new ControlUnaryI(heap, address);
     case TAG_CONTROL_binary_i:

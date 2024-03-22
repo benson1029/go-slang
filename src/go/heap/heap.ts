@@ -55,7 +55,6 @@ import { ControlForI } from "./types/control/for_i";
 import { ControlFunction } from "./types/control/function";
 import { ControlIf } from "./types/control/if";
 import { ControlIfI } from "./types/control/if_i";
-import { ControlLambdaCall } from "./types/control/lambda_call";
 import { ControlLiteral } from "./types/control/literal";
 import { ControlName } from "./types/control/name";
 import { ControlPopI } from "./types/control/pop_i";
@@ -95,7 +94,6 @@ import {
     TAGSTRING_CONTROL_sequence,
     TAGSTRING_CONTROL_call,
     TAGSTRING_CONTROL_function,
-    TAGSTRING_CONTROL_lambda_call,
     TAGSTRING_CONTROL_unary_i,
     TAGSTRING_CONTROL_binary_i,
     TAG_PRIMITIVE_nil,
@@ -589,28 +587,14 @@ class Heap {
      * CONTROL_call
      * Fields    : number of children
      * Children  :
-     * - 4 bytes address of the called function name (COMPLEX_string)
+     * - 4 bytes address of the called function (any)
      * - 4 bytes * num_arguments address of the arguments (expression)
      *
      * @param obj control object
      * @returns address of the object
      */
-    public allocate_CONTROL_call(obj: { tag: string, name: string, args: any[] }): number {
-        return ControlCall.allocate(this, obj.name, obj.args);
-    }
-
-    /**
-     * CONTROL_lambda_call
-     * Fields    : number of children
-     * Children  :
-     * - 4 bytes address of the called function (CONTROL_function)
-     * - 4 bytes * num_arguments address of the arguments (expression)
-     *
-     * @param obj control object
-     * @returns address of the object
-     */
-    public allocate_CONTROL_lambda_call(obj: { tag: string, func: any, args: any[] }): number {
-        return ControlLambdaCall.allocate(this, obj.func, obj.args);
+    public allocate_CONTROL_call(obj: { tag: string, func: any, args: any[] }): number {
+        return ControlCall.allocate(this, obj.func, obj.args);
     }
 
     /**
@@ -865,8 +849,6 @@ class Heap {
                 return this.allocate_CONTROL_function(obj);
             case TAGSTRING_CONTROL_call:
                 return this.allocate_CONTROL_call(obj);
-            case TAGSTRING_CONTROL_lambda_call:
-                return this.allocate_CONTROL_lambda_call(obj);
             case TAGSTRING_CONTROL_unary_i:
                 return this.allocate_CONTROL_unary_i(obj);
             case TAGSTRING_CONTROL_binary_i:

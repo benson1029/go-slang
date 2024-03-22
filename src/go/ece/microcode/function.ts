@@ -23,20 +23,7 @@ function evaluate_function(cmd: number, heap: Heap, C: ContextControl, S: Contex
 
 function evaluate_call(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
     const cmd_object = auto_cast(heap, cmd) as ControlCall;
-    const name = cmd_object.get_name_address();
-    const function_object = E.get_frame().get_variable_value_address(name.address) as ComplexFunction;
-
-    S.push(function_object.address);
-
-    if (function_object.get_tag() === TAG_COMPLEX_function) {
-        if (function_object.get_number_of_params() !== cmd_object.get_number_of_args()) {
-            throw new Error("Number of parameters does not match");
-        }
-    } else if (function_object.get_tag() === TAG_COMPLEX_builtin) {
-        // Do nothing
-    } else {
-        throw new Error("Object is not callable");
-    }
+    const function_object = cmd_object.get_func_address();
 
     const call_i_cmd = heap.allocate_any({ tag: "call_i", num_args: cmd_object.get_number_of_args() });
     C.push(call_i_cmd);
@@ -46,6 +33,8 @@ function evaluate_call(cmd: number, heap: Heap, C: ContextControl, S: ContextSta
         const arg = cmd_object.get_arg_address(i);
         C.push(arg.address);
     }
+
+    C.push(function_object.address);
 }
 
 function evaluate_call_i(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv, output: Function): void {
@@ -66,6 +55,18 @@ function evaluate_call_i(cmd: number, heap: Heap, C: ContextControl, S: ContextS
             heap.free_object(arg);
         }
     };
+
+    if (function_object.get_tag() === TAG_COMPLEX_function) {
+        if (function_object.get_number_of_params() !== cmd_object.get_number_of_args()) {
+            deferred_free();
+            throw new Error("Number of parameters does not match");
+        }
+    } else if (function_object.get_tag() === TAG_COMPLEX_builtin) {
+        // Do nothing
+    } else {
+        deferred_free();
+        throw new Error("Object is not callable");
+    }
 
     if (function_object.get_tag() === TAG_COMPLEX_builtin) {
         const name = (function_object as unknown as ComplexBuiltin).get_name();
