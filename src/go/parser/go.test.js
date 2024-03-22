@@ -259,8 +259,8 @@ test(
             fmt.Println(1 == 2)
             fmt.Println(1 != 2)
             x := 1
-            y := x++
-            z := x--
+            x++
+            x--
         }`;
         const result = await parse(code);
         expect(result).toBeInstanceOf(Object);

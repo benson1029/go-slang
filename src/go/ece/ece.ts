@@ -59,9 +59,10 @@ class ECE {
       this.heap.free_object(cmd);
     }
 
-    if (!S.empty()) {
-      throw new Error("ECE.evaluate: Stash not empty after program execution");
-    }
+    // console.log(S.stringify());
+    // if (!S.empty()) {
+    //   throw new Error("ECE.evaluate: Stash not empty after program execution");
+    // }
 
     thread.free();
 

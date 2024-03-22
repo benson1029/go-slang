@@ -7,7 +7,7 @@ import { ComplexFunction } from '../../heap/types/complex/function';
 import { auto_cast } from '../../heap/types/auto_cast';
 import { ControlCall } from '../../heap/types/control/call';
 import { ControlCallI } from '../../heap/types/control/call_i';
-import { TAG_COMPLEX_builtin, TAG_COMPLEX_function, TAG_CONTROL_exit_scope_i } from '../../heap/types/tags';
+import { TAG_COMPLEX_builtin, TAG_COMPLEX_function, TAG_CONTROL_exit_scope_i, TAG_CONTROL_restore_env_i, TAG_PRIMITIVE_nil } from '../../heap/types/tags';
 import { ControlReturn } from '../../heap/types/control/return';
 import { ControlReturnI } from '../../heap/types/control/return_i';
 import { ControlRestoreEnvI } from '../../heap/types/control/restore_env_i';
@@ -80,6 +80,10 @@ function evaluate_call_i(cmd: number, heap: Heap, C: ContextControl, S: ContextS
     C.push(restore_env_cmd);
     heap.free_object(restore_env_cmd);
 
+    // Push dummy return command
+    const return_cmd = heap.allocate_any({ tag: "return", value: 0 });
+    C.push(return_cmd);
+
     // Set the environment
     E.set_frame(function_object.get_environment_address());
 
@@ -103,13 +107,17 @@ function evaluate_return(cmd: number, heap: Heap, C: ContextControl, S: ContextS
     C.push(return_i_cmd);
     heap.free_object(return_i_cmd);
     const value = cmd_object.get_expression_address();
-    C.push(value.address);
+    if (value.get_tag() === TAG_PRIMITIVE_nil) {
+        S.push(value.address);
+    } else {
+        C.push(value.address);
+    }
 }
 
 function evaluate_return_i(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
     const cmd_object = auto_cast(heap, cmd) as ControlReturnI;
     const top_cmd = auto_cast(heap, C.pop()); // owner
-    if (top_cmd.get_tag() === TAG_CONTROL_exit_scope_i) {
+    if (top_cmd.get_tag() === TAG_CONTROL_restore_env_i) {
         C.push(top_cmd.address);
     } else {
         if (top_cmd.get_tag() === TAG_CONTROL_exit_scope_i) {
