@@ -10,7 +10,8 @@ import { ComplexString } from '../../../heap/types/complex/string';
 function evaluate_builtin(name: string, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv, output: Function, args: number[]): void {
     // Stub for now
     if (name === "fmt.Println") {
-        args.forEach((addr) => {
+        args.forEach((addr, index) => {
+            if (index > 0) output(" ");
             const value = auto_cast(heap, addr);
             if (value.get_tag() === TAG_COMPLEX_string) {
                 output((value as ComplexString).get_string());
