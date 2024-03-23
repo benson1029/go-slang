@@ -135,10 +135,8 @@ const microcode_preprocess = {
       if (comp.type === null) {
         throw new Error(`VariableObject ${comp.name} must have a type.`);
       }
-
-    } else {
-      preprocess(comp.value, scope);
     }
+    preprocess(comp.value, scope);
     scope.addVariable(comp.name, comp.type);
   },
 
@@ -157,6 +155,7 @@ const microcode_preprocess = {
       comp.return_captures.captures = scope.current_declaration.captures;
     }
     scope.current_declaration = null;
+    preprocess({ tag: "name", name: comp.name }, scope);
   },
 
   unary: (
