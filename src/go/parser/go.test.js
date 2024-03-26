@@ -31,8 +31,12 @@ test(
                                     body: {
                                         tag: "call",
                                         func: {
-                                            tag: "name",
-                                            name: "fmt.Println"
+                                            tag: "member",
+                                            object: {
+                                                tag: "name",
+                                                name: "fmt"
+                                            },
+                                            member: "Println"
                                         },
                                         args: [
                                             {
