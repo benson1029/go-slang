@@ -307,6 +307,7 @@ test(
             var x []int32
             fmt.Println(x)
             y := []int32{1, 2, 3, 4, 5}
+            y[0] = 6
             fmt.Println(y)
             fmt.Println(y[0])
             fmt.Println(y[1:3])
@@ -328,6 +329,7 @@ test(
             var x [5][5]int32
             fmt.Println(x)
             y := [2][5]int32{{1, 2, 3, 4, 5}, {6, 7, 8, 9, 10}}
+            y[0][0] = 11
             fmt.Println(y)
             fmt.Println(y[0])
             fmt.Println(y[0][0])
@@ -358,5 +360,190 @@ test(
         }`;
         const result = await parse(code);
         expect(result).toBeInstanceOf(Object);
+    }
+)
+
+describe(
+    "parser supports parsing struct declarations",
+
+    () => {
+        test(
+            "with fields",
+            async () => {
+                const code = `package main
+
+                import "fmt"
+
+                type Point struct {
+                    x int32
+                    y int32
+                }
+
+                func main() {
+                    p := Point{1, 2}
+                    fmt.Println(p.x)
+                    fmt.Println(p.y)
+                }`;
+                const result = await parse(code);
+                expect(result).toBeInstanceOf(Object);
+            }
+        )
+
+        test(
+            "with methods",
+            async () => {
+                const code = `package main
+
+                import "fmt"
+
+                type Point struct {
+                    x int32
+                    y int32
+                }
+
+                func (p *Point) print() {
+                    fmt.Println(p.x)
+                    fmt.Println(p.y)
+                }
+
+                func main() {
+                    p := Point{1, 2}
+                    p.print()
+                }`;
+                const result = await parse(code);
+                expect(result).toBeInstanceOf(Object);
+            }
+        )
+    }
+)
+
+describe(
+    "parser supports channels",
+
+    () => {
+        test(
+            "unbuffered",
+            async () => {
+                const code = `package main
+
+                import "fmt"
+
+                func main() {
+                    ch := make(chan int32)
+                    go func() {
+                        ch <- 1
+                    }()
+                    fmt.Println(<-ch)
+                }`;
+                const result = await parse(code);
+                expect(result).toBeInstanceOf(Object);
+            }
+        )
+
+        test(
+            "buffered",
+            async () => {
+                const code = `package main
+
+                import "fmt"
+
+                func main() {
+                    ch := make(chan int32, 1)
+                    ch <- 1
+                    fmt.Println(<-ch)
+                }`;
+                const result = await parse(code);
+                expect(result).toBeInstanceOf(Object);
+            }
+        )
+    }
+)
+
+test(
+    "parser supports type declarations",
+    async () => {
+        const code = `package main
+
+        import "fmt"
+
+        type Point struct {
+            x int32
+            y int32
+        }
+
+        type Line struct {
+            p1 Point
+            p2 Point
+        }
+
+        func main() {
+            p := Point{1, 2}
+            fmt.Println(p.x)
+            fmt.Println(p.y)
+            l := Line{p, p}
+            fmt.Println(l.p1.x)
+            fmt.Println(l.p1.y)
+            fmt.Println(l.p2.x)
+            fmt.Println(l.p2.y)
+        }`;
+        const result = await parse(code);
+        expect(result).toBeInstanceOf(Object);
+    }
+)
+
+describe(
+    "parser supports select statements",
+
+    () => {
+        test(
+            "with send and receive operations",
+            async () => {
+                const code = `package main
+
+                import "fmt"
+
+                func main() {
+                    ch1 := make(chan int32)
+                    ch2 := make(chan int32)
+                    go func() {
+                        ch1 <- 1
+                    }()
+                    go func() {
+                        ch2 <- 2
+                    }()
+                    var x int32
+                    select {
+                    case x = <-ch1:
+                        fmt.Println(x)
+                    case x = <-ch2:
+                        fmt.Println(x)
+                    }
+                }`;
+                const result = await parse(code);
+                expect(result).toBeInstanceOf(Object);
+            }
+        )
+
+        test(
+            "with default case",
+            async () => {
+                const code = `package main
+
+                import "fmt"
+
+                func main() {
+                    ch := make(chan int32)
+                    var x int32
+                    select {
+                    case x = <-ch:
+                        fmt.Println(x)
+                    default:
+                        fmt.Println("default")
+                    }
+                }`;
+                const result = await parse(code);
+                expect(result).toBeInstanceOf(Object);
+            }
+        )
     }
 )
