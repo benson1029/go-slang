@@ -441,7 +441,7 @@ function peg$parse(input, options) {
   var peg$f33 = function(exp0) { return [exp0]; };
   var peg$f34 = function() { return []; };
   var peg$f35 = function(elements) { return elements; };
-  var peg$f36 = function(type, elements) { return { tag: "array-literal", type: type, elements: elements }; };
+  var peg$f36 = function(type, elements) { return { tag: "constructor", type: type, elements: elements }; };
   var peg$f37 = function(exp) { return exp; };
   var peg$f38 = function(expr) { return { tag: "index", index: expr }; };
   var peg$f39 = function(expr) { return expr; };
@@ -2345,14 +2345,11 @@ function peg$parse(input, options) {
     return s0;
   }
 
-  function peg$parseArrayConstructor() {
+  function peg$parseTypeConstructor() {
     var s0, s1, s2, s3;
 
     s0 = peg$currPos;
-    s1 = peg$parseArrayType();
-    if (s1 === peg$FAILED) {
-      s1 = peg$parseSliceType();
-    }
+    s1 = peg$parseType();
     if (s1 !== peg$FAILED) {
       s2 = peg$parse__();
       s3 = peg$parseExpressionList();
@@ -2375,11 +2372,11 @@ function peg$parse(input, options) {
     var s0, s1, s2, s3, s4, s5;
 
     peg$silentFails++;
-    s0 = peg$parseLiteral();
+    s0 = peg$parseTypeConstructor();
     if (s0 === peg$FAILED) {
-      s0 = peg$parseName();
+      s0 = peg$parseLiteral();
       if (s0 === peg$FAILED) {
-        s0 = peg$parseArrayConstructor();
+        s0 = peg$parseName();
         if (s0 === peg$FAILED) {
           s0 = peg$parseChannelReceiveExpression();
           if (s0 === peg$FAILED) {

@@ -174,13 +174,13 @@ ExpressionListElements
 ExpressionList
     = "{" __ elements:ExpressionListElements __ "}" { return elements; }
 
-ArrayConstructor
-    = type:(ArrayType / SliceType) __ elements:ExpressionList { return { tag: "array-literal", type: type, elements: elements }; }
+TypeConstructor
+    = type:(Type) __ elements:ExpressionList { return { tag: "constructor", type: type, elements: elements }; }
 
 PrimaryExpression "PrimaryExpression"
-    = Literal
+    = TypeConstructor
+    / Literal
     / Name
-    / ArrayConstructor
     / ChannelReceiveExpression
     / AnonymousFunctionDeclaration
     / "(" __ exp:Expression __ ")" { return exp; }
