@@ -178,8 +178,8 @@ TypeConstructor
     = type:(Type) __ elements:ExpressionList { return { tag: "constructor", type: type, elements: elements }; }
 
 PrimaryExpression "PrimaryExpression"
-    = TypeConstructor
-    / Literal
+    = Literal
+    / TypeConstructor
     / Name
     / ChannelReceiveExpression
     / AnonymousFunctionDeclaration
@@ -387,7 +387,7 @@ Block
 
 IfStatement "if"
     = "if" WhiteSpace __ condition:Expression __ body:Block __ "else" WhiteSpace __ elseBody:IfStatement { return { tag: "if", condition: condition, then_body: body, else_body: elseBody }; }
-    / "if" WhiteSpace __ condition:Expression __ body:Block __ "else" WhiteSpace __ elseBody:Block { return { tag: "if", condition: condition, then_body: body, else_body: elseBody }; }
+    / "if" WhiteSpace __ condition:Expression __ body:Block __ "else" __ elseBody:Block { return { tag: "if", condition: condition, then_body: body, else_body: elseBody }; }
     / "if" WhiteSpace __ condition:Expression __ body:Block { return { tag: "if", condition: condition, then_body: body }; }
 
 ForInitStatement "statement"
