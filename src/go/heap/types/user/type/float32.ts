@@ -10,7 +10,7 @@ import { UserType } from ".";
 import { Heap } from "../../../heap";
 import { ComplexString } from "../../complex/string";
 import { PrimitiveFloat32 } from "../../primitive/float32";
-import { TAG_USER_type_float32 } from "../../tags";
+import { TAGSTRING_PRIMITIVE_float32, TAG_USER_type_float32 } from "../../tags";
 import { UserVariable } from "../variable";
 
 class UserTypeFloat32 extends UserType {
@@ -27,7 +27,7 @@ class UserTypeFloat32 extends UserType {
     const address = heap.allocate_object(TAG_USER_type_float32, 1, 1);
     const name_address = ComplexString.allocate(
       heap,
-      "float32"
+      TAGSTRING_PRIMITIVE_float32
     );
     heap.set_child(address, 0, name_address);
     return address;

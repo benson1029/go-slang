@@ -58,7 +58,7 @@ class UserTypeArray extends UserType {
     const address = heap.allocate_object(TAG_USER_type_array, 2, 2);
     const name_address = ComplexString.allocate(
       heap,
-      type.stringify() + "[" + len.toString() + "]"
+      "[" + len.toString() + "]" + type.get_name().get_string()
     );
     heap.set_field(address, 1, len);
     heap.set_child(address, 0, name_address);
