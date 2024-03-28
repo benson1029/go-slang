@@ -29,8 +29,17 @@ class PrimitiveBool extends Primitive {
     return address;
   }
 
+  public static allocate_default(heap: Heap): PrimitiveBool {
+    const address = this.allocate(heap, false);
+    return new PrimitiveBool(heap, address);
+  }
+
   public stringify_i(): string {
-    return this.address.toString() + " (bool): " + (this.get_value() ? "true" : "false");
+    return (
+      this.address.toString() +
+      " (bool): " +
+      (this.get_value() ? "true" : "false")
+    );
   }
 }
 

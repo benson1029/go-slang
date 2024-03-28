@@ -6,6 +6,7 @@
  */
 
 import { Heap } from "../../heap";
+import { auto_cast } from "../auto_cast";
 import { EnvironmentFrame } from "../environment/frame";
 import { HeapObject } from "../objects";
 import { TAG_CONTEXT_env } from "../tags";
@@ -23,7 +24,8 @@ class ContextEnv extends HeapObject {
       const name = this.heap.allocate_COMPLEX_string(imp.name);
       const value = this.heap.allocate_any(imp.value);
       this.get_frame().insert_new_variable(name);
-      this.get_frame().set_variable_value_address(name, value);
+      const variable = this.get_frame().get_variable_address(name);
+      variable.set_value(auto_cast(this.heap, value));
       this.heap.free_object(name);
       this.heap.free_object(value);
     }

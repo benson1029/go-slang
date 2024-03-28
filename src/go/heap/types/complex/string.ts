@@ -63,6 +63,11 @@ class ComplexString extends HeapObject {
     return address;
   }
 
+  public static allocate_default(heap: Heap): ComplexString {
+    const address = this.allocate(heap, "");
+    return new ComplexString(heap, address);
+  }
+
   public stringify_i(): string {
     return this.address.toString() + " (string): " + this.get_string();
   }

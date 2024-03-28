@@ -33,7 +33,9 @@ class PrimitiveFloat32 extends Primitive {
     if (this.get_tag() !== TAG_PRIMITIVE_float32) {
       throw new Error("PrimitiveFloat32.get_value: Invalid tag");
     }
-    return PrimitiveFloat32.word_to_float32(this.heap.get_field(this.address, 0));
+    return PrimitiveFloat32.word_to_float32(
+      this.heap.get_field(this.address, 0)
+    );
   }
 
   public static allocate(heap: Heap, value: number): number {
@@ -42,8 +44,15 @@ class PrimitiveFloat32 extends Primitive {
     return address;
   }
 
+  public static allocate_default(heap: Heap): PrimitiveFloat32 {
+    const address = this.allocate(heap, 0);
+    return new PrimitiveFloat32(heap, address);
+  }
+
   public stringify_i(): string {
-    return this.address.toString() + " (float32): " + this.get_value().toString();
+    return (
+      this.address.toString() + " (float32): " + this.get_value().toString()
+    );
   }
 }
 
