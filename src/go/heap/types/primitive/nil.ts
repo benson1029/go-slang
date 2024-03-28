@@ -5,6 +5,7 @@
  */
 
 import { Primitive } from ".";
+import { Heap } from "../../heap";
 
 class PrimitiveNil extends Primitive {
   public get_type(): string {
@@ -30,6 +31,10 @@ class PrimitiveNil extends Primitive {
 
   public static allocate(): number {
     return 0;
+  }
+
+  public static allocate_default(heap: Heap): PrimitiveNil {
+    return new PrimitiveNil(heap, PrimitiveNil.allocate());
   }
 
   public stringify_i(): string {

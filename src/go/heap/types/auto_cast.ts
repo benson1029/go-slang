@@ -98,7 +98,29 @@ import {
   TAG_CONTROL_logical_imm_i,
   TAG_CONTROL_call_stmt,
   TAG_CONTROL_go_call_stmt,
+  TAG_USER_struct,
+  TAG_USER_type_array,
+  TAG_USER_type_bool,
+  TAG_USER_type_channel,
+  TAG_USER_type_float32,
+  TAG_USER_type_function,
+  TAG_USER_type_int32,
+  TAG_USER_type_nil,
+  TAG_USER_type_slice,
+  TAG_USER_type_string,
+  TAG_USER_type_struct,
 } from "./tags"
+import { UserStruct } from "./user/struct";
+import { UserTypeArray } from "./user/type/array";
+import { UserTypeBool } from "./user/type/bool";
+import { UserTypeChannel } from "./user/type/channel";
+import { UserTypeFloat32 } from "./user/type/float32";
+import { UserTypeFunction } from "./user/type/function";
+import { UserTypeInt32 } from "./user/type/int32";
+import { UserTypeNil } from "./user/type/nil";
+import { UserTypeSlice } from "./user/type/slice";
+import { UserTypeString } from "./user/type/string";
+import { UserTypeStruct } from "./user/type/struct";
 
 
 function auto_cast(heap: Heap, address: number): HeapObject {
@@ -202,6 +224,28 @@ function auto_cast(heap: Heap, address: number): HeapObject {
       return new ContextStash(heap, address);
     case TAG_CONTEXT_env:
       return new ContextEnv(heap, address);
+    case TAG_USER_struct:
+      return new UserStruct(heap, address);
+    case TAG_USER_type_array:
+      return new UserTypeArray(heap, address);
+    case TAG_USER_type_bool:
+      return new UserTypeBool(heap, address);
+    case TAG_USER_type_channel:
+      return new UserTypeChannel(heap, address);
+    case TAG_USER_type_float32:
+      return new UserTypeFloat32(heap, address);
+    case TAG_USER_type_function:
+      return new UserTypeFunction(heap, address);
+    case TAG_USER_type_int32:
+      return new UserTypeInt32(heap, address);
+    case TAG_USER_type_nil:
+      return new UserTypeNil(heap, address);
+    case TAG_USER_type_slice:
+      return new UserTypeSlice(heap, address);
+    case TAG_USER_type_string:
+      return new UserTypeString(heap, address);
+    case TAG_USER_type_struct:
+      return new UserTypeStruct(heap, address);
     default:
       throw new Error("Unknown tag " + tag.toString() + " at address " + address.toString());
   }

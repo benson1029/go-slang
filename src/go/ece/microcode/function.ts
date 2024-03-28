@@ -94,7 +94,8 @@ function evaluate_call_i(cmd: number, heap: Heap, C: ContextControl, S: ContextS
     for (let i = 0; i < function_object.get_number_of_params(); i++) {
         const param_name = function_object.get_param_name_address(i);
         E.get_frame().insert_new_variable(param_name.address);
-        E.get_frame().set_variable_value_address(param_name.address, args[i]);
+        const variable = E.get_frame().get_variable_address(param_name.address);
+        variable.set_value(args[i]);
     }
 
     // Push the body

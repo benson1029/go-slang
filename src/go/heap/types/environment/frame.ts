@@ -12,6 +12,7 @@ import { auto_cast } from "../auto_cast";
 import { HeapObject } from "../objects";
 import { PrimitiveNil } from "../primitive/nil";
 import { TAG_ENVIRONMENT_frame } from "../tags";
+import { UserVariable } from "../user/variable";
 import { EnvironmentEntry } from "./entry";
 import { EnvironmentHashTable } from "./hash_table";
 
@@ -28,16 +29,23 @@ class EnvironmentFrame extends HeapObject {
 
   private get_lookup_hash_table_address(): EnvironmentHashTable {
     if (this.get_tag() !== TAG_ENVIRONMENT_frame) {
-      throw new Error("EnvironmentFrame.get_lookup_hash_table_address: Invalid tag");
+      throw new Error(
+        "EnvironmentFrame.get_lookup_hash_table_address: Invalid tag"
+      );
     }
     return new EnvironmentHashTable(this.heap, this.get_child(CUR_HASH_TABLE));
   }
 
   private get_cache_hash_table_address(): EnvironmentHashTable {
     if (this.get_tag() !== TAG_ENVIRONMENT_frame) {
-      throw new Error("EnvironmentFrame.get_cache_hash_table_address: Invalid tag");
+      throw new Error(
+        "EnvironmentFrame.get_cache_hash_table_address: Invalid tag"
+      );
     }
-    return new EnvironmentHashTable(this.heap, this.get_child(CACHE_HASH_TABLE));
+    return new EnvironmentHashTable(
+      this.heap,
+      this.get_child(CACHE_HASH_TABLE)
+    );
   }
 
   private lookup_current_scope(key_address: number): EnvironmentEntry {
@@ -70,7 +78,8 @@ class EnvironmentFrame extends HeapObject {
 
     // check the cache of parent frames' variables
     if (!this.get_cache_hash_table_address().is_nil()) {
-      const entry = this.get_cache_hash_table_address().find_variable(key_address);
+      const entry =
+        this.get_cache_hash_table_address().find_variable(key_address);
       if (!entry.is_nil()) {
         return entry;
       }
@@ -90,7 +99,10 @@ class EnvironmentFrame extends HeapObject {
     }
     this.set_cannnot_be_freed(true);
     if (this.get_cache_hash_table_address().is_nil()) {
-      this.set_child(CACHE_HASH_TABLE, EnvironmentHashTable.allocate(this.heap));
+      this.set_child(
+        CACHE_HASH_TABLE,
+        EnvironmentHashTable.allocate(this.heap)
+      );
     }
     this.get_cache_hash_table_address().force_insert(entry);
     this.set_cannnot_be_freed(false);
@@ -107,7 +119,8 @@ class EnvironmentFrame extends HeapObject {
       throw new Error("EnvironmentFrame.lookup_entry: Invalid tag");
     }
 
-    { // try to find the variable in the current frame
+    {
+      // try to find the variable in the current frame
       const entry = this.lookup_current_frame(key_address);
       if (!entry.is_nil()) {
         return entry;
@@ -169,7 +182,11 @@ class EnvironmentFrame extends HeapObject {
     }
 
     this.set_cannnot_be_freed(true);
-    const new_entry_address = EnvironmentEntry.allocate(this.heap, key_address, PrimitiveNil.allocate());
+    const new_entry_address = EnvironmentEntry.allocate(
+      this.heap,
+      key_address,
+      PrimitiveNil.allocate()
+    );
     const new_entry = new EnvironmentEntry(this.heap, new_entry_address);
     this.set_cannnot_be_freed(false);
 
@@ -178,38 +195,19 @@ class EnvironmentFrame extends HeapObject {
     return new_entry;
   }
 
-  /**
-   * Sets the value of a variable. This method does not create a new variable.
-   * Important: This method calls reference() for the value_address and free() for the old value.
-   *
-   * @param key_address address of the variable name (COMPLEX_string)
-   * @param value_address address of the value (any)
-   */
-  public set_variable_value_address(key_address: number, value_address: number): void {
+  public get_variable_address(key_address: number): UserVariable {
     if (this.get_tag() !== TAG_ENVIRONMENT_frame) {
-      throw new Error("EnvironmentFrame.set_variable_value_address: Invalid tag");
+      throw new Error("EnvironmentFrame.get_variable_address: Invalid tag");
     }
     const entry = this.lookup_entry(key_address);
     if (entry.is_nil()) {
-      throw new Error("Variable " + auto_cast(this.heap, key_address).stringify() + " does not exist in current scope.");
+      throw new Error(
+        "Variable " +
+          auto_cast(this.heap, key_address).stringify() +
+          " does not exist in current scope."
+      );
     }
-    entry.set_value_address(value_address);
-  }
-
-  /**
-   * Gets the value of a variable. This method does not create a new variable.
-   * @param key_address address of the variable name (COMPLEX_string)
-   * @returns address of the value (any)
-   */
-  public get_variable_value_address(key_address: number): HeapObject {
-    if (this.get_tag() !== TAG_ENVIRONMENT_frame) {
-      throw new Error("EnvironmentFrame.get_variable_value_address: Invalid tag");
-    }
-    const entry = this.lookup_entry(key_address);
-    if (entry.is_nil()) {
-      throw new Error("Variable " + auto_cast(this.heap, key_address).stringify() + " does not exist in current scope.");
-    }
-    return entry.get_value_address();
+    return entry.get_variable_address();
   }
 
   /**
@@ -232,7 +230,8 @@ class EnvironmentFrame extends HeapObject {
     if (this.get_tag() !== TAG_ENVIRONMENT_frame) {
       throw new Error("EnvironmentFrame.pop_frame: Invalid tag");
     }
-    const parent_frame = this.get_parent_frame_address().reference() as EnvironmentFrame;
+    const parent_frame =
+      this.get_parent_frame_address().reference() as EnvironmentFrame;
     this.free();
     return parent_frame;
   }

@@ -42,6 +42,11 @@ class PrimitiveInt32 extends Primitive {
     return address;
   }
 
+  public static allocate_default(heap: Heap): PrimitiveInt32 {
+    const address = this.allocate(heap, 0);
+    return new PrimitiveInt32(heap, address);
+  }
+
   public stringify_i(): string {
     return this.address.toString() + " (int32): " + this.get_value().toString();
   }
