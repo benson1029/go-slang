@@ -54,7 +54,21 @@ class ComplexLinkedList extends HeapObject {
     return next;
   }
 
-  private static allocate(heap: Heap, value_address: number, next_address: number): number {
+  /**
+   * Important: This method calls free() on the previous next,
+   * and calls reference() on the new next.
+   * @param next 
+   */
+  public set_next_address(next: ComplexLinkedList): void {
+    if (this.get_tag() !== TAG_COMPLEX_linked_list) {
+      throw new Error("ComplexLinkedList.set_next_address: Invalid tag");
+    }
+    const old_next = this.get_next_address();
+    this.set_child(1, next.reference().address);
+    old_next.free();
+  }
+
+  public static allocate(heap: Heap, value_address: number, next_address: number): number {
     const value = auto_cast(heap, value_address);
     const next = auto_cast(heap, next_address);
 
