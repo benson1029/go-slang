@@ -1,10 +1,10 @@
 /**
- * USER_type_slice
+ * USER_type_channel
  * Fields    :
  * - number of children
  * Children  :
  * - 4 bytes address of the name (COMPLEX_string)
- * - 4 bytes address of the type of the slice (USER_type)
+ * - 4 bytes address of the type of the channel (USER_type)
  */
 
 import { UserType } from ".";
