@@ -7,41 +7,24 @@
  * - 4 bytes * num_members (name, type) of the members (COMPLEX_string, USER_type)
  */
 
-import { Heap } from "../../heap";
-import { ComplexString } from "../complex/string";
-import { HeapObject } from "../objects";
-import { PrimitiveBool } from "../primitive/bool";
-import { PrimitiveInt32 } from "../primitive/int32";
-import { PrimitiveNil } from "../primitive/nil";
-import {
-  TAGSTRING_COMPLEX_string,
-  TAGSTRING_PRIMITIVE_bool,
-  TAGSTRING_PRIMITIVE_float32,
-  TAGSTRING_PRIMITIVE_int32,
-  TAG_USER_type,
-} from "../tags";
-import { UserStruct } from "./struct";
-import { UserVariable } from "./variable";
+import { Heap } from "../../../heap";
+import { auto_cast } from "../../auto_cast";
+import { ComplexString } from "../../complex/string";
+import { HeapObject } from "../../objects";
+import { TAG_USER_type } from "../../tags";
+import { UserStruct } from "../struct";
+import { UserVariable } from "../variable";
 
 class UserType extends HeapObject {
   public get_name(): ComplexString {
-    if (this.get_tag() !== TAG_USER_type) {
-      throw new Error("UserType.get_name: Invalid tag");
-    }
     return new ComplexString(this.heap, this.get_child(0));
   }
 
   public get_number_of_members(): number {
-    if (this.get_tag() !== TAG_USER_type) {
-      throw new Error("UserType.get_number_of_members: Invalid tag");
-    }
     return (this.get_number_of_children() - 1) / 2;
   }
 
   public get_member_name(index: number): ComplexString {
-    if (this.get_tag() !== TAG_USER_type) {
-      throw new Error("UserType.get_member_name: Invalid tag");
-    }
     if (index < 0 || index >= this.get_number_of_members()) {
       throw new Error("UserType.get_member_name: Index out of range");
     }
@@ -49,9 +32,6 @@ class UserType extends HeapObject {
   }
 
   public get_member_type(index: number): UserType {
-    if (this.get_tag() !== TAG_USER_type) {
-      throw new Error("UserType.get_member_type: Invalid tag");
-    }
     if (index < 0 || index >= this.get_number_of_members()) {
       throw new Error("UserType.get_member_type: Index out of range");
     }
@@ -59,28 +39,19 @@ class UserType extends HeapObject {
   }
 
   public construct_default(variable: UserVariable): void {
+    return (auto_cast(this.heap, this.address) as UserType).construct_default_i(
+      variable
+    );
+  }
+
+  public construct_default_i(variable: UserVariable): void {
     if (this.get_tag() !== TAG_USER_type) {
-      throw new Error("UserType.construct_default: Invalid tag");
+      throw new Error("UserType.construct_default_i: Invalid tag");
     }
-    const name = this.get_name().get_string();
-    let value = PrimitiveNil.allocate_default(this.heap) as HeapObject;
-    switch (name) {
-      case TAGSTRING_PRIMITIVE_int32:
-        value = PrimitiveInt32.allocate_default(this.heap);
-        break;
-      case TAGSTRING_PRIMITIVE_float32:
-        value = PrimitiveInt32.allocate_default(this.heap);
-        break;
-      case TAGSTRING_PRIMITIVE_bool:
-        value = PrimitiveBool.allocate_default(this.heap);
-        break;
-      case TAGSTRING_COMPLEX_string:
-        value = ComplexString.allocate_default(this.heap);
-        break;
-      default:
-        value = new UserStruct(this.heap, UserStruct.allocate(this.heap, this));
-        break;
-    }
+    const value = new UserStruct(
+      this.heap,
+      UserStruct.allocate(this.heap, this)
+    );
     variable.set_value(value);
     value.free();
   }
