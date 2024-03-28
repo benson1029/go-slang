@@ -15,7 +15,7 @@ class UserVariable extends HeapObject {
     if (this.get_tag() !== TAG_USER_variable) {
       throw new Error("UserVariable.get_type: Invalid tag");
     }
-    return new UserType(this.heap, this.get_child(0));
+    return auto_cast(this.heap, this.get_child(0)) as UserType;
   }
 
   public get_value(): HeapObject {
@@ -50,7 +50,7 @@ class UserVariable extends HeapObject {
     const address = heap.allocate_object(TAG_USER_variable, 1, 2);
     heap.set_child(address, 0, type_address.reference().address);
     heap.set_child(address, 1, value_address.reference().address);
-    
+
     if (value_address.is_nil()) {
       type_address.construct_default(new UserVariable(heap, address));
     }

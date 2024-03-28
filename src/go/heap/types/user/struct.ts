@@ -11,11 +11,11 @@ import { EnvironmentFrame } from "../environment/frame";
 import { HeapObject } from "../objects";
 import { PrimitiveNil } from "../primitive/nil";
 import { TAG_USER_struct } from "../tags";
-import { UserType } from "./type";
+import { UserTypeStruct } from "./type/struct";
 import { UserVariable } from "./variable";
 
 class UserStruct extends HeapObject {
-  public static allocate(heap: Heap, type: UserType): number {
+  public static allocate(heap: Heap, type: UserTypeStruct): number {
     const address = heap.allocate_object(TAG_USER_struct, 1, 1);
     const env_address = EnvironmentFrame.allocate(
       heap,
