@@ -75,6 +75,7 @@ export const TAG_USER_type_array = 0xC307; // 1100 0011 0000 0111
 export const TAG_USER_type_function = 0xC308; // 1100 0011 0000 1000
 export const TAG_USER_type_channel = 0xC309; // 1100 0011 0000 1001
 export const TAG_USER_type_slice = 0xC30A; // 1100 0011 0000 1010
+export const TAG_USER_type_nil = 0xC30B; // 1100 0011 0000 1011
 
 export const TAGSTRING_PRIMITIVE_nil = "nil";
 export const TAGSTRING_PRIMITIVE_bool = "bool";
