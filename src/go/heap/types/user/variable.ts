@@ -35,7 +35,11 @@ class UserVariable extends HeapObject {
       throw new Error("UserVariable.set_value: Invalid tag");
     }
     const old_value = this.get_value();
-    if (old_value.get_tag() !== value.get_tag()) {
+    if (
+      !value.is_nil() &&
+      !old_value.is_nil() &&
+      old_value.get_tag() !== value.get_tag()
+    ) {
       throw new Error("UserVariable.set_value: Type mismatch");
     }
     this.heap.set_child(this.address, 1, value.reference().address);
