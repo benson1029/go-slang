@@ -63,12 +63,18 @@ export const TAG_CONTEXT_stash = 0xC201; // 1100 0010 0000 0001
 export const TAG_CONTEXT_env = 0xC202; // 1100 0010 0000 0010
 export const TAG_CONTEXT_thread = 0xC203; // 1100 0010 0000 0011
 
-export const TAG_USER_type = 0xC300; // 1100 0011 0000 0000
 export const TAG_USER_variable = 0xC301; // 1100 0011 0000 0001
 export const TAG_USER_struct = 0xC302; // 1100 0011 0000 0010
 
+export const TAG_USER_type_struct = 0xC300; // 1100 0011 0000 0000
 export const TAG_USER_type_int32 = 0xC303; // 1100 0011 0000 0011
-
+export const TAG_USER_type_float32 = 0xC304; // 1100 0011 0000 0100
+export const TAG_USER_type_bool = 0xC305; // 1100 0011 0000 0101
+export const TAG_USER_type_string = 0xC306; // 1100 0011 0000 0110
+export const TAG_USER_type_array = 0xC307; // 1100 0011 0000 0111
+export const TAG_USER_type_function = 0xC308; // 1100 0011 0000 1000
+export const TAG_USER_type_channel = 0xC309; // 1100 0011 0000 1001
+export const TAG_USER_type_slice = 0xC30A; // 1100 0011 0000 1010
 
 export const TAGSTRING_PRIMITIVE_nil = "nil";
 export const TAGSTRING_PRIMITIVE_bool = "bool";
