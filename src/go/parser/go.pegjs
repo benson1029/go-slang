@@ -159,13 +159,13 @@ ChannelType "channelType"
     = "chan" WhiteSpace __ type:Type { return { tag: "channel-type", type: type }; }
 
 Type "type"
-    = "int32" { return "int32"; }
-    / "float32" { return "float32"; }
-    / "bool" { return "bool"; }
-    / "string" { return "string"; }
+    = "int32" { return { tag: "int32-type" }; }
+    / "float32" { return { tag: "float32-type" }; }
+    / "bool" { return { tag: "bool-type" }; }
+    / "string" { return { tag: "string-type" }; }
     / type:FunctionType { return type; }
     / type:ChannelType { return type; }
-    / identifier:IdentifierWithPackage { return identifier; }
+    / identifier:IdentifierWithPackage { return { tag: "struct-decl-type", name: identifier }; }
     / type:ArrayType { return type; }
     / type:SliceType { return type; }
 

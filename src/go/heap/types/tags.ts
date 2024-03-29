@@ -20,6 +20,8 @@ export const TAG_CONTROL_break = 0x8003; // 1000 0000 0000 0011
 export const TAG_CONTROL_continue = 0x8004; // 1000 0000 0000 0100
 export const TAG_CONTROL_return_i = 0x8005; // 1000 0000 0000 0101
 export const TAG_CONTROL_assign_i = 0x8006; // 1000 0000 0000 0110
+export const TAG_CONTROL_index_i = 0x8007; // 1000 0000 0000 0111
+export const TAG_CONTROL_index_address_i = 0x8008; // 1000 0000 0000 1000
 
 export const TAG_CONTROL_name = 0xC001; // 1100 0000 0000 0001
 export const TAG_CONTROL_literal = 0xC002; // 1100 0000 0000 0010
@@ -57,6 +59,9 @@ export const TAG_CONTROL_member = 0xC025; // 1100 0000 0010 0101
 export const TAG_CONTROL_member_address = 0xC026; // 1100 0000 0010 0110
 export const TAG_CONTROL_member_i = 0xC027; // 1100 0000 0010 0111
 export const TAG_CONTROL_name_address = 0xC028; // 1100 0000 0010 1000
+export const TAG_CONTROL_make = 0xC029; // 1100 0000 0010 1001
+export const TAG_CONTROL_index = 0xC02A; // 1100 0000 0010 1010
+export const TAG_CONTROL_index_address = 0xC02B; // 1100 0000 0010 1011
 
 export const TAG_ENVIRONMENT_entry = 0xC100; // 1100 0001 0000 0000
 export const TAG_ENVIRONMENT_frame = 0xC101; // 1100 0001 0000 0001
@@ -81,6 +86,7 @@ export const TAG_USER_type_channel = 0xC309; // 1100 0011 0000 1001
 export const TAG_USER_type_slice = 0xC30A; // 1100 0011 0000 1010
 export const TAG_USER_type_nil = 0xC30B; // 1100 0011 0000 1011
 export const TAG_USER_type_builtin = 0xC30C; // 1100 0011 0000 1100
+export const TAG_USER_type_struct_decl = 0xC30D; // 1100 0011 0000 1101
 
 export const TAGSTRING_PRIMITIVE_nil = "nil";
 export const TAGSTRING_PRIMITIVE_bool = "bool";
@@ -116,6 +122,9 @@ export const TAGSTRING_CONTROL_go_call_stmt = "go-call-stmt";
 export const TAGSTRING_CONTROL_member = "member";
 export const TAGSTRING_CONTROL_member_address = "member-address";
 export const TAGSTRING_CONTROL_name_address = "name-address";
+export const TAGSTRING_CONTROL_make = "make";
+export const TAGSTRING_CONTROL_index = "index";
+export const TAGSTRING_CONTROL_index_address = "index-address";
 
 export const TAGSTRING_CONTROL_unary_i = "unary_i";
 export const TAGSTRING_CONTROL_binary_i = "binary_i";
@@ -131,5 +140,18 @@ export const TAGSTRING_CONTROL_return_i = "return_i";
 export const TAGSTRING_CONTROL_logical_i = "logical_i";
 export const TAGSTRING_CONTROL_logical_imm_i = "logical_imm_i";
 export const TAGSTRING_CONTROL_member_i = "member_i";
+export const TAGSTRING_CONTROL_index_i = "index_i";
+export const TAGSTRING_CONTROL_index_address_i = "index_address_i";
+
+export const TAGSTRING_USER_type_bool = "bool-type";
+export const TAGSTRING_USER_type_int32 = "int32-type";
+export const TAGSTRING_USER_type_float32 = "float32-type";
+export const TAGSTRING_USER_type_string = "string-type";
+export const TAGSTRING_USER_type_array = "array-type";
+export const TAGSTRING_USER_type_function = "function-type";
+export const TAGSTRING_USER_type_channel = "channel-type";
+export const TAGSTRING_USER_type_slice = "slice-type";
+export const TAGSTRING_USER_type_struct_decl = "struct-decl-type";
+export const TAGSTRING_USER_type_struct = "struct-type";
 
 export const TAGSTRING_ENVIRONMENT_frame = "frame";

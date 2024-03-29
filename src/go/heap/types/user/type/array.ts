@@ -54,15 +54,25 @@ class UserTypeArray extends UserType {
     }
   }
 
-  public static allocate(heap: Heap, len: number, type: UserType): number {
+  public static allocate(heap: Heap, len: number, type: any): number {
     const address = heap.allocate_object(TAG_USER_type_array, 2, 2);
+    heap.set_cannnot_be_freed(address, true);
+
+    heap.set_field(address, 1, len);
+
+    const type_address = heap.allocate_any(type);
+    heap.set_child(address, 1, type_address);
+
     const name_address = ComplexString.allocate(
       heap,
-      "[" + len.toString() + "]" + type.get_name().get_string()
+      "[" + len.toString() + "]" + (auto_cast(heap, type_address) as UserType).get_name().get_string()
     );
-    heap.set_field(address, 1, len);
     heap.set_child(address, 0, name_address);
-    heap.set_child(address, 1, type.reference().address);
+
+    // Unmark cannot-be-free
+    heap.set_cannnot_be_freed(address, false);
+    heap.set_cannnot_be_freed(name_address, false);
+  
     return address;
   }
 

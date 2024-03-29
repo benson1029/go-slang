@@ -1,0 +1,64 @@
+/**
+ * CONTROL_index_address
+ * Fields    : number of children
+ * Children  :
+ * - 4 bytes address of the array (expression)
+ * - 4 bytes address of the index (expression)
+ */
+
+import { Heap } from "../../heap";
+import { HeapObject } from "../objects";
+import { TAG_CONTROL_index_address } from "../tags";
+
+class ControlIndexAddress extends HeapObject {
+  public get_array_address(): number {
+    if (this.get_tag() !== TAG_CONTROL_index_address) {
+      throw new Error("Invalid tag for ControlIndexAddress");
+    }
+    return this.get_child(0);
+  }
+
+  public get_array(): HeapObject {
+    if (this.get_tag() !== TAG_CONTROL_index_address) {
+      throw new Error("Invalid tag for ControlIndexAddress");
+    }
+    return new HeapObject(this.heap, this.get_array_address());
+  }
+
+  public get_index_address(): number {
+    if (this.get_tag() !== TAG_CONTROL_index_address) {
+      throw new Error("Invalid tag for ControlIndexAddress");
+    }
+    return this.get_child(1);
+  }
+
+  public get_index(): HeapObject {
+    if (this.get_tag() !== TAG_CONTROL_index_address) {
+      throw new Error("Invalid tag for ControlIndexAddress");
+    }
+    return new HeapObject(this.heap, this.get_index_address());
+  }
+
+  public static allocate(heap: Heap, array: any, index: any): number {
+    const address = heap.allocate_object(TAG_CONTROL_index_address, 2, 2);
+    heap.set_cannnot_be_freed(address, true);
+
+    const array_address = heap.allocate_any(array);
+    heap.set_cannnot_be_freed(array_address, true);
+
+    const index_address = heap.allocate_any(index);
+    heap.set_cannnot_be_freed(index_address, true);
+
+    heap.set_child(address, 0, array_address);
+    heap.set_child(address, 1, index_address);
+
+    // Unmark cannot-be-free
+    heap.set_cannnot_be_freed(address, false);
+    heap.set_cannnot_be_freed(array_address, false);
+    heap.set_cannnot_be_freed(index_address, false);
+
+    return address;
+  }
+}
+
+export { ControlIndexAddress };

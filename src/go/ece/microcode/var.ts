@@ -51,7 +51,7 @@ function evaluate_assign(cmd: number, heap: Heap, C: ContextControl, S: ContextS
 
 function evaluate_assign_i(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
     const variable = auto_cast(heap, S.pop()) as unknown as UserVariable;
-    const value = auto_cast(heap, S.pop()) as unknown as Primitive;
+    const value = auto_cast(heap, S.pop());
     variable.set_value(value);
     variable.free();
     value.free();

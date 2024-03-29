@@ -9,6 +9,7 @@ import { ContextControl } from "./context/control";
 import { ContextEnv } from "./context/env";
 import { ContextStash } from "./context/stash";
 import { ContextThread } from "./context/thread";
+import { ControlIndex } from "./control";
 import { ControlAssign } from "./control/assign";
 import { ControlAssignI } from "./control/assign_i";
 import { ControlBinary } from "./control/binary";
@@ -26,8 +27,12 @@ import { ControlFunction } from "./control/function";
 import { ControlGoCallStmt } from "./control/go_call_stmt";
 import { ControlIf } from "./control/if";
 import { ControlIfI } from "./control/if_i";
+import { ControlIndexAddress } from "./control/index_address";
+import { ControlIndexAddressI } from "./control/index_address_i";
+import { ControlIndexI } from "./control/index_i";
 import { ControlLogicalI } from "./control/logical_i";
 import { ControlLogicalImmI } from "./control/logical_imm_i";
+import { ControlMake } from "./control/make";
 import { ControlMember } from "./control/member";
 import { ControlMemberAddress } from "./control/member_address";
 import { ControlMemberI } from "./control/member_i";
@@ -119,6 +124,11 @@ import {
   TAG_CONTROL_member_address,
   TAG_USER_variable,
   TAG_CONTROL_name_address,
+  TAG_CONTROL_make,
+  TAG_CONTROL_index,
+  TAG_CONTROL_index_i,
+  TAG_CONTROL_index_address,
+  TAG_CONTROL_index_address_i,
 } from "./tags"
 import { UserStruct } from "./user/struct";
 import { UserTypeArray } from "./user/type/array";
@@ -230,6 +240,16 @@ function auto_cast(heap: Heap, address: number): HeapObject {
       return new ControlMemberI(heap, address);
     case TAG_CONTROL_name_address:
       return new ControlNameAddress(heap, address);
+    case TAG_CONTROL_make:
+      return new ControlMake(heap, address);
+    case TAG_CONTROL_index:
+      return new ControlIndex(heap, address);
+    case TAG_CONTROL_index_i:
+      return new ControlIndexI(heap, address);
+    case TAG_CONTROL_index_address:
+      return new ControlIndexAddress(heap, address);
+    case TAG_CONTROL_index_address_i:
+      return new ControlIndexAddressI(heap, address);
     case TAG_ENVIRONMENT_entry:
       return new EnvironmentEntry(heap, address);
     case TAG_ENVIRONMENT_frame:

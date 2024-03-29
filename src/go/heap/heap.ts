@@ -40,6 +40,7 @@ import { ComplexBuiltin } from "./types/complex/builtin";
 import { ComplexLinkedList } from "./types/complex/linked_list";
 import { ComplexPointer } from "./types/complex/pointer";
 import { ComplexString } from "./types/complex/string";
+import { ControlIndex } from "./types/control";
 import { ControlAssign } from "./types/control/assign";
 import { ControlAssignI } from "./types/control/assign_i";
 import { ControlBinary } from "./types/control/binary";
@@ -57,9 +58,13 @@ import { ControlFunction } from "./types/control/function";
 import { ControlGoCallStmt } from "./types/control/go_call_stmt";
 import { ControlIf } from "./types/control/if";
 import { ControlIfI } from "./types/control/if_i";
+import { ControlIndexAddress } from "./types/control/index_address";
+import { ControlIndexAddressI } from "./types/control/index_address_i";
+import { ControlIndexI } from "./types/control/index_i";
 import { ControlLiteral } from "./types/control/literal";
 import { ControlLogicalI } from "./types/control/logical_i";
 import { ControlLogicalImmI } from "./types/control/logical_imm_i";
+import { ControlMake } from "./types/control/make";
 import { ControlMember } from "./types/control/member";
 import { ControlMemberAddress } from "./types/control/member_address";
 import { ControlMemberI } from "./types/control/member_i";
@@ -130,8 +135,23 @@ import {
     TAGSTRING_CONTROL_member,
     TAGSTRING_CONTROL_member_address,
     TAGSTRING_CONTROL_member_i,
-    TAGSTRING_CONTROL_name_address
+    TAGSTRING_CONTROL_name_address,
+    TAGSTRING_CONTROL_make,
+    TAGSTRING_USER_type_array,
+    TAGSTRING_USER_type_bool,
+    TAGSTRING_USER_type_float32,
+    TAGSTRING_USER_type_int32,
+    TAGSTRING_USER_type_string,
+    TAGSTRING_CONTROL_index,
+    TAGSTRING_CONTROL_index_i,
+    TAGSTRING_CONTROL_index_address,
+    TAGSTRING_CONTROL_index_address_i
 } from "./types/tags";
+import { UserTypeArray } from "./types/user/type/array";
+import { UserTypeBool } from "./types/user/type/bool";
+import { UserTypeFloat32 } from "./types/user/type/float32";
+import { UserTypeInt32 } from "./types/user/type/int32";
+import { UserTypeString } from "./types/user/type/string";
 
 class Heap {
     private alloc: BuddyAllocator;
@@ -877,6 +897,55 @@ class Heap {
     }
 
     /**
+     * CONTROL_make
+     * Fields    : number of children
+     * Children  :
+     * - 4 bytes address of the type (type)
+     * - 4 bytes * num_arguments address of the arguments (expression)
+     */
+    public allocate_CONTROL_make(obj: { tag: string, type: any, args: any[] }): number {
+        return ControlMake.allocate(this, obj.type, obj.args);
+    }
+
+    /**
+     * CONTROL_index
+     * Fields    : number of children
+     * Children  :
+     * - 4 bytes address of the array (expression)
+     * - 4 bytes address of the index (expression)
+     */
+    public allocate_CONTROL_index(obj: { tag: string, array: any, index: any }): number {
+        return ControlIndex.allocate(this, obj.array, obj.index);
+    }
+
+    /**
+     * CONTROL_index_i
+     * Fields    : none
+     */
+    public allocate_CONTROL_index_i(): number {
+        return ControlIndexI.allocate(this);
+    }
+
+    /**
+     * CONTROL_index_address
+     * Fields    : number of children
+     * Children  :
+     * - 4 bytes address of the array (expression)
+     * - 4 bytes address of the index (expression)
+     */
+    public allocate_CONTROL_index_address(obj: { tag: string, array: any, index: any }): number {
+        return ControlIndexAddress.allocate(this, obj.array, obj.index);
+    }
+
+    /**
+     * CONTROL_index_address_i
+     * Fields    : none
+     */
+    public allocate_CONTROL_index_address_i(): number {
+        return ControlIndexAddressI.allocate(this);
+    }
+
+    /**
      * ENVIRONMENT_frame
      * Fields    : number of children
      * Children  :
@@ -887,6 +956,63 @@ class Heap {
      */
     public allocate_ENVIRONMENT_frame(obj: { tag: string, parent_frame_address: number }): number {
         return EnvironmentFrame.allocate(this, obj.parent_frame_address);
+    }
+
+    /**
+     * USER_type_array
+     * Fields    :
+     * - number of children
+     * - size of the array
+     * Children  :
+     * - 4 bytes address of the name (COMPLEX_string)
+     * - 4 bytes address of the type of the array (USER_type)
+     */
+    public allocate_USER_type_array(obj: { tag: string, len: number, type: any }): number {
+        return UserTypeArray.allocate(this, obj.len, obj.type);
+    }
+
+    /**
+     * USER_type_bool
+     * Fields    :
+     * - number of children
+     * Children  :
+     * - 4 bytes address of the name (COMPLEX_string)
+     */
+    public allocate_USER_type_bool(): number {
+        return UserTypeBool.allocate(this);
+    }
+
+    /**
+     * USER_type_float32
+     * Fields    :
+     * - number of children
+     * Children  :
+     * - 4 bytes address of the name (COMPLEX_string)
+     */
+    public allocate_USER_type_float32(): number {
+        return UserTypeFloat32.allocate(this);
+    }
+
+    /**
+     * USER_type_int32
+     * Fields    :
+     * - number of children
+     * Children  :
+     * - 4 bytes address of the name (COMPLEX_string)
+     */
+    public allocate_USER_type_int32(): number {
+        return UserTypeInt32.allocate(this);
+    }
+
+    /**
+     * USER_type_string
+     * Fields    :
+     * - number of children
+     * Children  :
+     * - 4 bytes address of the name (COMPLEX_string)
+     */
+    public allocate_USER_type_string(): number {
+        return UserTypeString.allocate(this);
     }
 
     public allocate_number(value: number): number {
@@ -996,8 +1122,28 @@ class Heap {
                 return this.allocate_CONTROL_member_i(obj);
             case TAGSTRING_CONTROL_name_address:
                 return this.allocate_CONTROL_name_address(obj);
+            case TAGSTRING_CONTROL_make:
+                return this.allocate_CONTROL_make(obj);
+            case TAGSTRING_CONTROL_index:
+                return this.allocate_CONTROL_index(obj);
+            case TAGSTRING_CONTROL_index_i:
+                return this.allocate_CONTROL_index_i();
+            case TAGSTRING_CONTROL_index_address:
+                return this.allocate_CONTROL_index_address(obj);
+            case TAGSTRING_CONTROL_index_address_i:
+                return this.allocate_CONTROL_index_address_i();
             case TAGSTRING_ENVIRONMENT_frame:
                 return this.allocate_ENVIRONMENT_frame(obj);
+            case TAGSTRING_USER_type_array:
+                return this.allocate_USER_type_array(obj);
+            case TAGSTRING_USER_type_bool:
+                return this.allocate_USER_type_bool();
+            case TAGSTRING_USER_type_float32:
+                return this.allocate_USER_type_float32();
+            case TAGSTRING_USER_type_int32:
+                return this.allocate_USER_type_int32();
+            case TAGSTRING_USER_type_string:
+                return this.allocate_USER_type_string();
             default:
                 throw new Error("Unknown tag " + obj.tag);
         }

@@ -1,8 +1,10 @@
+import * as array from "./array";
 import * as block from "./block";
 import * as expression from "./expression";
 import * as control_for from "./for";
 import * as control_function from "./function";
 import * as control_if from "./if";
+import * as make from "./make";
 import * as sequence from "./sequence";
 import * as struct from "./struct";
 import * as control_var from "./var";
@@ -77,6 +79,16 @@ function lookup_microcode(tag: number): Function {
             return struct.evaluate_member_i;
         case tags.TAG_CONTROL_name_address:
             return control_var.evaluate_name_address;
+        case tags.TAG_CONTROL_make:
+            return make.evaluate_make;
+        case tags.TAG_CONTROL_index:
+            return array.evaluate_index;
+        case tags.TAG_CONTROL_index_i:
+            return array.evaluate_index_i;
+        case tags.TAG_CONTROL_index_address:
+            return array.evaluate_index_address;
+        case tags.TAG_CONTROL_index_address_i:
+            return array.evaluate_index_address_i;
         case tags.TAG_PRIMITIVE_nil:
             return (...args: any[]) => {};
         default:
