@@ -185,7 +185,7 @@ class EnvironmentFrame extends HeapObject {
     const new_entry_address = EnvironmentEntry.allocate(
       this.heap,
       key_address,
-      PrimitiveNil.allocate()
+      UserVariable.allocate_nil(this.heap)
     );
     const new_entry = new EnvironmentEntry(this.heap, new_entry_address);
     this.set_cannnot_be_freed(false);
