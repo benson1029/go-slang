@@ -28,6 +28,9 @@ import { ControlIf } from "./control/if";
 import { ControlIfI } from "./control/if_i";
 import { ControlLogicalI } from "./control/logical_i";
 import { ControlLogicalImmI } from "./control/logical_imm_i";
+import { ControlMember } from "./control/member";
+import { ControlMemberAddress } from "./control/member_address";
+import { ControlMemberI } from "./control/member_i";
 import { ControlName } from "./control/name";
 import { ControlPopI } from "./control/pop_i";
 import { ControlPostfix } from "./control/postfix";
@@ -109,10 +112,16 @@ import {
   TAG_USER_type_slice,
   TAG_USER_type_string,
   TAG_USER_type_struct,
+  TAG_USER_type_builtin,
+  TAG_CONTROL_member,
+  TAG_CONTROL_member_i,
+  TAG_CONTROL_member_address,
+  TAG_USER_variable,
 } from "./tags"
 import { UserStruct } from "./user/struct";
 import { UserTypeArray } from "./user/type/array";
 import { UserTypeBool } from "./user/type/bool";
+import { UserTypeBuiltin } from "./user/type/builtin";
 import { UserTypeChannel } from "./user/type/channel";
 import { UserTypeFloat32 } from "./user/type/float32";
 import { UserTypeFunction } from "./user/type/function";
@@ -121,6 +130,7 @@ import { UserTypeNil } from "./user/type/nil";
 import { UserTypeSlice } from "./user/type/slice";
 import { UserTypeString } from "./user/type/string";
 import { UserTypeStruct } from "./user/type/struct";
+import { UserVariable } from "./user/variable";
 
 
 function auto_cast(heap: Heap, address: number): HeapObject {
@@ -210,6 +220,12 @@ function auto_cast(heap: Heap, address: number): HeapObject {
       return new ControlCallStmt(heap, address);
     case TAG_CONTROL_go_call_stmt:
       return new ControlGoCallStmt(heap, address);
+    case TAG_CONTROL_member:
+      return new ControlMember(heap, address);
+    case TAG_CONTROL_member_address:
+      return new ControlMemberAddress(heap, address);
+    case TAG_CONTROL_member_i:
+      return new ControlMemberI(heap, address);
     case TAG_ENVIRONMENT_entry:
       return new EnvironmentEntry(heap, address);
     case TAG_ENVIRONMENT_frame:
@@ -224,6 +240,8 @@ function auto_cast(heap: Heap, address: number): HeapObject {
       return new ContextStash(heap, address);
     case TAG_CONTEXT_env:
       return new ContextEnv(heap, address);
+    case TAG_USER_variable:
+      return new UserVariable(heap, address);
     case TAG_USER_struct:
       return new UserStruct(heap, address);
     case TAG_USER_type_array:
@@ -246,6 +264,8 @@ function auto_cast(heap: Heap, address: number): HeapObject {
       return new UserTypeString(heap, address);
     case TAG_USER_type_struct:
       return new UserTypeStruct(heap, address);
+    case TAG_USER_type_builtin:
+      return new UserTypeBuiltin(heap, address);
     default:
       throw new Error("Unknown tag " + tag.toString() + " at address " + address.toString());
   }

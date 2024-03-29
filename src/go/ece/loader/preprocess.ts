@@ -111,6 +111,87 @@ const microcode_preprocess = {
     }
   },
 
+  index: (
+    comp: {
+      tag: string;
+      array: any;
+      index: any;
+    },
+    scope: Scope
+  ) => {
+    preprocess(comp.array, scope);
+    preprocess(comp.index, scope);
+  },
+
+  slice: (
+    comp: {
+      tag: string;
+      array: any;
+      left: any;
+      right: any;
+    },
+    scope: Scope
+  ) => {
+    preprocess(comp.array, scope);
+    preprocess(comp.left, scope);
+    preprocess(comp.right, scope);
+  },
+
+  member: (
+    comp: {
+      tag: string;
+      object: any;
+      member: string;
+    },
+    scope: Scope
+  ) => {
+    preprocess(comp.object, scope);
+  },
+
+  "name-address": (
+    comp: {
+      tag: string;
+      name: string;
+    },
+    scope: Scope
+  ) => {
+    preprocess({ tag: "name", name: comp.name }, scope);
+  },
+
+  "index-address": (
+    comp: {
+      tag: string;
+      array: any;
+      index: any;
+    },
+    scope: Scope
+  ) => {
+    preprocess({ tag: "index", array: comp.array, index: comp.index }, scope)
+  },
+
+  "slice-address": (
+    comp: {
+      tag: string;
+      array: any;
+      left: any;
+      right: any;
+    },
+    scope: Scope
+  ) => {
+    preprocess({ tag: "slice", array: comp.array, left: comp.left, right: comp.right }, scope)
+  },
+
+  "member-address": (
+    comp: {
+      tag: string;
+      object: any;
+      member: string;
+    },
+    scope: Scope
+  ) => {
+    preprocess({ tag: "member", object: comp.object, member: comp.member }, scope)
+  },
+
   literal: (
     comp: {
       tag: string;
@@ -349,6 +430,75 @@ const microcode_preprocess = {
     }
   },
 
+  make: (
+    comp: {
+      tag: string;
+      type: any;
+      args: any[];
+    },
+    scope: Scope
+  ) => {
+      for (let arg of comp.args) {
+        preprocess(arg, scope);
+      }
+  },
+
+  "channel-send": (
+    comp: {
+      tag: string;
+      name: any;
+      expression: any;
+    },
+    scope: Scope
+  ) => {
+    preprocess(comp.name, scope);
+    preprocess(comp.expression, scope);
+  },
+
+  "channel-receive": (
+    comp: {
+      tag: string;
+      name: any;
+    },
+    scope: Scope
+  ) => {
+    preprocess(comp.name, scope);
+  },
+
+  select: (
+    comp: {
+      tag: string;
+      body: any;
+    },
+    scope: Scope
+  ) => {
+    for (let exp of comp.body) {
+      preprocess(exp, scope);
+    }
+  },
+
+  "select-case": (
+    comp: {
+      tag: string;
+      case: any;
+      body: any;
+    },
+    scope: Scope
+  ) => {
+    preprocess(comp.case, scope);
+    preprocess(comp.body, scope);
+  },
+
+  "select-default": (
+    comp: {
+      tag: string;
+      body: any;
+    },
+    scope: Scope
+  ) => {
+    preprocess(comp.body, scope);
+  },
+
   program: (
     comp: {
       tag: string;
@@ -363,6 +513,10 @@ const microcode_preprocess = {
         preprocess({ tag: "var", name: exp.name }, scope);
       } else if (exp.tag === "function") {
         preprocess({ tag: "var", name: exp.name }, scope);
+      } else if (exp.tag === "struct") {
+        // nothing to do
+      } else if (exp.tag === "struct-method") {
+        throw new Error("Not implemented.");
       } else {
         throw new Error(`Invalid tag ${exp.tag} in global namespace.`);
       }

@@ -4,6 +4,7 @@ import * as control_for from "./for";
 import * as control_function from "./function";
 import * as control_if from "./if";
 import * as sequence from "./sequence";
+import * as struct from "./struct";
 import * as control_var from "./var";
 import * as tags from "../../heap/types/tags";
 
@@ -70,6 +71,10 @@ function lookup_microcode(tag: number): Function {
             return control_function.evaluate_call_stmt;
         case tags.TAG_CONTROL_pop_i:
             return control_function.evaluate_pop_i;
+        case tags.TAG_CONTROL_member:
+            return struct.evaluate_member;
+        case tags.TAG_CONTROL_member_i:
+            return struct.evaluate_member_i;
         case tags.TAG_PRIMITIVE_nil:
             return (...args: any[]) => {};
         default:
