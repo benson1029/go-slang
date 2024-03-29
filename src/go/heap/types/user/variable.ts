@@ -7,8 +7,10 @@
 import { Heap } from "../../heap";
 import { auto_cast } from "../auto_cast";
 import { HeapObject } from "../objects";
+import { PrimitiveNil } from "../primitive/nil";
 import { TAG_USER_variable } from "../tags";
 import { UserType } from "./type";
+import { UserTypeNil } from "./type/nil";
 
 class UserVariable extends HeapObject {
   public get_type(): UserType {
@@ -35,13 +37,6 @@ class UserVariable extends HeapObject {
       throw new Error("UserVariable.set_value: Invalid tag");
     }
     const old_value = this.get_value();
-    if (
-      !value.is_nil() &&
-      !old_value.is_nil() &&
-      old_value.get_tag() !== value.get_tag()
-    ) {
-      throw new Error("UserVariable.set_value: Type mismatch");
-    }
     this.heap.set_child(this.address, 1, value.reference().address);
     old_value.free();
   }
@@ -60,6 +55,14 @@ class UserVariable extends HeapObject {
     }
 
     return address;
+  }
+
+  public static allocate_nil(heap: Heap): number {
+    return UserVariable.allocate(
+      heap,
+      UserTypeNil.allocate_default(heap),
+      PrimitiveNil.allocate_default(heap)
+    );
   }
 
   public stringify_i(): string {

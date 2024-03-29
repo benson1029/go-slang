@@ -30,6 +30,11 @@ class UserTypeNil extends UserType {
     return address;
   }
 
+  public static allocate_default(heap: Heap): UserTypeNil {
+    const address = UserTypeNil.allocate(heap);
+    return new UserTypeNil(heap, address);
+  }
+
   public stringify_i(): string {
     return this.get_name().get_string();
   }
