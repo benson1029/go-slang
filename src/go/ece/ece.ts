@@ -25,7 +25,6 @@ class ECE {
   }
 
   public evaluate(check_all_free: boolean = false) {
-    check_all_free = true;
     // Initialize the control, stash and environment.
     let thread = new ContextThread(
       this.heap,
