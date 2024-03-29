@@ -14,7 +14,7 @@ import { Heap } from "../../../heap";
 import { auto_cast } from "../../auto_cast";
 import { ComplexString } from "../../complex/string";
 import { PrimitiveNil } from "../../primitive/nil";
-import { TAGSTRING_COMPLEX_string, TAG_USER_type_function } from "../../tags";
+import { TAG_USER_type_function } from "../../tags";
 
 import { UserVariable } from "../variable";
 

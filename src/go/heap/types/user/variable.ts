@@ -41,18 +41,34 @@ class UserVariable extends HeapObject {
     old_value.free();
   }
 
+  public reallocate(type_address: UserType, value_address: HeapObject): void {
+    if (this.get_tag() !== TAG_USER_variable) {
+      throw new Error("UserVariable.reallocate: Invalid tag");
+    }
+
+    const old_type = this.get_type();
+    const old_value = this.get_value();
+    this.heap.set_child(this.address, 0, type_address.reference().address);
+    this.heap.set_child(this.address, 1, value_address.reference().address);
+    old_type.free();
+    old_value.free();
+
+    if (value_address.is_nil()) {
+      type_address.construct_default(this);
+    }
+  }
+
   public static allocate(
     heap: Heap,
     type_address: UserType,
     value_address: HeapObject
   ): number {
     const address = heap.allocate_object(TAG_USER_variable, 1, 2);
-    heap.set_child(address, 0, type_address.reference().address);
-    heap.set_child(address, 1, value_address.reference().address);
+    heap.set_child(address, 0, PrimitiveNil.allocate());
+    heap.set_child(address, 1, PrimitiveNil.allocate());
 
-    if (value_address.is_nil()) {
-      type_address.construct_default(new UserVariable(heap, address));
-    }
+    const variable = new UserVariable(heap, address);
+    variable.reallocate(type_address, value_address);
 
     return address;
   }
