@@ -39,7 +39,10 @@ function load(
           program.body[i].tag === "function"
             ? heap.allocate_any({
                 tag: "assign",
-                name: program.body[i].name,
+                name: {
+                  tag: "name-address",
+                  name: program.body[i].name
+                },
                 value: program.body[i],
               })
             : heap.allocate_any(program.body[i]);

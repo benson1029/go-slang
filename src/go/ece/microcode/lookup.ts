@@ -75,6 +75,8 @@ function lookup_microcode(tag: number): Function {
             return struct.evaluate_member;
         case tags.TAG_CONTROL_member_i:
             return struct.evaluate_member_i;
+        case tags.TAG_CONTROL_name_address:
+            return control_var.evaluate_name_address;
         case tags.TAG_PRIMITIVE_nil:
             return (...args: any[]) => {};
         default:

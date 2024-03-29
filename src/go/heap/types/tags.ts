@@ -19,6 +19,7 @@ export const TAG_CONTROL_exit_scope_i = 0x8002; // 1000 0000 0000 0010
 export const TAG_CONTROL_break = 0x8003; // 1000 0000 0000 0011
 export const TAG_CONTROL_continue = 0x8004; // 1000 0000 0000 0100
 export const TAG_CONTROL_return_i = 0x8005; // 1000 0000 0000 0101
+export const TAG_CONTROL_assign_i = 0x8006; // 1000 0000 0000 0110
 
 export const TAG_CONTROL_name = 0xC001; // 1100 0000 0000 0001
 export const TAG_CONTROL_literal = 0xC002; // 1100 0000 0000 0010
@@ -40,7 +41,6 @@ export const TAG_CONTROL_call = 0xC011; // 1100 0000 0001 0001
 export const TAG_CONTROL_unary_i = 0xC013; // 1100 0000 0001 0011
 export const TAG_CONTROL_binary_i = 0xC014; // 1100 0000 0001 0100
 export const TAG_CONTROL_var_i = 0xC016; // 1100 0000 0001 0110
-export const TAG_CONTROL_assign_i = 0xC017; // 1100 0000 0001 0111
 export const TAG_CONTROL_block = 0xC018; // 1100 0000 0001 1000
 export const TAG_CONTROL_for = 0xC019; // 1100 0000 0001 1001
 export const TAG_CONTROL_for_i = 0xC01A; // 1100 0000 0001 1010
@@ -56,6 +56,7 @@ export const TAG_CONTROL_struct = 0xC024; // 1100 0000 0010 0100
 export const TAG_CONTROL_member = 0xC025; // 1100 0000 0010 0101
 export const TAG_CONTROL_member_address = 0xC026; // 1100 0000 0010 0110
 export const TAG_CONTROL_member_i = 0xC027; // 1100 0000 0010 0111
+export const TAG_CONTROL_name_address = 0xC028; // 1100 0000 0010 1000
 
 export const TAG_ENVIRONMENT_entry = 0xC100; // 1100 0001 0000 0000
 export const TAG_ENVIRONMENT_frame = 0xC101; // 1100 0001 0000 0001
@@ -114,6 +115,7 @@ export const TAGSTRING_CONTROL_call_stmt = "call-stmt";
 export const TAGSTRING_CONTROL_go_call_stmt = "go-call-stmt";
 export const TAGSTRING_CONTROL_member = "member";
 export const TAGSTRING_CONTROL_member_address = "member-address";
+export const TAGSTRING_CONTROL_name_address = "name-address";
 
 export const TAGSTRING_CONTROL_unary_i = "unary_i";
 export const TAGSTRING_CONTROL_binary_i = "binary_i";

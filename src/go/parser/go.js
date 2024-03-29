@@ -68,6 +68,18 @@ function buildProgram(pack, imports, body) {
     };
 }
 
+function addressToValue(name) {
+    if (name.tag === "name-address") {
+        return { tag: "name", name: name.name };
+    } else if (name.tag === "index-address") {
+        return { tag: "index", array: addressToValue(name.array), index: name.index };
+    } else if (name.tag === "slice-address") {
+        return { tag: "slice", array: addressToValue(name.array), left: name.left, right: name.right };
+    } else if (name.tag === "member-address") {
+        return { tag: "member", object: addressToValue(name.object), member: name.member };
+    }
+}
+
 function peg$subclass(child, parent) {
   function C() { this.constructor = child; }
   C.prototype = parent.prototype;
@@ -512,17 +524,14 @@ function peg$parse(input, options) {
   var peg$f82 = function(stmt) { return { tag: "defer", stmt: stmt }; };
   var peg$f83 = function(exp) { return { tag: "return", value: exp }; };
   var peg$f84 = function() { return { tag: "return" }; };
-  var peg$f85 = function(identifier, operator) {
+  var peg$f85 = function(name, operator) {
         return {
             tag: "assign",
-            name: identifier,
+            name: name,
             value: {
                 tag: "binary",
                 operator: (operator === "++") ? "+" : "-",
-                leftOperand: {
-                    tag: "name",
-                    name: identifier
-                },
+                leftOperand: addressToValue(name),
                 rightOperand: makeLiteral("int32", 1)
             }
         }
@@ -2372,15 +2381,15 @@ function peg$parse(input, options) {
     var s0, s1, s2, s3, s4, s5;
 
     peg$silentFails++;
-    s0 = peg$parseLiteral();
+    s0 = peg$parseAnonymousFunctionDeclaration();
     if (s0 === peg$FAILED) {
-      s0 = peg$parseTypeConstructor();
+      s0 = peg$parseLiteral();
       if (s0 === peg$FAILED) {
-        s0 = peg$parseName();
+        s0 = peg$parseTypeConstructor();
         if (s0 === peg$FAILED) {
-          s0 = peg$parseChannelReceiveExpression();
+          s0 = peg$parseName();
           if (s0 === peg$FAILED) {
-            s0 = peg$parseAnonymousFunctionDeclaration();
+            s0 = peg$parseChannelReceiveExpression();
             if (s0 === peg$FAILED) {
               s0 = peg$currPos;
               if (input.charCodeAt(peg$currPos) === 40) {
@@ -4488,7 +4497,7 @@ function peg$parse(input, options) {
 
     peg$silentFails++;
     s0 = peg$currPos;
-    s1 = peg$parseIdentifier();
+    s1 = peg$parseVariableAddress();
     if (s1 !== peg$FAILED) {
       s2 = peg$parse__();
       s3 = peg$parsePostfixOperator();

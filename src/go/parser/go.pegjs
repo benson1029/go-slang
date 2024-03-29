@@ -62,6 +62,18 @@ function buildProgram(pack, imports, body) {
         body: body
     };
 }
+
+function addressToValue(name) {
+    if (name.tag === "name-address") {
+        return { tag: "name", name: name.name };
+    } else if (name.tag === "index-address") {
+        return { tag: "index", array: addressToValue(name.array), index: name.index };
+    } else if (name.tag === "slice-address") {
+        return { tag: "slice", array: addressToValue(name.array), left: name.left, right: name.right };
+    } else if (name.tag === "member-address") {
+        return { tag: "member", object: addressToValue(name.object), member: name.member };
+    }
+}
 }}
 
 Start
@@ -178,11 +190,11 @@ TypeConstructor
     = type:(Type) __ elements:ExpressionList { return { tag: "constructor", type: type, elements: elements }; }
 
 PrimaryExpression "PrimaryExpression"
-    = Literal
+    = AnonymousFunctionDeclaration
+    / Literal
     / TypeConstructor
     / Name
     / ChannelReceiveExpression
-    / AnonymousFunctionDeclaration
     / "(" __ exp:Expression __ ")" { return exp; }
 
 ArrayOperator
@@ -351,17 +363,14 @@ ReturnStatement "return"
     / "return" { return { tag: "return" }; }
 
 PostfixStatement "postfix"
-    = identifier:Identifier __ operator:PostfixOperator {
+    = name:VariableAddress __ operator:PostfixOperator {
         return {
             tag: "assign",
-            name: identifier,
+            name: name,
             value: {
                 tag: "binary",
                 operator: (operator === "++") ? "+" : "-",
-                leftOperand: {
-                    tag: "name",
-                    name: identifier
-                },
+                leftOperand: addressToValue(name),
                 rightOperand: makeLiteral("int32", 1)
             }
         }

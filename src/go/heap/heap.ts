@@ -64,6 +64,7 @@ import { ControlMember } from "./types/control/member";
 import { ControlMemberAddress } from "./types/control/member_address";
 import { ControlMemberI } from "./types/control/member_i";
 import { ControlName } from "./types/control/name";
+import { ControlNameAddress } from "./types/control/name_address";
 import { ControlPopI } from "./types/control/pop_i";
 import { ControlPostfix } from "./types/control/postfix";
 import { ControlRestoreEnvI } from "./types/control/restore_env_i";
@@ -128,7 +129,8 @@ import {
     TAGSTRING_CONTROL_go_call_stmt,
     TAGSTRING_CONTROL_member,
     TAGSTRING_CONTROL_member_address,
-    TAGSTRING_CONTROL_member_i
+    TAGSTRING_CONTROL_member_i,
+    TAGSTRING_CONTROL_name_address
 } from "./types/tags";
 
 class Heap {
@@ -516,13 +518,13 @@ class Heap {
      * CONTROL_assign
      * Fields    : number of children
      * Children  :
-     * - 4 bytes address of the name (COMPLEX_string)
+     * - 4 bytes address of the name (expression)
      * - 4 bytes address of the value (expression)
      *
      * @param obj control object
      * @returns address of the object
      */
-    public allocate_CONTROL_assign(obj: { tag: string, name: string, value: any }): number {
+    public allocate_CONTROL_assign(obj: { tag: string, name: any, value: any }): number {
         return ControlAssign.allocate(this, obj.name, obj.value);
     }
 
@@ -662,15 +664,13 @@ class Heap {
 
     /**
      * CONTROL_assign_i
-     * Fields    : number of children
-     * Children  :
-     * - 4 bytes address of the name (COMPLEX_string)
+     * Fields    : None
      *
      * @param obj control object
      * @returns address of the object
      */
-    public allocate_CONTROL_assign_i(obj: { tag: string, name: ComplexString }): number {
-        return ControlAssignI.allocate(this, obj.name);
+    public allocate_CONTROL_assign_i(): number {
+        return ControlAssignI.allocate(this);
     }
 
     /**
@@ -867,6 +867,16 @@ class Heap {
     }
 
     /**
+     * CONTROL_name_address
+     * Fields    : number of children
+     * Children  :
+     * - 4 bytes address of the name (COMPLEX_string)
+     */
+    public allocate_CONTROL_name_address(obj: { tag: string, name: string }): number {
+        return ControlNameAddress.allocate(this, obj.name);
+    }
+
+    /**
      * ENVIRONMENT_frame
      * Fields    : number of children
      * Children  :
@@ -945,7 +955,7 @@ class Heap {
             case TAGSTRING_CONTROL_var_i:
                 return this.allocate_CONTROL_var_i(obj);
             case TAGSTRING_CONTROL_assign_i:
-                return this.allocate_CONTROL_assign_i(obj);
+                return this.allocate_CONTROL_assign_i();
             case TAGSTRING_CONTROL_block:
                 return this.allocate_CONTROL_block(obj);
             case TAGSTRING_CONTROL_exit_scope_i:
@@ -984,6 +994,8 @@ class Heap {
                 return this.allocate_CONTROL_member_address(obj);
             case TAGSTRING_CONTROL_member_i:
                 return this.allocate_CONTROL_member_i(obj);
+            case TAGSTRING_CONTROL_name_address:
+                return this.allocate_CONTROL_name_address(obj);
             case TAGSTRING_ENVIRONMENT_frame:
                 return this.allocate_ENVIRONMENT_frame(obj);
             default:

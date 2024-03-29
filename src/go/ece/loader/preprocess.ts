@@ -224,7 +224,7 @@ const microcode_preprocess = {
   assign: (
     comp: {
       tag: string;
-      name: string;
+      name: any;
       value: any;
       return_captures: any | null;
     },
@@ -236,7 +236,7 @@ const microcode_preprocess = {
       comp.return_captures.captures = scope.current_declaration.captures;
     }
     scope.current_declaration = null;
-    preprocess({ tag: "name", name: comp.name }, scope);
+    preprocess(comp.name, scope);
   },
 
   unary: (
@@ -523,9 +523,15 @@ const microcode_preprocess = {
     }
     for (let exp of comp.body) {
       if (exp.tag === "var") {
-        preprocess({ tag: "assign", name: exp.name, value: exp.value, return_captures: exp }, scope);
+        preprocess({ tag: "assign", name: {
+          tag: "name-address",
+          name: exp.name
+        }, value: exp.value, return_captures: exp }, scope);
       } else if (exp.tag === "function") {
-        preprocess({ tag: "assign", name: exp.name, value: exp }, scope);
+        preprocess({ tag: "assign", name: {
+          tag: "name-address",
+          name: exp.name
+        }, value: exp }, scope);
       }
     }
   },

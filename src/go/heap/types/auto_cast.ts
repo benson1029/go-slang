@@ -32,6 +32,7 @@ import { ControlMember } from "./control/member";
 import { ControlMemberAddress } from "./control/member_address";
 import { ControlMemberI } from "./control/member_i";
 import { ControlName } from "./control/name";
+import { ControlNameAddress } from "./control/name_address";
 import { ControlPopI } from "./control/pop_i";
 import { ControlPostfix } from "./control/postfix";
 import { ControlRestoreEnvI } from "./control/restore_env_i";
@@ -117,6 +118,7 @@ import {
   TAG_CONTROL_member_i,
   TAG_CONTROL_member_address,
   TAG_USER_variable,
+  TAG_CONTROL_name_address,
 } from "./tags"
 import { UserStruct } from "./user/struct";
 import { UserTypeArray } from "./user/type/array";
@@ -226,6 +228,8 @@ function auto_cast(heap: Heap, address: number): HeapObject {
       return new ControlMemberAddress(heap, address);
     case TAG_CONTROL_member_i:
       return new ControlMemberI(heap, address);
+    case TAG_CONTROL_name_address:
+      return new ControlNameAddress(heap, address);
     case TAG_ENVIRONMENT_entry:
       return new EnvironmentEntry(heap, address);
     case TAG_ENVIRONMENT_frame:
