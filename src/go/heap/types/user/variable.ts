@@ -74,11 +74,12 @@ class UserVariable extends HeapObject {
   }
 
   public static allocate_nil(heap: Heap): number {
-    return UserVariable.allocate(
-      heap,
-      UserTypeNil.allocate_default(heap),
-      PrimitiveNil.allocate_default(heap)
-    );
+    const user_type_nil = UserTypeNil.allocate_default(heap);
+    const primitive_nil = PrimitiveNil.allocate_default(heap);
+    const address = UserVariable.allocate(heap, user_type_nil, primitive_nil);
+    user_type_nil.free();
+    primitive_nil.free();
+    return address;
   }
 
   public stringify_i(): string {

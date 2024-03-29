@@ -20,6 +20,7 @@ class UserTypeBuiltin extends UserType {
     }
     const builtin = ComplexBuiltin.allocate_default(this.heap);
     variable.set_value(builtin);
+    builtin.free();
   }
 
   public static allocate(heap: Heap, name: string): number {
