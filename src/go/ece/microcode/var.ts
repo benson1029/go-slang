@@ -1,7 +1,6 @@
 import { Heap } from "../../heap";
 import { auto_cast } from "../../heap/types/auto_cast";
 import { ControlAssign } from "../../heap/types/control/assign";
-import { ControlAssignI } from "../../heap/types/control/assign_i";
 import { ControlName } from "../../heap/types/control/name";
 import { ControlVar } from "../../heap/types/control/var";
 import { ControlVarI } from "../../heap/types/control/var_i";
@@ -54,6 +53,7 @@ function evaluate_assign_i(cmd: number, heap: Heap, C: ContextControl, S: Contex
     const variable = auto_cast(heap, S.pop()) as unknown as UserVariable;
     const value = auto_cast(heap, S.pop()) as unknown as Primitive;
     variable.set_value(value);
+    variable.free();
     value.free();
 }
 
