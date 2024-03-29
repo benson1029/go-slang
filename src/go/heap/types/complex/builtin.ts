@@ -42,6 +42,11 @@ class ComplexBuiltin extends HeapObject {
     return address;
   }
 
+  public static allocate_default(heap: Heap): ComplexBuiltin {
+    const address = this.allocate(heap, "");
+    return new ComplexBuiltin(heap, address);
+  }
+
   public stringify_i(): string {
     return this.address.toString() + " (builtin): " + this.get_name();
   }

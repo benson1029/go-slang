@@ -7,9 +7,14 @@
 
 import { Heap } from "../../heap";
 import { auto_cast } from "../auto_cast";
+import { ComplexBuiltin } from "../complex/builtin";
+import { ComplexString } from "../complex/string";
 import { EnvironmentFrame } from "../environment/frame";
 import { HeapObject } from "../objects";
 import { TAG_CONTEXT_env } from "../tags";
+import { UserStruct } from "../user/struct";
+import { UserTypeBuiltin } from "../user/type/builtin";
+import { UserTypeStruct } from "../user/type/struct";
 
 /**
  * The environment of the ECE. The content is stored inside the heap.
@@ -20,14 +25,27 @@ class ContextEnv extends HeapObject {
       throw new Error("ContextEnv.create_global_environment: Invalid tag");
     }
     this.push_frame();
+    const builtin_type = auto_cast(this.heap, UserTypeBuiltin.allocate(this.heap, "builtin")) as ComplexBuiltin;
     for (const imp of imports) {
-      const name = this.heap.allocate_COMPLEX_string(imp.name);
-      const value = this.heap.allocate_any(imp.value);
-      this.get_frame().insert_new_variable(name);
-      const variable = this.get_frame().get_variable_address(name);
-      variable.set_value(auto_cast(this.heap, value));
-      this.heap.free_object(name);
-      this.heap.free_object(value);
+      const name = auto_cast(this.heap, this.heap.allocate_COMPLEX_string("IMPORT." + imp.name)) as ComplexString;
+      const type = auto_cast(this.heap, UserTypeStruct.allocate(this.heap, name,
+        imp.value.map((v: any) => {
+          return {
+            name: auto_cast(this.heap, this.heap.allocate_COMPLEX_string(v.name)) as ComplexString,
+            type: builtin_type
+          }
+        })
+      )) as UserTypeStruct;
+      const import_obj = auto_cast(this.heap, UserStruct.allocate(this.heap, type)) as UserStruct;
+      imp.value.forEach((v: any) => {
+        const variable = import_obj.get_frame().get_variable_address(this.heap.allocate_COMPLEX_string(v.name));
+        const function_obj = auto_cast(this.heap, this.heap.allocate_COMPLEX_builtin({tag: "builtin", name: v.value})) as ComplexBuiltin;
+        variable.set_value(function_obj);
+      });
+      const import_name = this.heap.allocate_COMPLEX_string(imp.name);
+      this.get_frame().insert_new_variable(import_name);
+      const variable = this.get_frame().get_variable_address(import_name);
+      variable.set_value(import_obj);
     }
   }
 

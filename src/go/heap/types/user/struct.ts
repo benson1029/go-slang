@@ -15,6 +15,13 @@ import { UserTypeStruct } from "./type/struct";
 import { UserVariable } from "./variable";
 
 class UserStruct extends HeapObject {
+  public get_frame(): EnvironmentFrame {
+    if (this.get_tag() !== TAG_USER_struct) {
+      throw new Error("UserStruct.get_frame: Invalid tag");
+    }
+    return new EnvironmentFrame(this.heap, this.get_child(0));
+  }
+
   public static allocate(heap: Heap, type: UserTypeStruct): number {
     const address = heap.allocate_object(TAG_USER_struct, 1, 1);
     const env_address = EnvironmentFrame.allocate(

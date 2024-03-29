@@ -60,6 +60,9 @@ import { ControlIfI } from "./types/control/if_i";
 import { ControlLiteral } from "./types/control/literal";
 import { ControlLogicalI } from "./types/control/logical_i";
 import { ControlLogicalImmI } from "./types/control/logical_imm_i";
+import { ControlMember } from "./types/control/member";
+import { ControlMemberAddress } from "./types/control/member_address";
+import { ControlMemberI } from "./types/control/member_i";
 import { ControlName } from "./types/control/name";
 import { ControlPopI } from "./types/control/pop_i";
 import { ControlPostfix } from "./types/control/postfix";
@@ -122,7 +125,10 @@ import {
     TAGSTRING_CONTROL_logical_i,
     TAGSTRING_CONTROL_logical_imm_i,
     TAGSTRING_CONTROL_call_stmt,
-    TAGSTRING_CONTROL_go_call_stmt
+    TAGSTRING_CONTROL_go_call_stmt,
+    TAGSTRING_CONTROL_member,
+    TAGSTRING_CONTROL_member_address,
+    TAGSTRING_CONTROL_member_i
 } from "./types/tags";
 
 class Heap {
@@ -829,6 +835,38 @@ class Heap {
     }
 
     /**
+     * CONTROL_member
+     * Fields    : number of children
+     * Children  :
+     * - 4 bytes address of the object (expression)
+     * - 4 bytes address of the member name (COMPLEX_string)
+     */
+    public allocate_CONTROL_member(obj: { tag: string, object: any, member: string }): number {
+        return ControlMember.allocate(this, obj.object, obj.member);
+    }
+
+    /**
+     * CONTROL_member_address
+     * Fields    : number of children
+     * Children  :
+     * - 4 bytes address of the object (expression)
+     * - 4 bytes address of the member name (COMPLEX_string)
+     */
+    public allocate_CONTROL_member_address(obj: { tag: string, object: any, member: string }): number {
+        return ControlMemberAddress.allocate(this, obj.object, obj.member);
+    }
+
+    /**
+     * CONTROL_member_i
+     * Fields    : number of children
+     * Children  :
+     * - 4 bytes address of the member name (COMPLEX_string)
+     */
+    public allocate_CONTROL_member_i(obj: { tag: string, member: ComplexString }): number {
+        return ControlMemberI.allocate(this, obj.member);
+    }
+
+    /**
      * ENVIRONMENT_frame
      * Fields    : number of children
      * Children  :
@@ -940,6 +978,12 @@ class Heap {
                 return this.allocate_CONTROL_call_stmt(obj);
             case TAGSTRING_CONTROL_go_call_stmt:
                 return this.allocate_CONTROL_go_call_stmt(obj);
+            case TAGSTRING_CONTROL_member:
+                return this.allocate_CONTROL_member(obj);
+            case TAGSTRING_CONTROL_member_address:
+                return this.allocate_CONTROL_member_address(obj);
+            case TAGSTRING_CONTROL_member_i:
+                return this.allocate_CONTROL_member_i(obj);
             case TAGSTRING_ENVIRONMENT_frame:
                 return this.allocate_ENVIRONMENT_frame(obj);
             default:

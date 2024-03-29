@@ -27,7 +27,9 @@ function link_imports(name: string): { name: string; value: any }[] {
     // Stub for now
     if (name === "fmt") {
         return [
-            { name: "fmt.Println", value: { tag: "builtin", name: "fmt.Println" } },
+            { name: "fmt", value: [
+                { name: "Println", value: "fmt.Println" },
+            ] },
         ];
     }
     return [];
