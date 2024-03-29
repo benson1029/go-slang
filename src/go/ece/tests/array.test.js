@@ -1,7 +1,7 @@
 import { parse } from '../../parser/go';
 import { ECE } from '../ece';
 
-function evaluateSequence(sequence) {
+function evaluateSequence(sequence, checkAllFree = true) {
     const program = `
     package main
     
@@ -13,7 +13,7 @@ function evaluateSequence(sequence) {
     `
     const parsed_program = parse(program);
     const heapSize = 1048576;
-    return (new ECE(heapSize, parsed_program)).evaluate(true);
+    return (new ECE(heapSize, parsed_program)).evaluate(checkAllFree);
 }
 
 describe("Fixed size array", () => {
@@ -63,5 +63,34 @@ describe("Fixed size array", () => {
         fmt.Println(a)
         `
         expect(evaluateSequence(program)).toBe("[0 1 1 2 3 5 8 13 21 34]\n");
+    })
+
+    it('can have multi-dimensional array', () => {
+        const program = `
+        var a [2][2]int32
+        a[0][0] = 1
+        a[0][1] = 2
+        a[1][0] = 3
+        a[1][1] = 4
+        fmt.Println(a)
+        `
+        expect(evaluateSequence(program)).toBe("[[1 2] [3 4]]\n");
+    })
+
+    it('can compute pascal triangle', () => {
+        const program = `
+        var a [5][5]int32
+        for i := 0; i < 5; i++ {
+            a[i][0] = 1
+            a[i][i] = 1
+        }
+        for i := 2; i < 5; i++ {
+            for j := 1; j < i; j++ {
+                a[i][j] = a[i-1][j-1] + a[i-1][j]
+            }
+        }
+        fmt.Println(a)
+        `
+        expect(evaluateSequence(program, false)).toBe("[[1 0 0 0 0] [1 1 0 0 0] [1 2 1 0 0] [1 3 3 1 0] [1 4 6 4 1]]\n");
     })
 })
