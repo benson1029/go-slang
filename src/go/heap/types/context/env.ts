@@ -20,11 +20,12 @@ import { UserTypeStruct } from "../user/type/struct";
  * The environment of the ECE. The content is stored inside the heap.
  */
 class ContextEnv extends HeapObject {
-  public create_global_environment(imports: { name: string; value: any }[]): void {
+  public create_global_environment(imports: { name: string; value: any }[], default_imports: { name: string; value: any }[]): void {
     if (this.get_tag() !== TAG_CONTEXT_env) {
       throw new Error("ContextEnv.create_global_environment: Invalid tag");
     }
     this.push_frame();
+    // link imports
     const builtin_type = auto_cast(this.heap, UserTypeBuiltin.allocate(this.heap, "builtin")) as ComplexBuiltin;
     for (const imp of imports) {
       const name = auto_cast(this.heap, this.heap.allocate_COMPLEX_string("IMPORT." + imp.name)) as ComplexString;
@@ -57,6 +58,19 @@ class ContextEnv extends HeapObject {
       this.heap.free_object(import_name);
     }
     builtin_type.free();
+
+    // link default imports
+    default_imports.forEach((imp) => {
+      const import_name = this.heap.allocate_COMPLEX_string(imp.name);
+      this.get_frame().insert_new_variable(import_name);
+      const variable = this.get_frame().get_variable_address(import_name);
+      const value = auto_cast(this.heap, this.heap.allocate_any({ tag: "builtin", name: imp.value })) as ComplexBuiltin;
+      variable.set_value(value);
+      this.heap.free_object(import_name);
+      value.free();
+    });
+
+    this.push_frame();
   }
 
   /**

@@ -57,7 +57,7 @@ function evaluate_constructor_i(cmd: number, heap: Heap, C: ContextControl, S: C
     switch (type.get_tag()) {
         case TAG_USER_type_array: {
             const type_casted = type as UserTypeArray;
-            if (constructor_i_cmd.get_number_of_arguments() != type_casted.get_length()) {
+            if (constructor_i_cmd.get_number_of_arguments() !== type_casted.get_length()) {
                 throw new Error("evaluate_constructor_i: Invalid number of arguments");
             }
             const array = auto_cast(heap, ComplexArray.allocate(heap, type_casted.get_length())) as ComplexArray;

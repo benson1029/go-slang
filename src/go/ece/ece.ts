@@ -2,7 +2,7 @@ import { Heap } from "../heap";
 import { lookup_microcode } from "./microcode";
 import { load } from "./loader";
 import { ContextThread } from "../heap/types/context/thread";
-import { link_imports } from "./microcode/builtin";
+import { get_default_imports, link_imports } from "./microcode/builtin";
 
 /**
  * Represents the main logic of the Explicit Control Evaluator.
@@ -42,8 +42,9 @@ class ECE {
     for (let imp of this.program.imports) {
       imports = imports.concat(link_imports(imp));
     }
-    E.create_global_environment(imports);
-    load(this.program, C, S, E, this.heap, imports);
+    const default_imports = get_default_imports();
+    E.create_global_environment(imports, default_imports);
+    load(this.program, C, S, E, this.heap, imports, default_imports);
 
     // Create output buffer
     let output_buffer = ``

@@ -547,9 +547,12 @@ function preprocess(comp: any, scope: Scope) {
   throw new Error(`Invalid tag ${comp.tag}`);
 }
 
-function preprocess_program(program: any, imports: any[]) {
+function preprocess_program(program: any, imports: any[], default_imports: any[]) {
   let scope = new Scope();
   for (let imp of imports) {
+    scope.addVariable(imp.name, undefined);
+  }
+  for (let imp of default_imports) {
     scope.addVariable(imp.name, undefined);
   }
   preprocess(program, scope);

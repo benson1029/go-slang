@@ -3,15 +3,15 @@ import { sort_global_declarations } from "./globalSort";
 import { preprocess_program } from './preprocess';
 
 function check_declaration_order(program: any, expected_order: string[]) {
-    preprocess_program(program, []);
-    sort_global_declarations(program, []);
+    preprocess_program(program, [], []);
+    sort_global_declarations(program, [], []);
     const decl_order = program.body.map((stmt: any) => stmt.name);
     expect(decl_order).toEqual(expected_order);
 }
 
 function check_cyclic_dependency(program: any) {
-    preprocess_program(program, []);
-    expect(() => sort_global_declarations(program, [])).toThrow();
+    preprocess_program(program, [], []);
+    expect(() => sort_global_declarations(program, [], [])).toThrow();
 }
 
 describe('sort_global_declarations', () => {
