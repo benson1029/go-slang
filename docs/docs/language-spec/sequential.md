@@ -16,7 +16,6 @@ The supported data types are shown in the following table:
 | `float32` | 32-bit floating point number |
 | `bool` | Boolean value |
 | `string` | String value |
-| `func` | Lambda Expression |
 
 ### Variable Declaration and Assignment
 
@@ -97,7 +96,7 @@ for i := 0; i < 5; i++ {
 }
 ```
 
-### Functions
+## Functions
 
 The syntax for a function definition is as follows:
 
@@ -122,3 +121,9 @@ add(1, 2) // Sequential
 go add(1, 2) // Concurrent
 ```
 
+### Built-in Functions
+
+The following built-in functions are supported:
+
+- Default: `len`
+- `fmt`: `Println`, `Print`

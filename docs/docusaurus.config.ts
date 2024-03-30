@@ -60,6 +60,12 @@ const config: Config = {
           label: 'Language Specification',
         },
         {
+          type: 'docSidebar',
+          sidebarId: 'reportSidebar',
+          position: 'left',
+          label: 'Project Report',
+        },
+        {
           href: 'https://github.com/benson1029/go-slang',
           label: 'GitHub',
           position: 'right',
@@ -71,6 +77,11 @@ const config: Config = {
       darkTheme: prismThemes.dracula,
     },
   } satisfies Preset.ThemeConfig,
+
+  markdown: {
+    mermaid: true,
+  },
+  themes: ['@docusaurus/theme-mermaid'],
 };
 
 export default config;

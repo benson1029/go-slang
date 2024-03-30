@@ -10,7 +10,7 @@ This is an example for a Hello World program that runs in our Explicit Control E
 package main
 
 import (
-    "fmt",
+    "fmt"
     "sync"
 )
 
