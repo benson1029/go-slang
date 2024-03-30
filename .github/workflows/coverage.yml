@@ -1,0 +1,26 @@
+name: Upload Coverage Data
+on:
+  push:
+    branches:
+      - main
+permissions:
+  contents: read
+jobs:
+  coverage:
+    name: coverage
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - uses: actions/setup-node@master
+      with:
+        node-version: '20'
+    - run: npm install -g npm@latest
+    - run: npm install
+    - run: npm run build
+    - run: npm install -g cross-env
+    - uses: paambaati/codeclimate-action@v5.0.0
+      env:
+        CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+      with:
+        debug: true
+        coverageCommand: 'cross-env CI=true npm test -- --env=jsdom --coverage'

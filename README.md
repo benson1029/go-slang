@@ -1,4 +1,4 @@
-# Explicit-control evaluator (ECE) for Go [![Deploy to GitHub Pages](https://github.com/benson1029/go-slang/actions/workflows/deploy.yml/badge.svg)](https://github.com/benson1029/go-slang/actions/workflows/deploy.yml) ![Lines of Code](https://raw.githubusercontent.com/benson1029/go-slang/image-data/badge.svg)
+# Explicit-control evaluator (ECE) for Go [![Deploy to GitHub Pages](https://github.com/benson1029/go-slang/actions/workflows/deploy.yml/badge.svg)](https://github.com/benson1029/go-slang/actions/workflows/deploy.yml) ![Lines of Code](https://raw.githubusercontent.com/benson1029/go-slang/image-data/badge.svg) [![Test Coverage](https://api.codeclimate.com/v1/badges/58662977e82c603c0630/test_coverage)](https://codeclimate.com/github/benson1029/go-slang/test_coverage)
 
 This CS4215 project is an implementation of a sublanguage of Go, applying the notion of an Explicit-control Evaluator (ECE). It comes with a web-based IDE for users to write and run Go programs. You can try it out [here](https://benson1029.github.io/go-slang/) and the documentation can be found [here](https://benson1029.github.io/go-slang/docs/).
 
