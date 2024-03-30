@@ -449,9 +449,9 @@ FunctionDeclaration
     / "func" WhiteSpace __ name:Identifier __ "(" params:FunctionParamList __ ")" __ body:Block { return buildFunctionDeclaration(name, params, null, body); }
 
 StructMethodDeclaration
-    = "func" WhiteSpace __ "(" __ self:Identifier __ "*" __ type:Type __ ")" __ name:Identifier __ "(" params:FunctionParamList __ ")" __
+    = "func" WhiteSpace __ "(" __ self:Identifier __ type:Type __ ")" __ name:Identifier __ "(" params:FunctionParamList __ ")" __
         returnType:Type __ body:Block { return buildStructMethodDeclaration(name, self, type, params, returnType, body); }
-    / "func" WhiteSpace __ "(" __ self:Identifier __ "*" __ type:Type __ ")" __ name:Identifier __ "(" params:FunctionParamList __ ")" __
+    / "func" WhiteSpace __ "(" __ self:Identifier __ type:Type __ ")" __ name:Identifier __ "(" params:FunctionParamList __ ")" __
         body:Block { return buildStructMethodDeclaration(name, self, type, params, null, body); }
 
 FunctionArgList

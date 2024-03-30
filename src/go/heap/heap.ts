@@ -149,12 +149,14 @@ import {
     TAGSTRING_CONTROL_index_address,
     TAGSTRING_CONTROL_index_address_i,
     TAGSTRING_CONTROL_constructor,
-    TAGSTRING_CONTROL_constructor_i
+    TAGSTRING_CONTROL_constructor_i,
+    TAGSTRING_USER_type_function
 } from "./types/tags";
 import { UserType } from "./types/user/type";
 import { UserTypeArray } from "./types/user/type/array";
 import { UserTypeBool } from "./types/user/type/bool";
 import { UserTypeFloat32 } from "./types/user/type/float32";
+import { UserTypeFunction } from "./types/user/type/function";
 import { UserTypeInt32 } from "./types/user/type/int32";
 import { UserTypeString } from "./types/user/type/string";
 
@@ -1042,6 +1044,19 @@ class Heap {
         return UserTypeString.allocate(this);
     }
 
+    /**
+     * USER_type_function
+     * Fields    :
+     * - number of children
+     * Children  :
+     * - 4 bytes address of the name (COMPLEX_string)
+     *  4 bytes address of the return type (USER_type)
+     * - 4 bytes * number of parameters addresses of the parameters (USER_type)
+     */
+    public allocate_USER_type_function(obj: { tag: string, params: any[], returnType: any }): number {
+        return UserTypeFunction.allocate(this, obj.params, obj.returnType);
+    }
+
     public allocate_number(value: number): number {
         return value;
     }
@@ -1175,6 +1190,8 @@ class Heap {
                 return this.allocate_USER_type_int32();
             case TAGSTRING_USER_type_string:
                 return this.allocate_USER_type_string();
+            case TAGSTRING_USER_type_function:
+                return this.allocate_USER_type_function(obj);
             default:
                 throw new Error("Unknown tag " + obj.tag);
         }

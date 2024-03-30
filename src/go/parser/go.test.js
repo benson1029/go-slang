@@ -401,7 +401,7 @@ describe(
                     y int32
                 }
 
-                func (p *Point) print() {
+                func (p Point) print() {
                     fmt.Println(p.x)
                     fmt.Println(p.y)
                 }

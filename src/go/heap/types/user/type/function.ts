@@ -45,26 +45,38 @@ class UserTypeFunction extends UserType {
 
   public static allocate(
     heap: Heap,
-    params: UserType[],
-    returnType: UserType
+    params: any[],
+    returnType: any
   ): number {
     const address = heap.allocate_object(
       TAG_USER_type_function,
       1,
       2 + params.length
     );
+    heap.set_cannnot_be_freed(address, true);
+
+    let params_string = []
+
+    for (let i = 0; i < params.length; i++) {
+      const param_address = heap.allocate_any(params[i]);
+      heap.set_child(address, 2 + i, param_address);
+      params_string.push((auto_cast(heap, param_address) as UserType).get_name().get_string());
+    }
+
+    const returnType_address = heap.allocate_any(returnType);
+    heap.set_child(address, 1, returnType_address);
+
     const name_address = ComplexString.allocate(
       heap,
       "func(" +
-        params.map((p) => p.get_name().get_string()).join(", ") +
+        params_string.join(", ") +
         ") " +
-        returnType.get_name().get_string()
+        (auto_cast(heap, returnType_address) as UserType).get_name().get_string()
     );
     heap.set_child(address, 0, name_address);
-    heap.set_child(address, 1, returnType.reference().address);
-    for (let i = 0; i < params.length; i++) {
-      heap.set_child(address, 2 + i, params[i].reference().address);
-    }
+
+    // Unmark cannot-be-free
+    heap.set_cannnot_be_freed(address, false);
     return address;
   }
 
