@@ -50,6 +50,22 @@ function buildFunctionCall(func, args) {
     };
 }
 
+function buildConstructor(type, args) {
+    let args_array = [];
+    for (let arg of args) {
+        if (arg instanceof Array) {
+            args_array.push(buildConstructor(type.type, arg));
+        } else {
+            args_array.push(arg);
+        }
+    }
+    return {
+        tag: "constructor",
+        type: type,
+        args: args_array
+    };
+}
+
 function buildProgram(pack, imports, body) {
     let import_array = [];
     for (let i = 0; i < imports.length; i++) {
@@ -136,6 +152,7 @@ IdentifierAndReserved "identifier"
 
 Identifier "identifier"
     = content:((! ReservedWord) IdentifierAndReserved) { return content[1]; }
+    / content1:ReservedWord content2:([a-zA-Z_][a-zA-Z0-9_]+) { return content1 + content2; }
 
 IdentifierWithPackage "identifier"
     = packageName:PackageName __ "." __ identifier:IdentifierWithPackage { return packageName + "." + identifier; }
@@ -187,7 +204,7 @@ ExpressionList
     = "{" __ elements:ExpressionListElements __ "}" { return elements; }
 
 TypeConstructor
-    = type:(Type) __ elements:ExpressionList { return { tag: "constructor", type: type, elements: elements }; }
+    = type:(Type) __ args:ExpressionList { return buildConstructor(type, args); }
 
 PrimaryExpression "PrimaryExpression"
     = AnonymousFunctionDeclaration

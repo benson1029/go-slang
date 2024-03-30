@@ -19,6 +19,8 @@ import { ControlBreak } from "./control/break";
 import { ControlCall } from "./control/call";
 import { ControlCallI } from "./control/call_i";
 import { ControlCallStmt } from "./control/call_stmt";
+import { ControlConstructor } from "./control/constructor";
+import { ControlConstructorI } from "./control/constructor_i";
 import { ControlContinue } from "./control/continue";
 import { ControlExitScopeI } from "./control/exit_scope";
 import { ControlFor } from "./control/for";
@@ -129,6 +131,8 @@ import {
   TAG_CONTROL_index_i,
   TAG_CONTROL_index_address,
   TAG_CONTROL_index_address_i,
+  TAG_CONTROL_constructor,
+  TAG_CONTROL_constructor_i,
 } from "./tags"
 import { UserStruct } from "./user/struct";
 import { UserTypeArray } from "./user/type/array";
@@ -250,6 +254,10 @@ function auto_cast(heap: Heap, address: number): HeapObject {
       return new ControlIndexAddress(heap, address);
     case TAG_CONTROL_index_address_i:
       return new ControlIndexAddressI(heap, address);
+    case TAG_CONTROL_constructor:
+      return new ControlConstructor(heap, address);
+    case TAG_CONTROL_constructor_i:
+      return new ControlConstructorI(heap, address);
     case TAG_ENVIRONMENT_entry:
       return new EnvironmentEntry(heap, address);
     case TAG_ENVIRONMENT_frame:

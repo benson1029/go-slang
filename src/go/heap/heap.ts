@@ -50,6 +50,8 @@ import { ControlBreak } from "./types/control/break";
 import { ControlCall } from "./types/control/call";
 import { ControlCallI } from "./types/control/call_i";
 import { ControlCallStmt } from "./types/control/call_stmt";
+import { ControlConstructor } from "./types/control/constructor";
+import { ControlConstructorI } from "./types/control/constructor_i";
 import { ControlContinue } from "./types/control/continue";
 import { ControlExitScopeI } from "./types/control/exit_scope";
 import { ControlFor } from "./types/control/for";
@@ -145,8 +147,11 @@ import {
     TAGSTRING_CONTROL_index,
     TAGSTRING_CONTROL_index_i,
     TAGSTRING_CONTROL_index_address,
-    TAGSTRING_CONTROL_index_address_i
+    TAGSTRING_CONTROL_index_address_i,
+    TAGSTRING_CONTROL_constructor,
+    TAGSTRING_CONTROL_constructor_i
 } from "./types/tags";
+import { UserType } from "./types/user/type";
 import { UserTypeArray } from "./types/user/type/array";
 import { UserTypeBool } from "./types/user/type/bool";
 import { UserTypeFloat32 } from "./types/user/type/float32";
@@ -946,6 +951,28 @@ class Heap {
     }
 
     /**
+     * CONTROL_constructor
+     * Fields    : number of children
+     * Children  :
+     * - 4 bytes address of the type (USER_type)
+     * - 4 bytes * num_arguments address of the arguments (expression)
+     */
+    public allocate_CONTROL_constructor(obj: { tag: string, type: any, args: any[] }): number {
+        return ControlConstructor.allocate(this, obj.type, obj.args);
+    }
+
+    /**
+     * CONTROL_constructor_i
+     * Fields    : number of children
+     * Children  :
+     * - 4 bytes address of the type (USER_type)
+     * - 4 bytes number of arguments (PRIMITIVE_int32)
+     */
+    public allocate_CONTROL_constructor_i(obj: { tag: string, type: UserType, num_args: number }): number {
+        return ControlConstructorI.allocate(this, obj.type, obj.num_args);
+    }
+
+    /**
      * ENVIRONMENT_frame
      * Fields    : number of children
      * Children  :
@@ -1132,6 +1159,10 @@ class Heap {
                 return this.allocate_CONTROL_index_address(obj);
             case TAGSTRING_CONTROL_index_address_i:
                 return this.allocate_CONTROL_index_address_i();
+            case TAGSTRING_CONTROL_constructor:
+                return this.allocate_CONTROL_constructor(obj);
+            case TAGSTRING_CONTROL_constructor_i:
+                return this.allocate_CONTROL_constructor_i(obj);
             case TAGSTRING_ENVIRONMENT_frame:
                 return this.allocate_ENVIRONMENT_frame(obj);
             case TAGSTRING_USER_type_array:

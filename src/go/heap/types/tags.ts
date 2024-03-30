@@ -62,6 +62,8 @@ export const TAG_CONTROL_name_address = 0xC028; // 1100 0000 0010 1000
 export const TAG_CONTROL_make = 0xC029; // 1100 0000 0010 1001
 export const TAG_CONTROL_index = 0xC02A; // 1100 0000 0010 1010
 export const TAG_CONTROL_index_address = 0xC02B; // 1100 0000 0010 1011
+export const TAG_CONTROL_constructor = 0xC02C; // 1100 0000 0010 1100
+export const TAG_CONTROL_constructor_i = 0xC02D; // 1100 0000 0010 1101
 
 export const TAG_ENVIRONMENT_entry = 0xC100; // 1100 0001 0000 0000
 export const TAG_ENVIRONMENT_frame = 0xC101; // 1100 0001 0000 0001
@@ -125,6 +127,7 @@ export const TAGSTRING_CONTROL_name_address = "name-address";
 export const TAGSTRING_CONTROL_make = "make";
 export const TAGSTRING_CONTROL_index = "index";
 export const TAGSTRING_CONTROL_index_address = "index-address";
+export const TAGSTRING_CONTROL_constructor = "constructor";
 
 export const TAGSTRING_CONTROL_unary_i = "unary_i";
 export const TAGSTRING_CONTROL_binary_i = "binary_i";
@@ -142,6 +145,7 @@ export const TAGSTRING_CONTROL_logical_imm_i = "logical_imm_i";
 export const TAGSTRING_CONTROL_member_i = "member_i";
 export const TAGSTRING_CONTROL_index_i = "index_i";
 export const TAGSTRING_CONTROL_index_address_i = "index_address_i";
+export const TAGSTRING_CONTROL_constructor_i = "constructor_i";
 
 export const TAGSTRING_USER_type_bool = "bool-type";
 export const TAGSTRING_USER_type_int32 = "int32-type";
