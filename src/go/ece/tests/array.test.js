@@ -97,7 +97,7 @@ describe("Fixed size array", () => {
         }
         fmt.Println(a)
         `
-        expect(evaluateSequence(program, false)).toBe("[[1 0 0 0 0] [1 1 0 0 0] [1 2 1 0 0] [1 3 3 1 0] [1 4 6 4 1]]\n");
+        expect(evaluateSequence(program)).toBe("[[1 0 0 0 0] [1 1 0 0 0] [1 2 1 0 0] [1 3 3 1 0] [1 4 6 4 1]]\n");
     })
 
     it('can construct one-dimensional array with constructor', () => {

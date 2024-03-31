@@ -58,7 +58,7 @@ class EnvironmentHashTable extends HeapObject {
 
     this.set_cannnot_be_freed(true);
 
-    const old_table = this.get_table_address().reference() as ComplexArray;
+    const old_table = this.get_table_address() as ComplexArray;
     old_table.set_cannnot_be_freed(true);
 
     const new_table = new ComplexArray(this.heap, ComplexArray.allocate(this.heap, new_capacity));
@@ -138,6 +138,7 @@ class EnvironmentHashTable extends HeapObject {
       throw new Error("EnvironmentHashTable.insert_internal: Invalid tag");
     }
 
+    new_entry.reference(); // Increase reference count
     this.increment_table_size();
     const table = this.get_table_address();
 
@@ -147,7 +148,7 @@ class EnvironmentHashTable extends HeapObject {
       const current_entry = table.get_value_address(index) as EnvironmentEntry;
       if (current_entry.is_nil()) {
         table.set_value_address(index, new_entry);
-        return;
+        break;
       }
 
       const desired = this.to_index(current_entry.get_key_address().get_hash());
@@ -156,6 +157,7 @@ class EnvironmentHashTable extends HeapObject {
       if (current_dist < dist) {
         const temp = current_entry.reference() as EnvironmentEntry;
         table.set_value_address(index, new_entry);
+        new_entry.free();
         new_entry = temp;
         dist = current_dist;
       }
@@ -163,6 +165,7 @@ class EnvironmentHashTable extends HeapObject {
       dist++;
       index = this.to_index(index + 1);
     }
+    new_entry.free();
   }
 
   private contains(variable_name_address: number): boolean {
