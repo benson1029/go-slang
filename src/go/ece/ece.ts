@@ -45,7 +45,7 @@ class ECE {
     const default_imports = get_default_imports();
     E.create_global_environment(imports, default_imports);
     load(this.program, C, S, E, this.heap, imports, default_imports);
-
+    return JSON.stringify(this.program, null, 2);
     // Create output buffer
     let output_buffer = ``
     let output = (value: any) => {

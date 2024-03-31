@@ -1,9 +1,276 @@
+abstract class Type {
+  tag: string;
+  constructor() {
+    this.tag = "";
+  }
+
+  isNil(): boolean {
+    return false;
+  }
+
+  isInt32(): boolean {
+    return false;
+  }
+
+  isFloat32(): boolean {
+    return false;
+  }
+
+  isBool(): boolean {
+    return false;
+  }
+
+  isString(): boolean {
+    return false;
+  }
+
+  isFunction(): boolean {
+    return false;
+  }
+
+  isArray(): boolean {
+    return false;
+  }
+
+  isSlice(): boolean {
+    return false;
+  }
+
+  isChannel(): boolean {
+    return false;
+  }
+
+  isStruct(): boolean {
+    return false;
+  }
+
+  toObject(): any {
+
+  }
+}
+
+class NilType extends Type {
+  constructor() {
+    super();
+    this.tag = "nil";
+  }
+
+  isNil(): boolean {
+    return true;
+  }
+
+  toObject(): any {
+    return null;
+  }
+}
+
+class Int32Type extends Type {
+  constructor() {
+    super();
+    this.tag = "int32";
+  }
+
+  isInt32(): boolean {
+    return true;
+  }
+
+  toObject(): any {
+    return { tag: "int32-type" };
+  }
+}
+
+class Float32Type extends Type {
+  constructor() {
+    super();
+    this.tag = "float32";
+  }
+
+  isFloat32(): boolean {
+    return true;
+  }
+
+  toObject(): any {
+    return { tag: "float32-type" };
+  }
+}
+
+class BoolType extends Type {
+  constructor() {
+    super();
+    this.tag = "bool";
+  }
+
+  isBool(): boolean {
+    return true;
+  }
+
+  toObject(): any {
+    return { tag: "bool-type" };
+  }
+}
+
+class StringType extends Type {
+  constructor() {
+    super();
+    this.tag = "string";
+  }
+
+  isString(): boolean {
+    return true;
+  }
+
+  toObject(): any {
+    return { tag: "string-type" };
+  }
+}
+
+class FunctionType extends Type {
+  params: Type[];
+  returnType: null | Type;
+
+  constructor(params: Type[], returnType: Type) {
+    super();
+    this.tag = "function-type";
+    this.params = params;
+    this.returnType = returnType;
+  }
+
+  isFunction(): boolean {
+    return true;
+  }
+
+  toObject(): any {
+    return {
+      tag: "function-type",
+      params: this.params.map((p) => p.toObject()),
+      returnType: this.returnType.toObject(),
+    };
+  }
+}
+
+class ArrayType extends Type {
+  len: number;
+  type: Type;
+
+  constructor(type: Type) {
+    super();
+    this.tag = "array-type";
+    this.type = type;
+  }
+
+  isArray(): boolean {
+    return true;
+  }
+
+  toObject(): any {
+    return {
+      tag: "array-type",
+      len: this.len,
+      type: this.type.toObject(),
+    };
+  }
+}
+
+class SliceType extends Type {
+  type: Type;
+
+  constructor(type: Type) {
+    super();
+    this.tag = "slice-type";
+    this.type = type;
+  }
+
+  isSlice(): boolean {
+    return true;
+  }
+
+  toObject(): any {
+    return {
+      tag: "slice-type",
+      type: this.type.toObject(),
+    };
+  }
+}
+
+class ChannelType extends Type {
+  type: Type;
+
+  constructor(type: Type) {
+    super();
+    this.tag = "channel-type";
+    this.type = type;
+  }
+
+  isChannel(): boolean {
+    return true;
+  }
+
+  toObject(): any {
+    return {
+      tag: "channel-type",
+      type: this.type.toObject(),
+    };
+  }
+}
+
+class StructType extends Type {
+  constructor(tag: string) {
+    super();
+    this.tag = tag;
+  }
+
+  isStruct(): boolean {
+    return true;
+  }
+
+  toObject(): any {
+    return {
+      tag: "struct-type",
+      name: this.tag,
+    };
+  }
+}
+
+class AddressType extends Type {
+  type: Type;
+
+  constructor(type: Type) {
+    super();
+    this.tag = "address-type";
+    this.type = type;
+  }
+
+  toObject(): any {
+    return {
+      tag: "address-type",
+      type: this.type.toObject(),
+    };
+  }
+}
+
+function toType(comp: any): Type {
+  return new Int32Type();
+  // switch (type) {
+  //   case "int32":
+  //     return new PrimitiveType("int32");
+  //   case "float32":
+  //     return new PrimitiveType("float32");
+  //   case "bool":
+  //     return new PrimitiveType("bool");
+  //   case "string":
+  //     return new PrimitiveType("string");
+  //   case
+  //   default:
+  //     throw new Error(`Invalid type ${type}`);
+  // }
+}
+
 class VariableObject {
   name: string;
-  type: string;
+  type: Type;
   level: number;
 
-  constructor(name: string, type: string, level: number) {
+  constructor(name: string, type: Type, level: number) {
     this.name = name;
     this.type = type;
     this.level = level;
@@ -12,10 +279,12 @@ class VariableObject {
 
 class FunctionObject {
   comp: any;
+  type: FunctionType;
   level: number;
 
-  constructor(comp: any, level: number) {
+  constructor(comp: any, type: FunctionType, level: number) {
     this.comp = comp;
+    this.type = type;
     this.level = level;
   }
 }
@@ -28,9 +297,47 @@ class DeclarationObject {
   }
 }
 
+class StructObject {
+  name: string;
+  fields: Map<string, Type>;
+  methods: Map<string, FunctionType>;
+
+  constructor(name: string, fields: Array<{ name: string; type: Type }>) {
+    this.name = name;
+    this.fields = new Map();
+    this.methods = new Map();
+    for (let field of fields) {
+      this.fields.set(field.name, field.type);
+    }
+  }
+
+  addMethod(name: string, type: FunctionType) {
+    if (this.methods.has(name)) {
+      throw new Error(`Method ${name} already declared in struct.`);
+    }
+    this.methods.set(name, type);
+  }
+
+  getMethod(name: string): FunctionType {
+    let method = this.methods.get(name);
+    if (method === undefined) {
+      throw new Error(`Method ${name} not declared in struct.`);
+    }
+    return method;
+  }
+
+  getField(name: string): Type {
+    let field = this.fields.get(name);
+    if (field === undefined) {
+      throw new Error(`Field ${name} not declared in struct.`);
+    }
+    return field;
+  }
+}
+
 class Scope {
-  frames: Array<Map<string, VariableObject>>;
-  variables: Map<string, Array<VariableObject>>;
+  frames: Array<Map<string, VariableObject | StructObject>>;
+  variables: Map<string, Array<VariableObject | StructObject>>;
   function_declaration_stack: Array<FunctionObject>;
   current_declaration: DeclarationObject | null;
 
@@ -60,7 +367,7 @@ class Scope {
     });
   }
 
-  addVariable(name: string, type: string): void {
+  addVariable(name: string, type: Type): void {
     let frame = this.frames[this.frames.length - 1];
     if (frame.has(name)) {
       throw new Error(
@@ -76,7 +383,21 @@ class Scope {
       .push(new VariableObject(name, type, this.frames.length - 1));
   }
 
-  getVariableType(name: string): VariableObject {
+  addStruct(name: string, fields: Array<{ name: string; type: Type }>): void {
+    let frame = this.frames[this.frames.length - 1];
+    if (frame.has(name)) {
+      throw new Error(
+        `StructObject ${name} already declared in current scope.`
+      );
+    }
+    frame.set(name, new StructObject(name, fields));
+    if (!this.variables.has(name)) {
+      this.variables.set(name, []);
+    }
+    this.variables.get(name).push(new StructObject(name, fields));
+  }
+
+  getType(name: string): VariableObject | StructObject {
     let types = this.variables.get(name);
     if (types === undefined) {
       throw new Error(`VariableObject ${name} not declared.`);
@@ -93,9 +414,12 @@ const microcode_preprocess = {
     },
     scope: Scope
   ) => {
-    const t = scope.getVariableType(comp.name);
+    const t = scope.getType(comp.name);
     if (t === undefined) {
       throw new Error(`VariableObject ${comp.name} not declared.`);
+    }
+    if (!(t instanceof VariableObject)) {
+      throw new Error(`VariableObject ${comp.name} is not a variable.`);
     }
     if (scope.current_declaration != null) {
       scope.current_declaration.captures.push({ name: t.name, type: t.type });
@@ -109,6 +433,7 @@ const microcode_preprocess = {
         break;
       }
     }
+    return t.type;
   },
 
   index: (
@@ -119,8 +444,15 @@ const microcode_preprocess = {
     },
     scope: Scope
   ) => {
-    preprocess(comp.array, scope);
-    preprocess(comp.index, scope);
+    const idx_t = preprocess(comp.index, scope);
+    const arr_t = preprocess(comp.array, scope);
+    if (!arr_t.isArray()) {
+      throw new Error("Indexing non-array type.");
+    }
+    if (!idx_t.isInt32()) {
+      throw new Error("Indexing with non-int32 type.");
+    }
+    return (arr_t as ArrayType).type;
   },
 
   slice: (
@@ -132,9 +464,19 @@ const microcode_preprocess = {
     },
     scope: Scope
   ) => {
-    preprocess(comp.array, scope);
-    preprocess(comp.left, scope);
-    preprocess(comp.right, scope);
+    const left_t = preprocess(comp.left, scope);
+    const right_t = preprocess(comp.right, scope);
+    const arr_t = preprocess(comp.array, scope);
+    if (!arr_t.isArray()) {
+      throw new Error("Slicing non-array type.");
+    }
+    if (!left_t.isInt32()) {
+      throw new Error("Slicing with non-int32 type.");
+    }
+    if (!right_t.isInt32()) {
+      throw new Error("Slicing with non-int32 type.");
+    }
+    return new SliceType((arr_t as ArrayType).type);
   },
 
   member: (
@@ -145,7 +487,12 @@ const microcode_preprocess = {
     },
     scope: Scope
   ) => {
-    preprocess(comp.object, scope);
+    const t = preprocess(comp.object, scope);
+    if (!t.isStruct()) {
+      throw new Error("Member access on non-user-defined type.");
+    }
+    const obj_t = scope.getType(t.tag) as StructObject;
+    return obj_t.getField(comp.member);
   },
 
   "name-address": (
@@ -155,7 +502,8 @@ const microcode_preprocess = {
     },
     scope: Scope
   ) => {
-    preprocess({ tag: "name", name: comp.name }, scope);
+    const t = preprocess({ tag: "name", name: comp.name }, scope);
+    return new AddressType(t);
   },
 
   "index-address": (
@@ -166,7 +514,8 @@ const microcode_preprocess = {
     },
     scope: Scope
   ) => {
-    preprocess({ tag: "index", array: comp.array, index: comp.index }, scope)
+    const t = preprocess({ tag: "index", array: comp.array, index: comp.index }, scope);
+    return new AddressType(t);
   },
 
   "slice-address": (
@@ -178,7 +527,11 @@ const microcode_preprocess = {
     },
     scope: Scope
   ) => {
-    preprocess({ tag: "slice", array: comp.array, left: comp.left, right: comp.right }, scope)
+    const t = preprocess(
+      { tag: "slice", array: comp.array, left: comp.left, right: comp.right },
+      scope
+    );
+    return new AddressType(t);
   },
 
   "member-address": (
@@ -189,7 +542,11 @@ const microcode_preprocess = {
     },
     scope: Scope
   ) => {
-    preprocess({ tag: "member", object: comp.object, member: comp.member }, scope)
+    const t = preprocess(
+      { tag: "member", object: comp.object, member: comp.member },
+      scope
+    );
+    return new AddressType(t);
   },
 
   literal: (
@@ -200,25 +557,33 @@ const microcode_preprocess = {
     },
     scope: Scope
   ) => {
-    // nothing to do
+    return toType(comp.type);
   },
 
   var: (
     comp: {
       tag: string;
       name: string;
-      type: string | null;
+      type: any;
       value: any;
     },
     scope: Scope
   ) => {
-    if (comp.value === null) {
-      if (comp.type === null) {
+    if (comp.value == null) {
+      if (comp.type == null) {
         throw new Error(`VariableObject ${comp.name} must have a type.`);
       }
+    } else {
+      const v = preprocess(comp.value, scope);
+      if (comp.type == null) {
+        comp.type = v.toObject();
+      }
+      if (comp.value.toObject() !== comp.type) {
+        throw new Error("VariableObject type mismatch.");
+      }
     }
-    preprocess(comp.value, scope);
-    scope.addVariable(comp.name, comp.type);
+    scope.addVariable(comp.name, toType(comp.type));
+    return new NilType();
   },
 
   assign: (
@@ -231,12 +596,16 @@ const microcode_preprocess = {
     scope: Scope
   ) => {
     scope.current_declaration = new DeclarationObject([]);
-    preprocess(comp.value, scope);
+    const v = preprocess(comp.value, scope);
     if (comp.return_captures != null) {
       comp.return_captures.captures = scope.current_declaration.captures;
     }
     scope.current_declaration = null;
-    preprocess(comp.name, scope);
+    const n = preprocess(comp.name, scope);
+    if (n.toObject() !== v.toObject()) {
+      throw new Error("Assignment type mismatch.");
+    }
+    return v;
   },
 
   unary: (
@@ -247,7 +616,22 @@ const microcode_preprocess = {
     },
     scope: Scope
   ) => {
-    preprocess(comp.operand, scope);
+    const o = preprocess(comp.operand, scope);
+    switch (comp.operator) {
+      case "+":
+      case "-":
+        if (!o.isInt32() && !o.isFloat32()) {
+          throw new Error("Unary operator on non-numeric type.");
+        }
+        return o;
+      case "!":
+        if (!o.isBool()) {
+          throw new Error("Unary operator ! on non-bool type.");
+        }
+        return o;
+      default:
+        throw new Error(`Invalid unary operator ${comp.operator}.`);
+    }
   },
 
   postfix: (
@@ -258,7 +642,17 @@ const microcode_preprocess = {
     },
     scope: Scope
   ) => {
-    preprocess(comp.operand, scope);
+    const o = preprocess(comp.operand, scope);
+    switch (comp.operator) {
+      case "++":
+      case "--":
+        if (!o.isInt32() && !o.isFloat32()) {
+          throw new Error("Postfix operator on non-numeric type.");
+        }
+        return o;
+      default:
+        throw new Error(`Invalid postfix operator ${comp.operator}.`);
+    }
   },
 
   binary: (
@@ -270,8 +664,49 @@ const microcode_preprocess = {
     },
     scope: Scope
   ) => {
-    preprocess(comp.leftOperand, scope);
-    preprocess(comp.rightOperand, scope);
+    const left = preprocess(comp.leftOperand, scope);
+    const right = preprocess(comp.rightOperand, scope);
+    switch (comp.operator) {
+      case "+":
+      case "-":
+      case "*":
+      case "/":
+      case "%":
+        if (!left.isInt32() && !left.isFloat32()) {
+          throw new Error("Binary operator on non-numeric type.");
+        }
+        if (!right.isInt32() && !right.isFloat32()) {
+          throw new Error("Binary operator on non-numeric type.");
+        }
+        if (left.isFloat32() || right.isFloat32()) {
+          return new Float32Type();
+        }
+        return new Int32Type();
+      case "==":
+      case "!=":
+      case "<":
+      case "<=":
+      case ">":
+      case ">=":
+        if (!left.isInt32() && !left.isFloat32()) {
+          throw new Error("Binary operator on non-numeric type.");
+        }
+        if (!right.isInt32() && !right.isFloat32()) {
+          throw new Error("Binary operator on non-numeric type.");
+        }
+        return new BoolType();
+      case "&&":
+      case "||":
+        if (!left.isBool()) {
+          throw new Error("Binary operator on non-bool type.");
+        }
+        if (!right.isBool()) {
+          throw new Error("Binary operator on non-bool type.");
+        }
+        return new BoolType();
+      default:
+        throw new Error(`Invalid binary operator ${comp.operator}.`);
+    }
   },
 
   sequence: (
@@ -281,9 +716,11 @@ const microcode_preprocess = {
     },
     scope: Scope
   ) => {
+    let t = new NilType();
     for (let exp of comp.body) {
-      preprocess(exp, scope);
+      t = preprocess(exp, scope);
     }
+    return t;
   },
 
   block: (
@@ -296,6 +733,7 @@ const microcode_preprocess = {
     scope.newFrame();
     preprocess(comp.body, scope);
     scope.popFrame();
+    return new NilType();
   },
 
   if: (
@@ -307,9 +745,13 @@ const microcode_preprocess = {
     },
     scope: Scope
   ) => {
-    preprocess(comp.condition, scope);
+    const c = preprocess(comp.condition, scope);
     preprocess(comp.then_body, scope);
     preprocess(comp.else_body, scope);
+    if (!c.isBool()) {
+      throw new Error("If condition must be a bool type.");
+    }
+    return new NilType();
   },
 
   for: (
@@ -324,10 +766,14 @@ const microcode_preprocess = {
   ) => {
     scope.newFrame();
     preprocess(comp.init, scope);
-    preprocess(comp.condition, scope);
+    const c = preprocess(comp.condition, scope);
     preprocess(comp.update, scope);
     preprocess(comp.body, scope);
     scope.popFrame();
+    if (!c.isBool()) {
+      throw new Error("For condition must be a bool type.");
+    }
+    return new NilType();
   },
 
   break: (
@@ -337,6 +783,7 @@ const microcode_preprocess = {
     scope: Scope
   ) => {
     // nothing to do
+    return new NilType();
   },
 
   continue: (
@@ -346,6 +793,7 @@ const microcode_preprocess = {
     scope: Scope
   ) => {
     // nothing to do
+    return new NilType();
   },
 
   return: (
@@ -355,7 +803,15 @@ const microcode_preprocess = {
     },
     scope: Scope
   ) => {
-    preprocess(comp.value, scope);
+    const v = preprocess(comp.value, scope);
+    if (scope.function_declaration_stack.length === 0) {
+      throw new Error("Return statement outside of function.");
+    }
+    const f = scope.function_declaration_stack[scope.function_declaration_stack.length - 1];
+    if (f.type.returnType !== v.toObject()) {
+      throw new Error("Return type mismatch.");
+    }
+    return new NilType();
   },
 
   function: (
@@ -374,7 +830,7 @@ const microcode_preprocess = {
 
     scope.newFrame();
     scope.function_declaration_stack.push(
-      new FunctionObject(comp, scope.level())
+      new FunctionObject(comp, toType(comp) as FunctionType, scope.level())
     );
     for (let param of comp.params) {
       scope.addVariable(param.name, param.type);
@@ -392,29 +848,32 @@ const microcode_preprocess = {
       captures.set(c.name, c);
     }
     comp.captures = Array.from(captures.values());
+
+    return new FunctionType(
+      comp.params.map((p) => toType(p.type)),
+      toType(comp.returnType)
+    );
   },
 
-  "call-stmt":
-    (
-      comp: {
-        tag: string;
-        body: any;
-      },
-      scope: Scope
-    ) => {
-      preprocess(comp.body, scope);
+  "call-stmt": (
+    comp: {
+      tag: string;
+      body: any;
     },
+    scope: Scope
+  ) => {
+    preprocess(comp.body, scope);
+  },
 
-    "go-call-stmt":
-    (
-      comp: {
-        tag: string;
-        body: any;
-      },
-      scope: Scope
-    ) => {
-      preprocess(comp.body, scope);
+  "go-call-stmt": (
+    comp: {
+      tag: string;
+      body: any;
     },
+    scope: Scope
+  ) => {
+    preprocess(comp.body, scope);
+  },
 
   call: (
     comp: {
@@ -438,9 +897,9 @@ const microcode_preprocess = {
     },
     scope: Scope
   ) => {
-      for (let arg of comp.args) {
-        preprocess(arg, scope);
-      }
+    for (let arg of comp.args) {
+      preprocess(arg, scope);
+    }
   },
 
   "channel-send": (
@@ -510,9 +969,9 @@ const microcode_preprocess = {
   ) => {
     for (let exp of comp.body) {
       if (exp.tag === "var") {
-        preprocess({ tag: "var", name: exp.name }, scope);
+        preprocess({ tag: "var", name: exp.name, type: toType(exp.type) }, scope);
       } else if (exp.tag === "function") {
-        preprocess({ tag: "var", name: exp.name }, scope);
+        preprocess({ tag: "var", name: exp.name, type: toType(exp) }, scope);
       } else if (exp.tag === "struct") {
         // nothing to do
       } else if (exp.tag === "struct-method") {
@@ -523,23 +982,38 @@ const microcode_preprocess = {
     }
     for (let exp of comp.body) {
       if (exp.tag === "var") {
-        preprocess({ tag: "assign", name: {
-          tag: "name-address",
-          name: exp.name
-        }, value: exp.value, return_captures: exp }, scope);
+        preprocess(
+          {
+            tag: "assign",
+            name: {
+              tag: "name-address",
+              name: exp.name,
+            },
+            value: exp.value,
+            return_captures: exp,
+          },
+          scope
+        );
       } else if (exp.tag === "function") {
-        preprocess({ tag: "assign", name: {
-          tag: "name-address",
-          name: exp.name
-        }, value: exp }, scope);
+        preprocess(
+          {
+            tag: "assign",
+            name: {
+              tag: "name-address",
+              name: exp.name,
+            },
+            value: exp,
+          },
+          scope
+        );
       }
     }
   },
 };
 
-function preprocess(comp: any, scope: Scope) {
+function preprocess(comp: any, scope: Scope): Type {
   if (comp === null || comp === undefined) {
-    return;
+    return new NilType();
   }
   if (comp.tag in microcode_preprocess) {
     return microcode_preprocess[comp.tag](comp, scope);
@@ -547,7 +1021,11 @@ function preprocess(comp: any, scope: Scope) {
   throw new Error(`Invalid tag ${comp.tag}`);
 }
 
-function preprocess_program(program: any, imports: any[], default_imports: any[]) {
+function preprocess_program(
+  program: any,
+  imports: any[],
+  default_imports: any[]
+) {
   let scope = new Scope();
   for (let imp of imports) {
     scope.addVariable(imp.name, undefined);
