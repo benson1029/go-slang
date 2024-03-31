@@ -6,7 +6,8 @@ import { ControlFor } from '../../heap/types/control/for';
 import { PrimitiveBool } from '../../heap/types/primitive/bool';
 import { auto_cast } from '../../heap/types/auto_cast';
 import { ControlForI } from '../../heap/types/control/for_i';
-import { TAG_CONTROL_exit_scope_i, TAG_CONTROL_for_i } from '../../heap/types/tags';
+import { TAG_COMPLEX_string, TAG_CONTROL_exit_scope_i, TAG_CONTROL_for_i, TAG_CONTROL_var } from '../../heap/types/tags';
+import { ControlVar } from '../../heap/types/control/var';
 
 function evaluate_for(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
     const cmd_object = new ControlFor(heap, cmd);
@@ -18,11 +19,20 @@ function evaluate_for(cmd: number, heap: Heap, C: ContextControl, S: ContextStas
     heap.free_object(exit_scope_cmd);
 
     // Push for loop body
+    const init_obj = cmd_object.get_init_address();
+    let loopVar;
+    if (init_obj.get_tag() === TAG_CONTROL_var) {
+        const var_cmd = init_obj as ControlVar;
+        loopVar = var_cmd.get_name_address();
+    } else {
+        loopVar = auto_cast(heap, 0);
+    }
     const for_i_cmd = heap.allocate_any({
         tag: "for_i",
         condition: cmd_object.get_condition_address(),
         update: cmd_object.get_update_address(),
         body: cmd_object.get_body_address(),
+        loopVar: loopVar,
     });
     C.push(for_i_cmd);
     heap.free_object(for_i_cmd);
@@ -41,6 +51,7 @@ function evaluate_for_i(cmd: number, heap: Heap, C: ContextControl, S: ContextSt
     const condition = cmd_object.get_condition_address();
     const update = cmd_object.get_update_address();
     const body = cmd_object.get_body_address();
+    const loopVar = cmd_object.get_loop_var();
 
     const condition_value = auto_cast(heap, S.pop()) as unknown as PrimitiveBool;
     if (condition_value.get_value()) {
@@ -48,6 +59,19 @@ function evaluate_for_i(cmd: number, heap: Heap, C: ContextControl, S: ContextSt
         C.push(cmd_object.address);
         C.push(condition.address);
         C.push(update.address);
+
+        if (loopVar.get_tag() === TAG_COMPLEX_string) {
+            // Copy the loop variable into a new scope
+            const variable = E.get_frame().get_variable_address(loopVar.address);
+            const value = variable.get_value();
+            E.push_frame();
+            E.get_frame().insert_new_variable(loopVar.address);
+            E.get_frame().get_variable_address(loopVar.address).set_value(value);
+            const exit_scope_cmd = heap.allocate_any({ tag: "exit-scope_i" });
+            C.push(exit_scope_cmd);
+            heap.free_object(exit_scope_cmd);
+        }
+
         C.push(body.address);
     } else {
         // Do nothing to terminate the loop

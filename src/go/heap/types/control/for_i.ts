@@ -5,10 +5,12 @@
  * - 4 bytes address of the condition (expression)
  * - 4 bytes address of the update (assign)
  * - 4 bytes address of the body (block)
+ * - 4 bytes address of the loop variable (COMPLEX_string)
  */
 
 import { Heap } from "../../heap";
 import { auto_cast } from "../auto_cast";
+import { ComplexString } from "../complex/string";
 import { HeapObject } from "../objects";
 import { TAG_CONTROL_for_i } from "../tags";
 
@@ -25,12 +27,17 @@ class ControlForI extends HeapObject {
         return auto_cast(this.heap, this.get_child(2));
     }
 
-    public static allocate(heap: Heap, condition: HeapObject, update: HeapObject, body: HeapObject): number {
-        const address = heap.allocate_object(TAG_CONTROL_for_i, 3, 3);
+    public get_loop_var(): ComplexString {
+        return auto_cast(this.heap, this.get_child(3)) as ComplexString;
+    }
+
+    public static allocate(heap: Heap, condition: HeapObject, update: HeapObject, body: HeapObject, loopVar: HeapObject): number {
+        const address = heap.allocate_object(TAG_CONTROL_for_i, 4, 4);
 
         heap.set_child(address, 0, condition.reference().address);
         heap.set_child(address, 1, update.reference().address);
         heap.set_child(address, 2, body.reference().address);
+        heap.set_child(address, 3, loopVar.reference().address);
 
         return address;
     }
@@ -40,7 +47,8 @@ class ControlForI extends HeapObject {
         result += this.address.toString() + " (for_i): ";
         result += "condition: " + this.get_condition_address().stringify() + ", ";
         result += "update: " + this.get_update_address().stringify() + ", ";
-        result += "body: " + this.get_body_address().stringify();
+        result += "body: " + this.get_body_address().stringify() + ", ";
+        result += "loopVar: " + this.get_loop_var().stringify();
         return result;
     }
 }

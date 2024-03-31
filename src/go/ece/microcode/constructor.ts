@@ -4,7 +4,7 @@ import { ContextStash } from '../../heap/types/context/stash';
 import { Heap } from '../../heap';
 import { ControlMake } from '../../heap/types/control/make';
 import { auto_cast } from '../../heap/types/auto_cast';
-import { TAG_USER_type_array } from '../../heap/types/tags';
+import { TAG_USER_type_array, TAG_USER_type_function } from '../../heap/types/tags';
 import { ComplexArray } from '../../heap/types/complex/array';
 import { UserTypeArray } from '../../heap/types/user/type/array';
 import { UserVariable } from '../../heap/types/user/variable';
@@ -28,6 +28,11 @@ function evaluate_make(cmd: number, heap: Heap, C: ContextControl, S: ContextSta
             array.free();
             break;
         }
+        case TAG_USER_type_function:
+            const nil_address = heap.allocate_any(null);
+            S.push(nil_address);
+            heap.free_object(nil_address);
+            break;
         default:
             throw new Error("evaluate_make: Invalid type");
     }

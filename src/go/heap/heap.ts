@@ -738,9 +738,10 @@ class Heap {
      * - 4 bytes address of the condition (expression)
      * - 4 bytes address of the update (assign)
      * - 4 bytes address of the body (block)
+     * - 4 bytes address of the loop variable (COMPLEX_string)
      */
-    public allocate_CONTROL_for_i(obj: { tag: string, condition: any, update: any, body: any }): number {
-        return ControlForI.allocate(this, obj.condition, obj.update, obj.body);
+    public allocate_CONTROL_for_i(obj: { tag: string, condition: any, update: any, body: any, loopVar: any }): number {
+        return ControlForI.allocate(this, obj.condition, obj.update, obj.body, obj.loopVar);
     }
 
     /**

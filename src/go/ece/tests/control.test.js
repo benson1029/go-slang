@@ -251,4 +251,31 @@ describe('Evaluating control structures', () => {
         }
         `)).toBe("0 0\n");
     })
+
+    it('lambda in for loop should capture global variables by reference', () => {
+        expect(evaluateSequence(`
+        var f func() int32
+        var i int32
+        for i = 0; i < 3; i++ {
+            f = func() int32 {
+                return i
+            }
+        }
+        fmt.Println(f())
+        `)).toBe("3\n");
+    })
+
+    // New patch in Go 1.22
+    // See https://go.dev/blog/loopvar-preview
+    it('lambda in for loop should capture loop variable in iteration scope', () => {
+        expect(evaluateSequence(`
+        var f func() int32
+        for i := 0; i < 3; i++ {
+            f = func() int32 {
+                return i
+            }
+        }
+        fmt.Println(f())
+        `)).toBe("2\n");
+    })
 })
