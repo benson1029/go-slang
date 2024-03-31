@@ -5,6 +5,7 @@ import { Heap } from '../../../heap';
 import { auto_cast } from '../../../heap/types/auto_cast';
 import { TAG_COMPLEX_array } from '../../../heap/types/tags';
 import { ComplexArray } from '../../../heap/types/complex/array';
+import { ArrayType, Int32Type, SliceType, Type } from '../../loader/typeUtil';
 
 function evaluate_builtin(name: string, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv, output: Function, args: number[]): void {
     if (name === "len") {
@@ -20,6 +21,19 @@ function evaluate_builtin(name: string, heap: Heap, C: ContextControl, S: Contex
     }
 }
 
+function get_builtin_type(name: string, args: Type[]): Type {
+    if (name === "len") {
+        if (args.length === 1) {
+            if (args[0] instanceof ArrayType || args[0] instanceof SliceType) {
+                return new Int32Type();
+            }
+            throw new Error("len: Argument is not an array or slice");
+        }
+        throw new Error("len: Expected 1 argument");
+    }
+    throw new Error("get_builtin_type: Builtin not found");
+}
+
 function link_imports(): { name: string; value: any }[] {
     return [
         { name: "append", value: "default.append" },
@@ -29,5 +43,6 @@ function link_imports(): { name: string; value: any }[] {
 
 export {
     evaluate_builtin,
+    get_builtin_type,
     link_imports,
 };

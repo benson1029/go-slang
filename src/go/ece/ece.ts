@@ -38,7 +38,7 @@ class ECE {
     let E = thread.env();
 
     // Link imports
-    let imports = []
+    let imports = [];
     for (let imp of this.program.imports) {
       imports = imports.concat(link_imports(imp));
     }
@@ -47,10 +47,10 @@ class ECE {
     load(this.program, C, S, E, this.heap, imports, default_imports);
 
     // Create output buffer
-    let output_buffer = ``
+    let output_buffer = ``;
     let output = (value: any) => {
       output_buffer += value;
-    }
+    };
 
     // Evaluate the program.
     while (!C.empty()) {
@@ -67,7 +67,9 @@ class ECE {
 
     if (check_all_free) {
       if (S.empty() === false) {
-        throw new Error("ECE.evaluate: Stash not empty after program execution");
+        throw new Error(
+          "ECE.evaluate: Stash not empty after program execution"
+        );
       }
     }
 
@@ -75,7 +77,9 @@ class ECE {
 
     if (check_all_free) {
       if (this.heap.check_all_free() === false) {
-        throw new Error("ECE.evaluate: Not all objects are freed after program execution");
+        throw new Error(
+          "ECE.evaluate: Not all objects are freed after program execution"
+        );
       }
     }
 
