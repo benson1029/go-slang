@@ -9,6 +9,7 @@ import { ComplexString } from '../../../heap/types/complex/string';
 import { ComplexArray } from '../../../heap/types/complex/array';
 import { UserVariable } from '../../../heap/types/user/variable';
 import { HeapObject } from '../../../heap/types/objects';
+import { NilType, Type } from '../../loader/typeUtil';
 
 function print(heap: Heap, output: Function, obj: HeapObject): void {
     if (obj.get_tag() === TAG_COMPLEX_array) {
@@ -44,6 +45,13 @@ function evaluate_builtin(name: string, heap: Heap, C: ContextControl, S: Contex
     }
 }
 
+function get_builtin_type(name: string, args: Type[]): Type {
+    if (name === "Print" || name === "Println") {
+        return new NilType();
+    }
+    throw new Error("get_builtin_type: Builtin not found");
+}
+
 function link_imports(name: string): { name: string; value: any }[] {
     let imports = []
     if (name === "" || name === "Print") {
@@ -57,5 +65,6 @@ function link_imports(name: string): { name: string; value: any }[] {
 
 export {
     evaluate_builtin,
+    get_builtin_type,
     link_imports,
 };
