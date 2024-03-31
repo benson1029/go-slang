@@ -3,6 +3,7 @@ import { lookup_microcode } from "./microcode";
 import { load } from "./loader";
 import { ContextThread } from "../heap/types/context/thread";
 import { get_default_imports, link_imports } from "./microcode/builtin";
+import { ContextScheduler } from "../heap/types/context/scheduler";
 
 /**
  * Represents the main logic of the Explicit Control Evaluator.
@@ -24,14 +25,12 @@ class ECE {
     this.program = program;
   }
 
-  public evaluate(check_all_free: boolean = false) {
+  private startup_thread(): ContextThread {
     // Initialize the control, stash and environment.
     let thread = new ContextThread(
       this.heap,
       ContextThread.allocate(this.heap)
     );
-
-    this.heap.set_root(thread.address);
 
     let C = thread.control();
     let S = thread.stash();
@@ -46,19 +45,47 @@ class ECE {
     E.create_global_environment(imports, default_imports);
     load(this.program, C, S, E, this.heap, imports, default_imports);
 
+    return thread;
+  }
+
+  public evaluate(check_all_free: boolean = false) {
+    const scheduler = new ContextScheduler(
+      this.heap,
+      ContextScheduler.allocate(this.heap)
+    );
+
+    this.heap.set_root(scheduler.address);
+
+    // Keep a copy of the main thread.
+    const main_thread = this.startup_thread();
+    scheduler.enqueue(main_thread);
+
     // Create output buffer
     let output_buffer = ``;
-    let output = (value: any) => {
+    let output = (thread_id: number) => (value: any) => {
       output_buffer += value;
+      // output_buffer += `${thread_id}: ${value}\n`;
     };
 
     // Evaluate the program.
-    while (!C.empty()) {
-      const cmd = C.pop();
-      const microcode = lookup_microcode(this.heap.get_tag(cmd));
-      microcode(cmd, this.heap, C, S, E, output);
-      this.heap.free_object(cmd);
+    while (!scheduler.empty()) {
+      const thread = scheduler.dequeue();
+      if (!thread.control().empty()) {
+        const cmd = thread.control().pop();
+        const microcode = lookup_microcode(this.heap.get_tag(cmd));
+        microcode(
+          cmd,
+          this.heap,
+          thread,
+          scheduler,
+          output(thread.thread_id())
+        );
+        this.heap.free_object(cmd);
+        scheduler.enqueue(thread);
+      }
+      thread.free();
     }
+    scheduler.free();
 
     // console.log(S.stringify());
     // if (!S.empty()) {
@@ -66,14 +93,14 @@ class ECE {
     // }
 
     if (check_all_free) {
-      if (S.empty() === false) {
+      if (main_thread.stash().empty() === false) {
         throw new Error(
           "ECE.evaluate: Stash not empty after program execution"
         );
       }
     }
 
-    thread.free();
+    main_thread.free();
 
     if (check_all_free) {
       if (this.heap.check_all_free() === false) {

@@ -48,6 +48,24 @@ class ComplexQueue extends HeapObject {
     return new ComplexLinkedList(this.heap, this.get_child(1));
   }
 
+  private set_front_address(address: ComplexLinkedList): void {
+    if (this.get_tag() !== TAG_COMPLEX_queue) {
+      throw new Error("ComplexQueue.set_front_address: Invalid tag");
+    }
+    const old_front = this.front_linked_list();
+    this.set_child(0, address.reference().address);
+    old_front.free();
+  }
+
+  private set_back_address(address: ComplexLinkedList): void {
+    if (this.get_tag() !== TAG_COMPLEX_queue) {
+      throw new Error("ComplexQueue.set_back_address: Invalid tag");
+    }
+    const old_back = this.back_linked_list();
+    this.set_child(1, address.reference().address);
+    old_back.free();
+  }
+
   /**
    * Important: This method does not call reference() on the value.
    * @returns front value
@@ -93,13 +111,11 @@ class ComplexQueue extends HeapObject {
     const new_back = new ComplexLinkedList(this.heap, new_back_address);
 
     if (this.length() === 0) {
-      this.set_child(0, new_back.reference().address);
-      this.set_child(1, new_back.reference().address);
+      this.set_front_address(new_back);
+      this.set_back_address(new_back);
     } else {
-      const old_back = this.back_linked_list();
-      old_back.set_next_address(new_back);
-      this.set_child(1, new_back.reference().address);
-      old_back.free();
+      this.back_linked_list().set_next_address(new_back);
+      this.set_back_address(new_back);
     }
 
     this.increment_length();
@@ -123,7 +139,7 @@ class ComplexQueue extends HeapObject {
     this.decrement_length();
 
     if (this.length() === 0) {
-      this.set_child(1, PrimitiveNil.allocate());
+      this.set_back_address(this.front_linked_list());
     }
 
     return value;

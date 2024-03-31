@@ -73,6 +73,9 @@ export const TAG_CONTEXT_control = 0xC200; // 1100 0010 0000 0000
 export const TAG_CONTEXT_stash = 0xC201; // 1100 0010 0000 0001
 export const TAG_CONTEXT_env = 0xC202; // 1100 0010 0000 0010
 export const TAG_CONTEXT_thread = 0xC203; // 1100 0010 0000 0011
+export const TAG_CONTEXT_scheduler = 0xC204; // 1100 0010 0000 0100
+export const TAG_CONTEXT_waker = 0xC205; // 1100 0010 0000 0101
+
 
 export const TAG_USER_variable = 0xC301; // 1100 0011 0000 0001
 export const TAG_USER_struct = 0xC302; // 1100 0011 0000 0010

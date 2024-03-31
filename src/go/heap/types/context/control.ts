@@ -45,7 +45,7 @@ class ContextControl extends HeapObject {
   /**
    * Pushes a new element onto the control stack.
    * Important: This method calls reference() on the value.
-   * 
+   *
    * @param cmd The element to push onto the control stack.
    */
   public push(cmd: number): void {
@@ -59,7 +59,7 @@ class ContextControl extends HeapObject {
   /**
    * Peeks at the top element of the control stack.
    * Important: This method does not return a reference to the value.
-   * 
+   *
    * @returns The top element of the control stack.
    */
   public peek(): number {
@@ -72,12 +72,19 @@ class ContextControl extends HeapObject {
     return this.get_control().get_value_address().address;
   }
 
-
   public empty(): boolean {
     if (this.get_tag() !== TAG_CONTEXT_control) {
       throw new Error("ContextControl.length: Invalid tag");
     }
     return this.get_control().is_nil();
+  }
+
+  public clear(): void {
+    if (this.get_tag() !== TAG_CONTEXT_control) {
+      throw new Error("ContextControl.clear: Invalid tag");
+    }
+    this.get_control().free();
+    this.set_child(0, PrimitiveNil.allocate());
   }
 
   public static allocate(heap: Heap): number {
@@ -86,7 +93,9 @@ class ContextControl extends HeapObject {
   }
 
   public stringify_i(): string {
-    return this.address.toString() + " (control): " + this.get_control().stringify();
+    return (
+      this.address.toString() + " (control): " + this.get_control().stringify()
+    );
   }
 }
 
