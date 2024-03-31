@@ -547,3 +547,28 @@ describe(
         )
     }
 )
+
+describe(
+    "parser supports channel receive statements",
+
+    () => {
+        test(
+            "with multiple assignments",
+            async () => {
+                const code = `package main
+
+                import "fmt"
+
+                func main() {
+                    ch := make(chan int32)
+                    go func() {
+                        ch <- 1
+                    }()
+                    <- ch
+                }`;
+                const result = await parse(code);
+                expect(result).toBeInstanceOf(Object);
+            }
+        )
+    }
+)

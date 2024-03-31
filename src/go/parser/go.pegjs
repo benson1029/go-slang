@@ -364,6 +364,7 @@ Statement
     / ContinueStatement
     / SelectStatement
     / FunctionCall
+    / ChannelReceiveStatement
 
 PackageStatement "package"
     = "package" WhiteSpace __ identifier:Identifier { return { tag: "package", name: identifier }; }
@@ -398,6 +399,9 @@ ChannelSendStatement "channel send"
 
 ChannelReceiveExpression "channel receive"
     = "<-" __ name:VariableAddress { return { tag: "chan-receive", name: name }; }
+
+ChannelReceiveStatement "channel receive"
+    = body:ChannelReceiveExpression { return { tag: "chan-receive-stmt", body: body }; }
 
 // ===== 4. Sequences, Control Structures and Blocks =====
 
