@@ -13,6 +13,7 @@ export const TAG_COMPLEX_pointer = 0x4006; // 0100 0000 0000 0110
 export const TAG_COMPLEX_function = 0x4007; // 0100 0000 0000 0111
 export const TAG_COMPLEX_builtin = 0x4008; // 0100 0000 0000 1000
 export const TAG_COMPLEX_queue = 0x4009; // 0100 0000 0000 1001
+export const TAG_COMPLEX_mutex = 0x400A; // 0100 0000 0000 1010
 
 export const TAG_CONTROL_pop_i = 0x8001; // 1000 0000 0000 0001
 export const TAG_CONTROL_exit_scope_i = 0x8002; // 1000 0000 0000 0010

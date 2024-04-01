@@ -13,6 +13,10 @@ function evaluate_go_call_stmt(
   const cmd_object = auto_cast(heap, cmd) as ControlGoCallStmt;
   const forked_cmd = cmd_object.get_body_address();
 
+  // The original thread does nothing.
+  scheduler.enqueue(thread);
+
+  // The new thread runs the goroutine.
   const forked_thread = thread.fork();
   forked_thread.control().clear();
   forked_thread.control().push(forked_cmd.address);

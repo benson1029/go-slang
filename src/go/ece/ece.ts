@@ -83,7 +83,6 @@ class ECE {
           output(thread.thread_id())
         );
         this.heap.free_object(cmd);
-        scheduler.enqueue(thread);
       }
       thread.free();
     }
