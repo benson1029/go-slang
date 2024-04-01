@@ -26,6 +26,8 @@ class ECE {
   }
 
   private startup_thread(): ContextThread {
+    ContextThread.reset_thread_id_counter();
+
     // Initialize the control, stash and environment.
     let thread = new ContextThread(
       this.heap,

@@ -14,14 +14,18 @@ import { ContextControl } from "./control";
 import { ContextEnv } from "./env";
 import { ContextStash } from "./stash";
 
-let thread_id_counter = 0;
-
-function generate_thread_id(): number {
-  thread_id_counter += 1;
-  return thread_id_counter;
-}
-
 class ContextThread extends HeapObject {
+  private static thread_id_counter = 0;
+
+  public static reset_thread_id_counter(): void {
+    this.thread_id_counter = 0;
+  }
+
+  private static generate_thread_id(): number {
+    this.thread_id_counter += 1;
+    return this.thread_id_counter;
+  }
+
   public control(): ContextControl {
     if (this.get_tag() !== TAG_CONTEXT_thread) {
       throw new Error("ContextThread.control: Invalid tag");
@@ -53,7 +57,7 @@ class ContextThread extends HeapObject {
   public fork(): ContextThread {
     const forked_address = this.heap.allocate_object(TAG_CONTEXT_thread, 2, 3);
     this.heap.set_cannnot_be_freed(forked_address, true);
-    this.heap.set_field(forked_address, 1, generate_thread_id());
+    this.heap.set_field(forked_address, 1, ContextThread.generate_thread_id());
 
     const control = this.control().copy();
     this.heap.set_child(forked_address, 0, control.address);
@@ -71,7 +75,7 @@ class ContextThread extends HeapObject {
   public static allocate(heap: Heap): number {
     const address = heap.allocate_object(TAG_CONTEXT_thread, 2, 3);
     heap.set_cannnot_be_freed(address, true);
-    heap.set_field(address, 1, generate_thread_id());
+    heap.set_field(address, 1, this.generate_thread_id());
 
     const control = ContextControl.allocate(heap);
     heap.set_child(address, 0, control);
