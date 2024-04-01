@@ -797,13 +797,13 @@ const microcode_preprocess: {
     comp: {
       tag: string;
       name: any;
-      expression: any;
+      value: any;
     },
     scope: Scope,
     type_check: boolean
   ) => {
     const t = preprocess(comp.name, scope, type_check);
-    const v = preprocess(comp.expression, scope, type_check);
+    const v = preprocess(comp.value, scope, type_check);
     if (!type_check) {
       return new NilType();
     }
@@ -834,6 +834,17 @@ const microcode_preprocess: {
     return (t as ChannelType).type;
   },
 
+  "chan-receive-stmt": (
+    comp: {
+      tag: string;
+      body: any;
+    },
+    scope: Scope,
+    type_check: boolean
+  ) => {
+    return preprocess(comp.body, scope, type_check);
+  },
+  
   select: (
     comp: {
       tag: string;
