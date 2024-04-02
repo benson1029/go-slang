@@ -8,7 +8,7 @@ function checkSequence(sequence: string, hasError: boolean = false): void {
     import "fmt"
     
     func main() {
-        ${sequence};
+        ${sequence}
     }
     `
     const parsed_program = parse(program);

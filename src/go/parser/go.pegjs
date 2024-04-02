@@ -98,10 +98,13 @@ Start
 // ===== 1. Characters and Comments =====
 
 WhiteSpace "whitespace"
-  = [ \t] / LineTerminator
+  = [ \t]
 
 __
     = (WhiteSpace / Comment)*
+
+___
+    = (WhiteSpace / LineTerminator / Comment)*
 
 LineTerminator
   = "\n"
@@ -155,25 +158,25 @@ Identifier "identifier"
     / content1:ReservedWord content2:([a-zA-Z_][a-zA-Z0-9_]+) { return content1 + content2.map(x => (x instanceof Array) ? x.join("") : x).join(""); }
 
 IdentifierWithPackage "identifier"
-    = packageName:PackageName __ "." __ identifier:IdentifierWithPackage { return packageName + "." + identifier; }
+    = packageName:PackageName ___ "." ___ identifier:IdentifierWithPackage { return packageName + "." + identifier; }
     / identifier:Identifier { return identifier; }
 
 Name "name"
     = identifier:Identifier { return { tag: "name", name: identifier }; }
 
 FunctionTypeList "functionTypeList"
-    = __ param0:Type __ params:((__ "," __ Type)*) __ { return [param0].concat(params.map(x => x[3])); }
-    / __ param0:Type __ { return [param0]; }
-    / __ { return []; }
+    = ___ param0:Type ___ params:((___ "," ___ Type)*) ___ { return [param0].concat(params.map(x => x[3])); }
+    / ___ param0:Type ___ { return [param0]; }
+    / ___ { return []; }
 
 FunctionType "functionType"
-    = "func" __ "(" __ params:FunctionTypeList __ ")" __ returnType:Type { return { tag: "function-type", params: params, returnType: returnType }; }
-    / "func" __ "(" __ ")" __ returnType:Type { return { tag: "function-type", params: [], returnType: returnType }; }
-    / "func" __ "(" __ params:FunctionTypeList __ ")" { return { tag: "function-type", params: params, returnType: null }; }
-    / "func" __ "(" __ ")" { return { tag: "function-type", params: [], returnType: null }; }
+    = "func" ___ "(" ___ params:FunctionTypeList ___ ")" ___ returnType:Type { return { tag: "function-type", params: params, returnType: returnType }; }
+    / "func" ___ "(" ___ ")" ___ returnType:Type { return { tag: "function-type", params: [], returnType: returnType }; }
+    / "func" ___ "(" ___ params:FunctionTypeList ___ ")" { return { tag: "function-type", params: params, returnType: null }; }
+    / "func" ___ "(" ___ ")" { return { tag: "function-type", params: [], returnType: null }; }
 
 ChannelType "channelType"
-    = "chan" WhiteSpace __ type:Type { return { tag: "channel-type", type: type }; }
+    = "chan" WhiteSpace ___ type:Type { return { tag: "channel-type", type: type }; }
 
 Type "type"
     = "int32" { return { tag: "int32-type" }; }
@@ -190,21 +193,21 @@ ArrayLength "array length"
     = lit:IntegerLiteral { return lit.value; }
 
 ArrayType "array type"
-    = "[" __ len:ArrayLength __ "]" __ type:Type { return { tag: "array-type", len: len, type: type }; }
+    = "[" ___ len:ArrayLength ___ "]" ___ type:Type { return { tag: "array-type", len: len, type: type }; }
 
 SliceType "slice type"
-    = "[" __ "]" __ type:Type { return { tag: "slice-type", type: type }; }
+    = "[" ___ "]" ___ type:Type { return { tag: "slice-type", type: type }; }
 
 ExpressionListElements
-    = __ exp0:(Expression / ExpressionList) __ exps:((__ "," __ (Expression / ExpressionList)))* __ { return [exp0].concat(exps.map(x => x[3])); }
-    / __ exp0:(Expression / ExpressionList) __ { return [exp0]; }
-    / __ { return []; }
+    = ___ exp0:(Expression / ExpressionList) ___ exps:((___ "," ___ (Expression / ExpressionList)))* ___ { return [exp0].concat(exps.map(x => x[3])); }
+    / ___ exp0:(Expression / ExpressionList) ___ { return [exp0]; }
+    / ___ { return []; }
 
 ExpressionList
-    = "{" __ elements:ExpressionListElements __ "}" { return elements; }
+    = "{" ___ elements:ExpressionListElements ___ "}" { return elements; }
 
 TypeConstructor
-    = type:(Type) __ args:ExpressionList { return buildConstructor(type, args); }
+    = type:(Type) ___ args:ExpressionList { return buildConstructor(type, args); }
 
 PrimaryExpression "PrimaryExpression"
     = AnonymousFunctionDeclaration
@@ -212,31 +215,31 @@ PrimaryExpression "PrimaryExpression"
     / TypeConstructor
     / Name
     / ChannelReceiveExpression
-    / "(" __ exp:Expression __ ")" { return exp; }
+    / "(" ___ exp:Expression ___ ")" { return exp; }
 
 ArrayOperator
-    = "[" __ expr:Expression __ "]" { return { tag: "index", index: expr }; }
+    = "[" ___ expr:Expression ___ "]" { return { tag: "index", index: expr }; }
 
 SliceExpression
     = expr:Expression { return expr; }
-    / __ { return null; }
+    / ___ { return null; }
 
 SliceOperator
-    = "[" __ expr:SliceExpression __ ":" __ expr2:SliceExpression __ "]" { return { tag: "slice", left: expr, right: expr2 }; }
+    = "[" ___ expr:SliceExpression ___ ":" ___ expr2:SliceExpression ___ "]" { return { tag: "slice", left: expr, right: expr2 }; }
 
 CallOperator
-    = "(" __ args:FunctionArgList __ ")" { return buildFunctionCall(null, args); }
+    = "(" ___ args:FunctionArgList ___ ")" { return buildFunctionCall(null, args); }
 
 MemberOperator
-    = "." __ member:Identifier { return { tag: "member", member: member }; }
+    = "." ___ member:Identifier { return { tag: "member", member: member }; }
 
 PostfixExpression
     = PostfixExpressionCompulsory
     / exp:PrimaryExpression
-    / "(" __ exp:Expression __ ")" { return exp; }
+    / "(" ___ exp:Expression ___ ")" { return exp; }
 
 PostfixExpressionCompulsory
-    = exp:PrimaryExpression __ posts:(ArrayOperator / SliceOperator / CallOperator / MemberOperator)+ {
+    = exp:PrimaryExpression ___ posts:(ArrayOperator / SliceOperator / CallOperator / MemberOperator)+ {
         return posts.reduce(function(result, element) {
             if (element.tag === "index") {
                 return { tag: "index", array: result, index: element.index };
@@ -254,7 +257,7 @@ CallExpression
     = expr:PostfixExpressionCompulsory
 
 VariableAddress "variable"
-    = identifier:Identifier __ posts:(ArrayOperator / SliceOperator / MemberOperator)+ {
+    = identifier:Identifier ___ posts:(ArrayOperator / SliceOperator / MemberOperator)+ {
         return posts.reduce(function(result, element) {
             if (element.tag === "index") {
                 return { tag: "index-address", array: result, index: element.index };
@@ -274,61 +277,61 @@ UnaryOperator
     = "+" / "-" / "!"
 
 UnaryExpression
-    = operator:UnaryOperator __ exp:UnaryExpression { return { tag: "unary", operator: operator, operand: exp }; }
+    = operator:UnaryOperator ___ exp:UnaryExpression { return { tag: "unary", operator: operator, operand: exp }; }
     / exp:PostfixExpression { return exp; }
-    / "(" __ exp:Expression __ ")" { return exp; }
+    / "(" ___ exp:Expression ___ ")" { return exp; }
 
 MultiplicativeOperator
     = "*" / "/" / "%"
 
 MultiplicativeExpression
-    = head:UnaryExpression tail:(__ MultiplicativeOperator __ UnaryExpression)* { return buildBinaryExpression(head, tail); }
+    = head:UnaryExpression tail:(__ MultiplicativeOperator ___ UnaryExpression)* { return buildBinaryExpression(head, tail); }
     / exp:UnaryExpression { return exp; }
-    / "(" __ exp:Expression __ ")" { return exp; }
+    / "(" ___ exp:Expression ___ ")" { return exp; }
 
 AdditiveOperator
     = "+" / "-"
 
 AdditiveExpression
-    = head:MultiplicativeExpression tail:(__ AdditiveOperator __ MultiplicativeExpression)* { return buildBinaryExpression(head, tail); }
+    = head:MultiplicativeExpression tail:(__ AdditiveOperator ___ MultiplicativeExpression)* { return buildBinaryExpression(head, tail); }
     / exp:MultiplicativeExpression { return exp; }
-    / "(" __ exp:Expression __ ")" { return exp; }
+    / "(" ___ exp:Expression ___ ")" { return exp; }
 
 RelationalOperator
     = "<=" / "<" / ">=" / ">"
 
 RelationalExpression
-    = head:AdditiveExpression tail:(__ RelationalOperator __ AdditiveExpression)* { return buildBinaryExpression(head, tail); }
+    = head:AdditiveExpression tail:(__ RelationalOperator ___ AdditiveExpression)* { return buildBinaryExpression(head, tail); }
     / exp:AdditiveExpression { return exp; }
-    / "(" __ exp:Expression __ ")" { return exp; }
+    / "(" ___ exp:Expression ___ ")" { return exp; }
 
 EqualityOperator
     = "==" / "!="
 
 EqualityExpression
-    = head:RelationalExpression tail:(__ EqualityOperator __ RelationalExpression)* { return buildBinaryExpression(head, tail); }
+    = head:RelationalExpression tail:(__ EqualityOperator ___ RelationalExpression)* { return buildBinaryExpression(head, tail); }
     / exp:RelationalExpression { return exp; }
-    / "(" __ exp:Expression __ ")" { return exp; }
+    / "(" ___ exp:Expression ___ ")" { return exp; }
 
 LogicalAndOperator
     = "&&"
 
 LogicalAndExpression
-    = head:EqualityExpression tail:(__ LogicalAndOperator __ EqualityExpression)* { return buildBinaryExpression(head, tail); }
+    = head:EqualityExpression tail:(__ LogicalAndOperator ___ EqualityExpression)* { return buildBinaryExpression(head, tail); }
     / exp:EqualityExpression { return exp; }
-    / "(" __ exp:Expression __ ")" { return exp; }
+    / "(" ___ exp:Expression ___ ")" { return exp; }
 
 LogicalOrOperator
     = "||"
 
 LogicalOrExpression
-    = head:LogicalAndExpression tail:(__ LogicalOrOperator __ LogicalAndExpression)* { return buildBinaryExpression(head, tail); }
+    = head:LogicalAndExpression tail:(__ LogicalOrOperator ___ LogicalAndExpression)* { return buildBinaryExpression(head, tail); }
     / exp:LogicalAndExpression { return exp; }
-    / "(" __ exp:Expression __ ")" { return exp; }
+    / "(" ___ exp:Expression ___ ")" { return exp; }
 
 MakeExpression
-    = "make" __ "(" __ type:Type __ "," __ args:FunctionArgList __ ")" { return { tag: "make", type: type, args: args }; }
-    / "make" __ "(" __ type:Type __ ")" { return { tag: "make", type: type, args: [] }; }
+    = "make" __ "(" ___ type:Type ___ "," ___ args:FunctionArgList ___ ")" { return { tag: "make", type: type, args: args }; }
+    / "make" __ "(" ___ type:Type ___ ")" { return { tag: "make", type: type, args: [] }; }
 
 Expression
     = MakeExpression
@@ -338,16 +341,13 @@ Expression
 // ===== 3. Statements =====
 
 VariableDeclaration
-    = "var" WhiteSpace __ identifier:Identifier __ type:Type __ "=" __ exp:Expression { return { tag: "var", name: identifier, type: type, value: exp }; }
+    = "var" WhiteSpace __ identifier:Identifier __ type:Type __ "=" ___ exp:Expression { return { tag: "var", name: identifier, type: type, value: exp }; }
     / "var" WhiteSpace __ identifier:Identifier __ type:Type { return { tag: "var", name: identifier, type: type }; }
-    / "var" WhiteSpace __ identifier:Identifier __ "=" __ exp:Expression { return { tag: "var", name: identifier, value: exp }; }
-    / "var" __ "(" __ identifier:Identifier __ type:Type __ "=" __ exp:Expression __ ")" { return { tag: "var", name: identifier, type: type, value: exp }; }
-    / "var" __ "(" __ identifier:Identifier __ type:Type __ ")" { return { tag: "var", name: identifier, type: type }; }
-    / "var" __ "(" __ identifier:Identifier __ "=" __ exp:Expression __ ")" { return { tag: "var", name: identifier, value: exp }; }
-    / identifier:Identifier __ ":=" __ exp:Expression { return { tag: "var", name: identifier, value: exp }; }
+    / "var" WhiteSpace __ identifier:Identifier __ "=" ___ exp:Expression { return { tag: "var", name: identifier, value: exp }; }
+    / identifier:Identifier __ ":=" ___ exp:Expression { return { tag: "var", name: identifier, value: exp }; }
 
 Assignment
-    = name:VariableAddress __ "=" __ exp:Expression { return { tag: "assign", name: name, value: exp }; }
+    = name:VariableAddress __ "=" ___ exp:Expression { return { tag: "assign", name: name, value: exp }; }
 
 Statement
     = VariableDeclaration
@@ -367,11 +367,11 @@ Statement
     / ChannelReceiveStatement
 
 PackageStatement "package"
-    = "package" WhiteSpace __ identifier:Identifier { return { tag: "package", name: identifier }; }
+    = "package" WhiteSpace ___ identifier:Identifier { return { tag: "package", name: identifier }; }
 
 ImportStatement "import"
-    = "import" WhiteSpace __ lib:StringLiteral { return { tag: "import", libs: [lib] }; }
-    / "import" WhiteSpace __ "(" __ lib:StringLiteral libs:((__ StringLiteral)*) __ ")" { return { tag: "import", libs: [lib].concat(libs.map(x => x[1])) }; }
+    = "import" WhiteSpace ___ lib:StringLiteral { return { tag: "import", libs: [lib] }; }
+    / "import" WhiteSpace ___ "(" ___ lib:StringLiteral libs:((___ StringLiteral)*) ___ ")" { return { tag: "import", libs: [lib].concat(libs.map(x => x[1])) }; }
 
 DeferStatement "defer"
     = "defer" WhiteSpace __ stmt:Statement { return { tag: "defer", stmt: stmt }; }
@@ -395,7 +395,7 @@ PostfixStatement "postfix"
     }
 
 ChannelSendStatement "channel send"
-    = name:VariableAddress __ "<-" __ exp:Expression { return { tag: "chan-send", name: name, value: exp }; }
+    = name:VariableAddress __ "<-" ___ exp:Expression { return { tag: "chan-send", name: name, value: exp }; }
 
 ChannelReceiveExpression "channel receive"
     = "<-" __ name:VariableAddress { return { tag: "chan-receive", name: name }; }
@@ -406,32 +406,32 @@ ChannelReceiveStatement "channel receive"
 // ===== 4. Sequences, Control Structures and Blocks =====
 
 StatementList
-    = __ stmt:Statement __ ";" __ stmts:StatementList { return { tag: "sequence", body: [stmt].concat(stmts.body) }; }
-    / __ stmt:Statement __ stmts:StatementList { return { tag: "sequence", body: [stmt].concat(stmts.body) }; }
-    / __ stmt:Statement __ ";" { return { tag: "sequence", body: [stmt] }; }
-    / __ stmt:Statement __ { return { tag: "sequence", body: [stmt] }; }
-    / __ { return { tag: "sequence", body: [] }; }
+    = ___ stmt:Statement __ ";" ___ stmts:StatementList { return { tag: "sequence", body: [stmt].concat(stmts.body) }; }
+    / ___ stmt:Statement LineTerminator ___ stmts:StatementList { return { tag: "sequence", body: [stmt].concat(stmts.body) }; }
+    / ___ stmt:Statement __ ";" { return { tag: "sequence", body: [stmt] }; }
+    / ___ stmt:Statement ___ { return { tag: "sequence", body: [stmt] }; }
+    / ___ { return { tag: "sequence", body: [] }; }
 
 Block
-    = "{" __ body:StatementList __ "}" { return { tag: "block", body: body }; }
+    = "{" ___ body:StatementList ___ "}" { return { tag: "block", body: body }; }
 
 IfStatement "if"
-    = "if" WhiteSpace __ condition:Expression __ body:Block __ "else" WhiteSpace __ elseBody:IfStatement { return { tag: "if", condition: condition, then_body: body, else_body: elseBody }; }
-    / "if" WhiteSpace __ condition:Expression __ body:Block __ "else" __ elseBody:Block { return { tag: "if", condition: condition, then_body: body, else_body: elseBody }; }
-    / "if" WhiteSpace __ condition:Expression __ body:Block { return { tag: "if", condition: condition, then_body: body }; }
+    = "if" WhiteSpace ___ condition:Expression ___ body:Block ___ "else" WhiteSpace ___ elseBody:IfStatement { return { tag: "if", condition: condition, then_body: body, else_body: elseBody }; }
+    / "if" WhiteSpace ___ condition:Expression ___ body:Block ___ "else" ___ elseBody:Block { return { tag: "if", condition: condition, then_body: body, else_body: elseBody }; }
+    / "if" WhiteSpace ___ condition:Expression ___ body:Block { return { tag: "if", condition: condition, then_body: body }; }
 
 ForInitStatement "statement"
     = VariableDeclaration
     / Assignment
-    / __ { return null; }
+    / ___ { return null; }
 
 ForUpdateStatement "statement"
     = Assignment
     / PostfixStatement
-    / __ { return null; }
+    / ___ { return null; }
 
 ForStatement "for"
-    = "for" WhiteSpace __ init: ForInitStatement __ ";" __ condition:Expression __ ";" __ update:ForUpdateStatement __ body:Block { return { tag: "for", init: init, condition: condition, update: update, body: body }; }
+    = "for" WhiteSpace ___ init: ForInitStatement ___ ";" ___ condition:Expression ___ ";" ___ update:ForUpdateStatement ___ body:Block { return { tag: "for", init: init, condition: condition, update: update, body: body }; }
 
 BreakStatement "break"
     = "break" { return { tag: "break" }; }
@@ -442,33 +442,33 @@ ContinueStatement "continue"
 // ===== 5. Function Declaration =====
 
 FunctionParamList
-    = __ param0:(__ Identifier __ Type) __ params:((__ "," __ Identifier __ Type)*) __ {
+    = ___ param0:(___ Identifier ___ Type) ___ params:((___ "," ___ Identifier ___ Type)*) ___ {
         return [{name: param0[1], type: param0[3]}].concat(params.map(x => ({name: x[3], type: x[5]})));
     }
-    / __ param0:(__ Identifier __ Type) __ { return [{name: param0[1], type: param0[3]}]; }
-    / __ { return []; }
+    / ___ param0:(___ Identifier ___ Type) ___ { return [{name: param0[1], type: param0[3]}]; }
+    / ___ { return []; }
 
 FunctionDeclaration
-    = "func" WhiteSpace __ name:Identifier __ "(" params:FunctionParamList __ ")" __ returnType:Type __ body:Block { return buildFunctionDeclaration(name, params, returnType, body); }
-    / "func" WhiteSpace __ name:Identifier __ "(" params:FunctionParamList __ ")" __ body:Block { return buildFunctionDeclaration(name, params, null, body); }
+    = "func" WhiteSpace ___ name:Identifier ___ "(" params:FunctionParamList ___ ")" ___ returnType:Type ___ body:Block { return buildFunctionDeclaration(name, params, returnType, body); }
+    / "func" WhiteSpace ___ name:Identifier ___ "(" params:FunctionParamList ___ ")" ___ body:Block { return buildFunctionDeclaration(name, params, null, body); }
 
 StructMethodDeclaration
-    = "func" WhiteSpace __ "(" __ self:Identifier __ type:Type __ ")" __ name:Identifier __ "(" params:FunctionParamList __ ")" __
-        returnType:Type __ body:Block { return buildStructMethodDeclaration(name, self, type, params, returnType, body); }
-    / "func" WhiteSpace __ "(" __ self:Identifier __ type:Type __ ")" __ name:Identifier __ "(" params:FunctionParamList __ ")" __
+    = "func" WhiteSpace ___ "(" ___ self:Identifier ___ type:Type ___ ")" ___ name:Identifier ___ "(" params:FunctionParamList ___ ")" ___
+        returnType:Type ___ body:Block { return buildStructMethodDeclaration(name, self, type, params, returnType, body); }
+    / "func" WhiteSpace ___ "(" ___ self:Identifier ___ type:Type ___ ")" ___ name:Identifier ___ "(" params:FunctionParamList ___ ")" ___
         body:Block { return buildStructMethodDeclaration(name, self, type, params, null, body); }
 
 FunctionArgList
-    = __ arg0:Expression args:((__ "," __ Expression)*) __ { return [arg0].concat(args.map(x => x[3])); }
-    / __ arg0:Expression __ { return [arg0]; }
-    / __ { return []; }
+    = ___ arg0:Expression args:((___ "," ___ Expression)*) ___ { return [arg0].concat(args.map(x => x[3])); }
+    / ___ arg0:Expression ___ { return [arg0]; }
+    / ___ { return []; }
 
 FunctionCall
     = func:CallExpression { return { tag: "call-stmt", body: func }; }
 
 AnonymousFunctionDeclaration
-    = "func" __ "(" __ params:FunctionParamList __ ")" __ returnType:Type __ body:Block { return buildFunctionDeclaration(null, params, returnType, body); }
-    / "func" __ "(" __ params:FunctionParamList __ ")" __ body:Block { return buildFunctionDeclaration(null, params, null, body); }
+    = "func" ___ "(" ___ params:FunctionParamList ___ ")" ___ returnType:Type ___ body:Block { return buildFunctionDeclaration(null, params, returnType, body); }
+    / "func" ___ "(" ___ params:FunctionParamList ___ ")" ___ body:Block { return buildFunctionDeclaration(null, params, null, body); }
 
 GoFunctionCall
     = "go" WhiteSpace __ func:CallExpression { return { tag: "go-call-stmt", body: func }; }
@@ -480,27 +480,27 @@ StructField "struct field"
     = identifier:Identifier __ type:Type { return { name: identifier, type: type }; }
 
 StructFieldList "struct field list"
-    = __ field0:StructField __ fields:((__ StructField)*) __ { return [field0].concat(fields.map(x => x[1])); }
-    / __ field0:StructField __ { return [field0]; }
-    / __ { return []; }
+    = ___ field0:StructField ___ fields:((___ StructField)*) ___ { return [field0].concat(fields.map(x => x[1])); }
+    / ___ field0:StructField ___ { return [field0]; }
+    / ___ { return []; }
 
 StructDeclaration
-    = "type" WhiteSpace __ name:Name WhiteSpace __ "struct" __ "{" __ fields:StructFieldList __ "}" { return { tag: "struct", name: name, fields: fields }; }
+    = "type" WhiteSpace __ name:Name WhiteSpace __ "struct" ___ "{" ___ fields:StructFieldList ___ "}" { return { tag: "struct", name: name, fields: fields }; }
 
 // ===== 7. Select Statements =====
 
 SelectStatement
-    = "select" WhiteSpace __ "{" __ cases:SelectCaseList __ "}" { return { tag: "select", body: cases }; }
+    = "select" WhiteSpace ___ "{" ___ cases:SelectCaseList ___ "}" { return { tag: "select", body: cases }; }
 
 SelectCase
-    = "case" WhiteSpace __ stmt:ChannelSendStatement __ ":" __ body:StatementList { return { tag: "select-case", case: stmt, body: body }; }
-    / "case" WhiteSpace __ stmt:Assignment __ ":" __ body:StatementList { return { tag: "select-case", case: stmt, body: body }; }
-    / "default" __ ":" __ body:StatementList { return { tag: "select-default", body: body }; }
+    = "case" WhiteSpace __ stmt:ChannelSendStatement __ ":" ___ body:StatementList { return { tag: "select-case", case: stmt, body: body }; }
+    / "case" WhiteSpace __ stmt:Assignment __ ":" ___ body:StatementList { return { tag: "select-case", case: stmt, body: body }; }
+    / "default" __ ":" ___ body:StatementList { return { tag: "select-default", body: body }; }
 
 SelectCaseList
-    = __ case0:SelectCase __ cases:((__ SelectCase)*) __ { return [case0].concat(cases.map(x => x[1])); }
-    / __ case0:SelectCase __ { return [case0]; }
-    / __ { return []; }
+    = ___ case0:SelectCase ___ cases:((___ SelectCase)*) ___ { return [case0].concat(cases.map(x => x[1])); }
+    / ___ case0:SelectCase ___ { return [case0]; }
+    / ___ { return []; }
 
 // ===== 8. Program =====
 
@@ -511,11 +511,11 @@ GlobalScopeStatements
     / VariableDeclaration
 
 GlobalScopeStatementList
-    = __ stmt:GlobalScopeStatements __ ";" __ stmts:GlobalScopeStatementList { return [stmt].concat(stmts); }
-    / __ stmt:GlobalScopeStatements __ stmts:GlobalScopeStatementList { return [stmt].concat(stmts); }
-    / __ stmt:GlobalScopeStatements __ ";" { return [stmt]; }
-    / __ stmt:GlobalScopeStatements { return [stmt]; }
-    / __ { return []; }
+    = ___ stmt:GlobalScopeStatements __ ";" ___ stmts:GlobalScopeStatementList { return [stmt].concat(stmts); }
+    / ___ stmt:GlobalScopeStatements LineTerminator ___ stmts:GlobalScopeStatementList { return [stmt].concat(stmts); }
+    / ___ stmt:GlobalScopeStatements __ ";" { return [stmt]; }
+    / ___ stmt:GlobalScopeStatements { return [stmt]; }
+    / ___ { return []; }
 
 Program
-    = __ pack:PackageStatement imports:((__ ImportStatement)*) __ stmts:GlobalScopeStatementList __ { return buildProgram(pack, imports, stmts); }
+    = ___ pack:PackageStatement imports:((___ ImportStatement)*) ___ stmts:GlobalScopeStatementList ___ { return buildProgram(pack, imports, stmts); }
