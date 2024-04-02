@@ -50,6 +50,9 @@ import { ControlBreak } from "./types/control/break";
 import { ControlCall } from "./types/control/call";
 import { ControlCallI } from "./types/control/call_i";
 import { ControlCallStmt } from "./types/control/call_stmt";
+import { ControlChanReceive } from "./types/control/chan_receive";
+import { ControlChanReceiveStmt } from "./types/control/chan_receive_stmt";
+import { ControlChanSend } from "./types/control/chan_send";
 import { ControlConstructor } from "./types/control/constructor";
 import { ControlConstructorI } from "./types/control/constructor_i";
 import { ControlContinue } from "./types/control/continue";
@@ -150,11 +153,16 @@ import {
     TAGSTRING_CONTROL_index_address_i,
     TAGSTRING_CONTROL_constructor,
     TAGSTRING_CONTROL_constructor_i,
-    TAGSTRING_USER_type_function
+    TAGSTRING_USER_type_function,
+    TAGSTRING_CONTROL_chan_send,
+    TAGSTRING_CONTROL_chan_receive,
+    TAGSTRING_CONTROL_chan_receive_stmt,
+    TAGSTRING_USER_type_channel
 } from "./types/tags";
 import { UserType } from "./types/user/type";
 import { UserTypeArray } from "./types/user/type/array";
 import { UserTypeBool } from "./types/user/type/bool";
+import { UserTypeChannel } from "./types/user/type/channel";
 import { UserTypeFloat32 } from "./types/user/type/float32";
 import { UserTypeFunction } from "./types/user/type/function";
 import { UserTypeInt32 } from "./types/user/type/int32";
@@ -976,6 +984,37 @@ class Heap {
     }
 
     /**
+     * CONTROL_chan_send
+     * Fields    : number of children
+     * Children  :
+     * - 4 bytes address of the name of the channel (COMPLEX_string)
+     * - 4 bytes address of the value to send
+     */
+    public allocate_CONTROL_chan_send(obj: { tag: string, name: any, value: any }): number {
+        return ControlChanSend.allocate(this, obj.name, obj.value);
+    }
+
+    /**
+     * CONTROL_chan_receive
+     * Fields    : number of children
+     * Children  :
+     * - 4 bytes address of the name of the channel (COMPLEX_string)
+     */
+    public allocate_CONTROL_chan_receive(obj: { tag: string, name: any }): number {
+        return ControlChanReceive.allocate(this, obj.name);
+    }
+
+    /**
+     * CONTROL_chan_receive_stmt
+     * Fields    : number of children
+     * Children  :
+     * - 4 bytes address of the name of the channel (COMPLEX_string)
+     */
+    public allocate_CONTROL_chan_receive_stmt(obj: { tag: string, name: any }): number {
+        return ControlChanReceiveStmt.allocate(this, obj.name);
+    }
+
+    /**
      * ENVIRONMENT_frame
      * Fields    : number of children
      * Children  :
@@ -1058,6 +1097,19 @@ class Heap {
         return UserTypeFunction.allocate(this, obj.params, obj.returnType);
     }
 
+    /**
+     * USER_type_channel
+     * Fields    :
+     * - number of children
+     * Children  :
+     * - 4 bytes address of the name (COMPLEX_string)
+     * - 4 bytes address of the type of the channel (USER_type)
+     */
+    public allocate_USER_type_channel(obj: { tag: string, type: any }): number {
+        return UserTypeChannel.allocate(this, obj.type);
+    }
+
+    
     public allocate_number(value: number): number {
         return value;
     }
@@ -1179,6 +1231,12 @@ class Heap {
                 return this.allocate_CONTROL_constructor(obj);
             case TAGSTRING_CONTROL_constructor_i:
                 return this.allocate_CONTROL_constructor_i(obj);
+            case TAGSTRING_CONTROL_chan_send:
+                return this.allocate_CONTROL_chan_send(obj);
+            case TAGSTRING_CONTROL_chan_receive:
+                return this.allocate_CONTROL_chan_receive(obj);
+            case TAGSTRING_CONTROL_chan_receive_stmt:
+                return this.allocate_CONTROL_chan_receive_stmt(obj);
             case TAGSTRING_ENVIRONMENT_frame:
                 return this.allocate_ENVIRONMENT_frame(obj);
             case TAGSTRING_USER_type_array:
@@ -1193,6 +1251,8 @@ class Heap {
                 return this.allocate_USER_type_string();
             case TAGSTRING_USER_type_function:
                 return this.allocate_USER_type_function(obj);
+            case TAGSTRING_USER_type_channel:
+                return this.allocate_USER_type_channel(obj);
             default:
                 throw new Error("Unknown tag " + obj.tag);
         }

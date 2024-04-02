@@ -51,6 +51,7 @@ class ECE {
   }
 
   public evaluate(check_all_free: boolean = false) {
+    // return JSON.stringify(this.program, null, 2);
     const scheduler = new ContextScheduler(
       this.heap,
       ContextScheduler.allocate(this.heap)

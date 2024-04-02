@@ -26,14 +26,19 @@ class UserTypeChannel extends UserType {
     throw new Error("UserTypeChannel.construct_default: Not implemented");
   }
 
-  public static allocate(heap: Heap, type: UserType): number {
+  public static allocate(heap: Heap, type: any): number {
     const address = heap.allocate_object(TAG_USER_type_channel, 1, 2);
+
+    const type_address = heap.allocate_any(type);
+    heap.set_child(address, 1, type_address);
+
+    const type_obj = auto_cast(heap, type_address) as UserType;
+
     const name_address = ComplexString.allocate(
       heap,
-      "chan " + type.get_name().get_string()
+      "chan " + type_obj.get_name().get_string()
     );
     heap.set_child(address, 0, name_address);
-    heap.set_child(address, 1, type.reference().address);
     return address;
   }
 

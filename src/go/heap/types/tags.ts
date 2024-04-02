@@ -15,6 +15,9 @@ export const TAG_COMPLEX_builtin = 0x4008; // 0100 0000 0000 1000
 export const TAG_COMPLEX_queue = 0x4009; // 0100 0000 0000 1001
 export const TAG_COMPLEX_mutex = 0x400A; // 0100 0000 0000 1010
 
+export const TAG_COMPLEX_semaphore = 0x400C; // 0100 0000 0000 1100
+
+
 export const TAG_CONTROL_pop_i = 0x8001; // 1000 0000 0000 0001
 export const TAG_CONTROL_exit_scope_i = 0x8002; // 1000 0000 0000 0010
 export const TAG_CONTROL_break = 0x8003; // 1000 0000 0000 0011
@@ -65,6 +68,11 @@ export const TAG_CONTROL_index = 0xC02A; // 1100 0000 0010 1010
 export const TAG_CONTROL_index_address = 0xC02B; // 1100 0000 0010 1011
 export const TAG_CONTROL_constructor = 0xC02C; // 1100 0000 0010 1100
 export const TAG_CONTROL_constructor_i = 0xC02D; // 1100 0000 0010 1101
+export const TAG_CONTROL_chan_send = 0xC02E; // 1100 0000 0010 1110
+export const TAG_CONTROL_chan_send_i = 0xC02F; // 1100 0000 0010 1111
+export const TAG_CONTROL_chan_receive = 0xC030; // 1100 0000 0011 0000
+export const TAG_CONTROL_chan_receive_i = 0xC031; // 1100 0000 0011 0001
+export const TAG_CONTROL_chan_receive_stmt = 0xC032; // 1100 0000 0011 0010
 
 export const TAG_ENVIRONMENT_entry = 0xC100; // 1100 0001 0000 0000
 export const TAG_ENVIRONMENT_frame = 0xC101; // 1100 0001 0000 0001
@@ -80,6 +88,7 @@ export const TAG_CONTEXT_waker = 0xC205; // 1100 0010 0000 0101
 
 export const TAG_USER_variable = 0xC301; // 1100 0011 0000 0001
 export const TAG_USER_struct = 0xC302; // 1100 0011 0000 0010
+export const TAG_USER_channel = 0xC303; // 1100 0011 0000 0011
 
 export const TAG_USER_type_struct = 0xC300; // 1100 0011 0000 0000
 export const TAG_USER_type_int32 = 0xC303; // 1100 0011 0000 0011
@@ -150,6 +159,10 @@ export const TAGSTRING_CONTROL_member_i = "member_i";
 export const TAGSTRING_CONTROL_index_i = "index_i";
 export const TAGSTRING_CONTROL_index_address_i = "index_address_i";
 export const TAGSTRING_CONTROL_constructor_i = "constructor_i";
+export const TAGSTRING_CONTROL_chan_send = "chan-send";
+export const TAGSTRING_CONTROL_chan_receive = "chan-receive";
+export const TAGSTRING_CONTROL_chan_receive_stmt = "chan-receive-stmt";
+
 
 export const TAGSTRING_USER_type_bool = "bool-type";
 export const TAGSTRING_USER_type_int32 = "int32-type";
