@@ -30,20 +30,46 @@
  * 
  * For struct declarations and struct methods, we place all struct declarations
  * at the beginning and treat struct methods as if they are function declarations.
+ * 
+ * @param ignore_structs If true, we ignore struct methods during the sorting. They
+ * will be placed at the end of the program. This is to accomodate the two-stage
+ * preprocessing and sorting algorithm.
  */
-function sort_global_declarations(program: any, imports: any[], default_imports: any[]): void {
+function sort_global_declarations(program: any, imports: any[], default_imports: any[], ignore_structs: boolean): void {
+    // Utility functions
+    const get_name = (stmt: any) => {
+        if (stmt.tag === "struct") {
+            return stmt.name.name;
+        } else if (stmt.tag === "struct-method") {
+            return "METHOD." + stmt.struct.name + "." + stmt.name;
+        } else {
+            return stmt.name;
+        }
+    };
+
     // Compute the edges and back edges of the dependency graph.
     let edges: { [key: string]: string[] } = {};
     let back_edges: { [key: string]: string[] } = {};
 
     for (let stmt of program.body) {
-        if (stmt.tag === "struct") continue;
-        edges[stmt.name] = [];
-        back_edges[stmt.name] = [];
+        if (stmt.tag === "struct" && ignore_structs) continue;
+        if (stmt.tag === "struct-method" && ignore_structs) continue;
+        edges[get_name(stmt)] = [];
+        back_edges[get_name(stmt)] = [];
     }
 
     for (let stmt of program.body) {
-        if (stmt.tag === "struct") continue;
+        if (stmt.tag === "struct" && ignore_structs) continue;
+        if (stmt.tag === "struct-method" && ignore_structs) continue;
+        if (stmt.tag === "struct") {
+            for (let ref of stmt.fields) {
+                if (ref.type.tag === "struct-decl-type") {
+                    back_edges[get_name(stmt)].push(ref.type.name);
+                    edges[ref.type.name].push(get_name(stmt));
+                }
+            }
+            continue;
+        }
         for (let ref of stmt.captures) {
             if (imports.filter((imp) => imp.name === ref.name).length > 0) {
                 continue;
@@ -51,12 +77,12 @@ function sort_global_declarations(program: any, imports: any[], default_imports:
             if (default_imports.filter((imp) => imp.name === ref.name).length > 0) {
                 continue;
             }
-            if (ref.name === stmt.name && stmt.tag === 'var') {
+            if (ref.name === get_name(stmt) && stmt.tag === 'var') {
                 throw new Error(`cyclic dependency in global declarations: ` +
-                    `${stmt.name} refers to itself`);
+                    `${get_name(stmt)} refers to itself`);
             }
-            back_edges[stmt.name].push(ref.name);
-            edges[ref.name].push(stmt.name);
+            back_edges[get_name(stmt)].push(ref.name);
+            edges[ref.name].push(get_name(stmt));
         }
     }
 
@@ -108,27 +134,33 @@ function sort_global_declarations(program: any, imports: any[], default_imports:
     // Check for cyclic dependencies.
     let type_lookup : { [key: string]: string } = {};
     for (let stmt of program.body) {
-        if (stmt.tag === "struct") continue;
-        type_lookup[stmt.name] = stmt.tag;
+        if (stmt.tag === "struct" && ignore_structs) continue;
+        if (stmt.tag === "struct-method" && ignore_structs) continue;
+        type_lookup[get_name(stmt)] = stmt.tag;
     }
     for (let component of scc) {
         let count_var = 0;
+        let count_func = 0;
+        let count_struct = 0;
         let var_names = [];
         for (let node of component) {
-            if (type_lookup[node] === 'var') {
+            if (type_lookup[node] === 'struct') {
+                count_struct++;
+                var_names.push(node);
+            } else if (type_lookup[node] === 'var') {
                 count_var++;
                 var_names.push(node);
+            } else {
+                count_func++;
             }
+        }
+        if (count_struct > 1) {
+            throw new Error(`cyclic dependency in global declarations: ` +
+                `struct declaration ${var_names[0]} refers to itself`);
         }
         if (count_var > 1) {
             throw new Error(`cyclic dependency in global declarations: ` +
                 `${var_names[0]} refers to ${var_names[1]} and vice versa`);
-        }
-        let count_func = 0;
-        for (let node of component) {
-            if (type_lookup[node] !== 'var') {
-                count_func++;
-            }
         }
         if (count_var === 1 && count_func > 0) {
             throw new Error(`cyclic dependency in global declarations: ` +
@@ -176,10 +208,17 @@ function sort_global_declarations(program: any, imports: any[], default_imports:
 
     // Sort the declarations in the program.
     program.body.sort((a: any, b: any) => {
+        if (a.tag === "struct" && b.tag === "struct") {
+            if (ignore_structs) return 0;
+            return decl_order.indexOf(scc_index[get_name(a)]) - decl_order.indexOf(scc_index[get_name(b)]);
+        }
         if (a.tag === "struct") return -1;
         if (b.tag === "struct") return 1;
-        const a_index = scc_index[a.name];
-        const b_index = scc_index[b.name];
+        if (a.tag === "struct-method" && b.tag === "struct-method" && ignore_structs) return 0;
+        if (a.tag === "struct-method" && ignore_structs) return 1;
+        if (b.tag === "struct-method" && ignore_structs) return -1;
+        const a_index = scc_index[get_name(a)];
+        const b_index = scc_index[get_name(b)];
         if (a_index !== b_index) {
             return decl_order.indexOf(a_index) - decl_order.indexOf(b_index);
         }

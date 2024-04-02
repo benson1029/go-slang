@@ -261,7 +261,20 @@ const microcode_preprocess: {
       throw new Error("Member access on non-user-defined type.");
     }
     const obj_t = scope.getType(t.tag) as StructObject;
-    return obj_t.getField(comp.member);
+    let method;
+    try {
+      method = obj_t.getMethod(comp.member);
+    } catch (e) {
+      return obj_t.getField(comp.member);
+    }
+    if (scope.current_declaration != null) {
+      scope.current_declaration.captures.push({ name: "METHOD." + obj_t.name + "." + comp.member, type: method });
+    }
+    for (let i = scope.function_declaration_stack.length - 1; i >= 0; i--) {
+      let f = scope.function_declaration_stack[i];
+      f.comp.captures.push({ name: "METHOD." + obj_t.name + "." + comp.member, type: method });
+    }
+    return method
   },
 
   "name-address": (
@@ -345,6 +358,7 @@ const microcode_preprocess: {
       name: string;
       type: any;
       value: any;
+      returnCaptures: any | null;
     },
     scope: Scope,
     type_check
@@ -356,7 +370,12 @@ const microcode_preprocess: {
         }
       }
     } else {
+      scope.current_declaration = new DeclarationObject([]);
       const v = preprocess(comp.value, scope, type_check);
+      if (comp.returnCaptures != null) {
+        comp.returnCaptures.captures = scope.current_declaration.captures;
+      }
+      scope.current_declaration = null;
       if (type_check) {
         if (comp.type == null) {
           comp.type = v.toObject();
@@ -1027,16 +1046,29 @@ const microcode_preprocess: {
             type_check
           );
         } else if (exp.tag === "struct") {
-          // nothing to do
+          scope.addStruct(exp.name.name, exp.fields.map((f : any) => {
+            return { name: f.name, type: toType(f.type) };
+          }))
         } else if (exp.tag === "struct-method") {
-          // nothing to do
+          const struct = scope.getType(exp.struct.name) as StructObject;
+          struct.addMethod(exp.name, new FunctionType(exp.params.map((p: any) => toType(p.type)), toType(exp.returnType)));
         } else {
           throw new Error(`Invalid tag ${exp.tag} in global namespace.`);
         }
       }
       for (let exp of comp.body) {
         if (exp.tag === "var") {
-          preprocess(exp, scope, type_check);
+          preprocess(
+            {
+              tag: "var",
+              name: exp.name,
+              type: exp.type,
+              value: exp.value,
+              returnCaptures: exp,
+            },
+            scope,
+            type_check
+          );
         } else if (exp.tag === "function") {
           preprocess(
             {

@@ -19,8 +19,9 @@ function load(
   default_imports: any[]
 ) {
   preprocess_program(program, imports, default_imports);
-  sort_global_declarations(program, imports, default_imports);
+  sort_global_declarations(program, imports, default_imports, true);
   preprocess_program(program, imports, default_imports, true);
+  sort_global_declarations(program, imports, default_imports, false);
 
   // // Stub for loading the main function directly:
   // let main = program.body.filter((x: any) => x.tag === "function" && x.name === "main")[0];

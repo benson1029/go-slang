@@ -153,7 +153,7 @@ abstract class Type {
       };
     }
   }
-  
+
   class ArrayType extends Type {
     len: number;
     type: Type;

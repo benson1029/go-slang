@@ -4,17 +4,42 @@ import { preprocess_program } from './preprocess';
 
 function check_declaration_order(program: any, expected_order: string[]) {
     preprocess_program(program, [], []);
-    sort_global_declarations(program, [], []);
+    sort_global_declarations(program, [], [], true);
     const decl_order = program.body.map((stmt: any) => stmt.name);
     expect(decl_order).toEqual(expected_order);
 }
 
 function check_cyclic_dependency(program: any) {
     preprocess_program(program, [], []);
-    expect(() => sort_global_declarations(program, [], [])).toThrow();
+    expect(() => sort_global_declarations(program, [], [], true)).toThrow();
 }
 
-describe('sort_global_declarations', () => {
+function check_declaration_order_two_stage(program: any, expected_order: string[]) {
+    preprocess_program(program, [], []);
+    sort_global_declarations(program, [], [], true);
+    preprocess_program(program, [], [], true);
+    sort_global_declarations(program, [], [], false);
+
+    const decl_order = program.body.map((stmt: any) => {
+        if (stmt.tag === "struct") {
+            return stmt.name.name;
+        } else {
+            return stmt.name;
+        }
+    });
+    expect(decl_order).toEqual(expected_order);
+}
+
+function check_cyclic_dependency_two_stage(program: any) {
+    expect(() => {
+        preprocess_program(program, [], []);
+        sort_global_declarations(program, [], [], true);
+        preprocess_program(program, [], [], true);
+        sort_global_declarations(program, [], [], false);
+    }).toThrow();
+}
+
+describe('sort_global_declarations (first stage)', () => {
     it('should perform topological sort on global declarations', () => {
         const program = parse(`
             package main
@@ -171,5 +196,117 @@ describe('sort_global_declarations', () => {
             var y = f(1) + 1;
         `);
         check_cyclic_dependency(program);
+    })
+})
+
+describe('sort global declarations (two-stage)', () => {
+    it('should place struct declarations at the beginning', () => {
+        const program = parse(`
+            package main
+
+            func main() {
+
+            }
+
+            type S struct {
+                x int32
+            }
+        `);
+        check_declaration_order_two_stage(program, ['S', 'main']);
+    })
+
+    it('should place struct method before it is used', () => {
+        const program = parse(`
+            package main
+
+            func main() {
+                var s S
+                s.f()
+            }
+
+            type S struct {
+                x int32
+            }
+
+            func (s S) f() {
+                return
+            }
+        `);
+        check_declaration_order_two_stage(program, ['S', 'f', 'main']);
+    })
+
+    it('should handle dependencies between structs', () => {
+        const program = parse(`
+            package main
+
+            func main() {
+                var t T
+                t.f()
+            }
+
+            type T struct {
+                s S
+            }
+
+            type S struct {
+                x int32
+            }
+
+            func (t T) f() {
+                return
+            }
+        `);
+        check_declaration_order_two_stage(program, ['S', 'T', 'f', 'main']);
+    })
+
+    it('should handle cyclic dependencies between structs', () => {
+        const program = parse(`
+            package main
+
+            func main() {
+                var t T
+                t.f()
+            }
+
+            type T struct {
+                s S
+            }
+
+            type S struct {
+                t T
+            }
+
+            func (t T) f() {
+                return
+            }
+        `);
+        check_cyclic_dependency_two_stage(program);
+    })
+
+    it('should handle cyclic dependencies involving a global variable', () => {
+        const program = parse(`
+            package main
+
+            func returnAPair() Pair {
+                var p Pair
+                return p
+            }
+
+            type Pair struct {
+                x int32
+                y int32
+            }
+
+            func (p Pair) f() int32 {
+                return p.x + a
+            }
+
+            var a = returnAPair().f()
+
+            func main() {
+                return
+            }
+        `);
+        check_cyclic_dependency_two_stage(program);
     })
 })
