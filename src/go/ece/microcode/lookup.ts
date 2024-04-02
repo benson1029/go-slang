@@ -125,6 +125,7 @@ function lookup_microcode(tag: number): Function {
           thread.env(),
           output
         );
+        scheduler.enqueue(thread);
       };
   }
 }

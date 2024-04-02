@@ -26,6 +26,8 @@ class ECE {
   }
 
   private startup_thread(): ContextThread {
+    ContextThread.reset_thread_id_counter();
+
     // Initialize the control, stash and environment.
     let thread = new ContextThread(
       this.heap,
@@ -49,6 +51,7 @@ class ECE {
   }
 
   public evaluate(check_all_free: boolean = false) {
+    // return JSON.stringify(this.program, null, 2);
     const scheduler = new ContextScheduler(
       this.heap,
       ContextScheduler.allocate(this.heap)
@@ -81,7 +84,6 @@ class ECE {
           output(thread.thread_id())
         );
         this.heap.free_object(cmd);
-        scheduler.enqueue(thread);
       }
       thread.free();
     }
