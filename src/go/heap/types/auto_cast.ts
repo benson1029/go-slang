@@ -49,6 +49,7 @@ import { ControlRestoreEnvI } from "./control/restore_env_i";
 import { ControlReturn } from "./control/return";
 import { ControlReturnI } from "./control/return_i";
 import { ControlSequence } from "./control/sequence";
+import { ControlStruct } from "./control/struct";
 import { ControlUnary } from "./control/unary";
 import { ControlUnaryI } from "./control/unary_i";
 import { ControlVar } from "./control/var";
@@ -139,6 +140,8 @@ import {
   TAG_CONTROL_chan_send,
   TAG_CONTROL_chan_receive,
   TAG_CONTROL_chan_receive_stmt,
+  TAG_USER_type_struct_decl,
+  TAG_CONTROL_struct,
 } from "./tags"
 import { UserStruct } from "./user/struct";
 import { UserTypeArray } from "./user/type/array";
@@ -152,6 +155,7 @@ import { UserTypeNil } from "./user/type/nil";
 import { UserTypeSlice } from "./user/type/slice";
 import { UserTypeString } from "./user/type/string";
 import { UserTypeStruct } from "./user/type/struct";
+import { UserTypeStructDecl } from "./user/type/struct_decl";
 import { UserVariable } from "./user/variable";
 
 
@@ -270,6 +274,8 @@ function auto_cast(heap: Heap, address: number): HeapObject {
       return new ControlChanReceive(heap, address);
     case TAG_CONTROL_chan_receive_stmt:
       return new ControlChanReceiveStmt(heap, address);
+    case TAG_CONTROL_struct:
+      return new ControlStruct(heap, address);
     case TAG_ENVIRONMENT_entry:
       return new EnvironmentEntry(heap, address);
     case TAG_ENVIRONMENT_frame:
@@ -310,6 +316,8 @@ function auto_cast(heap: Heap, address: number): HeapObject {
       return new UserTypeStruct(heap, address);
     case TAG_USER_type_builtin:
       return new UserTypeBuiltin(heap, address);
+    case TAG_USER_type_struct_decl:
+      return new UserTypeStructDecl(heap, address);
     default:
       throw new Error("Unknown tag " + tag.toString() + " at address " + address.toString());
   }

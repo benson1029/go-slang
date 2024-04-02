@@ -162,6 +162,7 @@ export const TAGSTRING_CONTROL_constructor_i = "constructor_i";
 export const TAGSTRING_CONTROL_chan_send = "chan-send";
 export const TAGSTRING_CONTROL_chan_receive = "chan-receive";
 export const TAGSTRING_CONTROL_chan_receive_stmt = "chan-receive-stmt";
+export const TAGSTRING_CONTROL_struct = "struct";
 
 
 export const TAGSTRING_USER_type_bool = "bool-type";

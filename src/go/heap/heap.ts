@@ -81,6 +81,7 @@ import { ControlRestoreEnvI } from "./types/control/restore_env_i";
 import { ControlReturn } from "./types/control/return";
 import { ControlReturnI } from "./types/control/return_i";
 import { ControlSequence } from "./types/control/sequence";
+import { ControlStruct } from "./types/control/struct";
 import { ControlUnary } from "./types/control/unary";
 import { ControlUnaryI } from "./types/control/unary_i";
 import { ControlVar } from "./types/control/var";
@@ -157,7 +158,9 @@ import {
     TAGSTRING_CONTROL_chan_send,
     TAGSTRING_CONTROL_chan_receive,
     TAGSTRING_CONTROL_chan_receive_stmt,
-    TAGSTRING_USER_type_channel
+    TAGSTRING_USER_type_channel,
+    TAGSTRING_USER_type_struct_decl,
+    TAGSTRING_CONTROL_struct
 } from "./types/tags";
 import { UserType } from "./types/user/type";
 import { UserTypeArray } from "./types/user/type/array";
@@ -167,6 +170,7 @@ import { UserTypeFloat32 } from "./types/user/type/float32";
 import { UserTypeFunction } from "./types/user/type/function";
 import { UserTypeInt32 } from "./types/user/type/int32";
 import { UserTypeString } from "./types/user/type/string";
+import { UserTypeStructDecl } from "./types/user/type/struct_decl";
 
 class Heap {
     private alloc: BuddyAllocator;
@@ -1015,6 +1019,17 @@ class Heap {
     }
 
     /**
+     * CONTROL_struct
+     * Fields    : number of children
+     * Children  :
+     * - 4 bytes address of the name (COMPLEX_string)
+     * - 4 bytes * num_fields (name, type) of the fields (COMPLEX_string, USER_type)
+     */
+    public allocate_CONTROL_struct(obj: { tag: string, name: string, fields: any[] }): number {
+        return ControlStruct.allocate(this, obj.name, obj.fields);
+    }
+
+    /**
      * ENVIRONMENT_frame
      * Fields    : number of children
      * Children  :
@@ -1109,6 +1124,16 @@ class Heap {
         return UserTypeChannel.allocate(this, obj.type);
     }
 
+    /**
+     * USER_type_struct_decl
+     * Fields    :
+     * - number of children
+     * Children  :
+     * - 4 bytes address of the name (COMPLEX_string)
+     */
+    public allocate_USER_type_struct_decl(obj: { tag: string, name: string }): number {
+        return UserTypeStructDecl.allocate(this, obj.name);
+    }
     
     public allocate_number(value: number): number {
         return value;
@@ -1237,6 +1262,8 @@ class Heap {
                 return this.allocate_CONTROL_chan_receive(obj);
             case TAGSTRING_CONTROL_chan_receive_stmt:
                 return this.allocate_CONTROL_chan_receive_stmt(obj);
+            case TAGSTRING_CONTROL_struct:
+                return this.allocate_CONTROL_struct(obj);
             case TAGSTRING_ENVIRONMENT_frame:
                 return this.allocate_ENVIRONMENT_frame(obj);
             case TAGSTRING_USER_type_array:
@@ -1253,6 +1280,8 @@ class Heap {
                 return this.allocate_USER_type_function(obj);
             case TAGSTRING_USER_type_channel:
                 return this.allocate_USER_type_channel(obj);
+            case TAGSTRING_USER_type_struct_decl:
+                return this.allocate_USER_type_struct_decl(obj);
             default:
                 throw new Error("Unknown tag " + obj.tag);
         }
