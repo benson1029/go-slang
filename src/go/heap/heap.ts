@@ -1165,7 +1165,7 @@ class Heap {
             case TAGSTRING_PRIMITIVE_rune:
                 return this.allocate_PRIMITIVE_rune(obj.value);
             case TAGSTRING_COMPLEX_string:
-                return this.allocate_COMPLEX_string(obj);
+                return this.allocate_COMPLEX_string(obj.value);
             case TAGSTRING_COMPLEX_linked_list:
                 return this.allocate_COMPLEX_linked_list(obj);
             case TAGSTRING_COMPLEX_pointer:

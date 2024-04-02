@@ -10,12 +10,15 @@ import {
     TAGSTRING_PRIMITIVE_bool,
     TAGSTRING_PRIMITIVE_int32,
     TAGSTRING_PRIMITIVE_float32,
+    TAG_COMPLEX_string,
+    TAGSTRING_COMPLEX_string,
 } from "../../heap/types/tags";
 import { ControlBinary } from '../../heap/types/control/binary';
 import { ControlBinaryI } from '../../heap/types/control/binary_i';
 import { HeapObject } from '../../heap/types/objects';
 import { ControlLogicalImmI } from '../../heap/types/control/logical_imm_i';
 import { ControlLogicalI } from '../../heap/types/control/logical_i';
+import { ComplexString } from '../../heap/types/complex/string';
 
 function evaluate_literal(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
     const cmd_object = new HeapObject(heap, cmd);
@@ -89,6 +92,13 @@ function evaluate_unary_i(cmd: number, heap: Heap, C: ContextControl, S: Context
 function binary_operator(operator: string, left: Primitive, right: Primitive): any {
     switch (operator) {
         case '+':
+            if (left.get_tag() === TAG_COMPLEX_string && right.get_tag() === TAG_COMPLEX_string) {
+                return {
+                    tag: TAGSTRING_COMPLEX_string,
+                    value: (left as unknown as ComplexString).get_string() + (right as unknown as ComplexString).get_string(),
+                };
+            }
+            // eslint-disable-next-line no-fallthrough
         case '-':
         case '*':
         case '/':

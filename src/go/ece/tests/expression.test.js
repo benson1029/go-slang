@@ -67,4 +67,8 @@ describe('Evaluating expressions', () => {
         expect(evaluateExpression('1 + 2 * 3 == 7 && 1 < 2')).toBe("true\n");
         expect(evaluateExpression('1 + 2 * 3 != 9 || 1 > 2 && 3 - 5 < -8')).toBe("true\n");
     })
+
+    it('should support string concatenation', () => {
+        expect(evaluateExpression('"hello" + " " + "world"')).toBe("hello world\n");
+    })
 })

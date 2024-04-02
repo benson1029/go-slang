@@ -9,6 +9,7 @@ import {
   Int32Type,
   NilType,
   SliceType,
+  StringType,
   StructType,
   Type,
   isEqual,
@@ -488,6 +489,10 @@ const microcode_preprocess: {
     }
     switch (comp.operator) {
       case "+":
+        if (left.isString() && right.isString()) {
+          return new StringType();
+        }
+        // eslint-disable-next-line no-fallthrough
       case "-":
       case "*":
       case "/":
