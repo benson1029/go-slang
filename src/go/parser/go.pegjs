@@ -152,7 +152,7 @@ IdentifierAndReserved "identifier"
 
 Identifier "identifier"
     = content:((! ReservedWord) IdentifierAndReserved) { return content[1]; }
-    / content1:ReservedWord content2:([a-zA-Z_][a-zA-Z0-9_]+) { return content1 + content2; }
+    / content1:ReservedWord content2:([a-zA-Z_][a-zA-Z0-9_]+) { return content1 + content2.map(x => (x instanceof Array) ? x.join("") : x).join(""); }
 
 IdentifierWithPackage "identifier"
     = packageName:PackageName __ "." __ identifier:IdentifierWithPackage { return packageName + "." + identifier; }

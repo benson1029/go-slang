@@ -685,6 +685,57 @@ const microcode_preprocess: {
     return func_type;
   },
 
+  "struct-method": (
+    comp: {
+      tag: string;
+      name: string;
+      params: any[];
+      captures: any[];
+      returnType: string | null;
+      self: string;
+      struct: any;
+      body: any;
+    },
+    scope: Scope,
+    type_check: boolean
+  ) => {
+    const func_type = new FunctionType(
+      comp.params.map((p: { name: string; type: any }) => toType(p.type)),
+      toType(comp.returnType)
+    );
+
+    // Initialize captures
+    comp.captures = [];
+
+    scope.newFrame();
+    scope.function_declaration_stack.push(
+      new FunctionObject(comp, func_type, scope.level())
+    );
+    for (let param of comp.params) {
+      scope.addVariable(param.name, toType(param.type));
+    }
+    scope.addVariable(comp.self, new StructType(comp.struct.name));
+    scope.newFrame();
+    preprocess(comp.body, scope, type_check);
+    scope.popFrame();
+    scope.function_declaration_stack.pop();
+    scope.popFrame();
+
+    // Postprocess captures
+    // Remove duplicates
+    let captures = new Map();
+    for (let c of comp.captures) {
+      captures.set(c.name, c);
+    }
+    comp.captures = Array.from(captures.values());
+
+    if (!type_check) {
+      return new NilType();
+    }
+
+    return func_type;
+  },
+
   "call-stmt": (
     comp: {
       tag: string;
@@ -898,9 +949,12 @@ const microcode_preprocess: {
             type_check
           );
         } else if (exp.tag === "struct") {
-          // nothing to do
+          scope.addStruct(exp.name.name, exp.fields.map((f : any) => {
+            return { name: f.name, type: toType(f.type) };
+          }))
         } else if (exp.tag === "struct-method") {
-          throw new Error("Not implemented.");
+          const struct = scope.getType(exp.struct.name) as StructObject;
+          struct.addMethod(exp.name, new FunctionType(exp.params.map((p: any) => toType(p.type)), toType(exp.returnType)));
         } else {
           throw new Error(`Invalid tag ${exp.tag} in global namespace.`);
         }
@@ -933,6 +987,12 @@ const microcode_preprocess: {
             scope,
             type_check
           );
+        } else if (exp.tag === "struct") {
+          // nothing to do
+        } else if (exp.tag === "struct-method") {
+          preprocess(exp, scope, type_check);
+        } else {
+          throw new Error(`Invalid tag ${exp.tag} in global namespace.`);
         }
       }
     } else {
@@ -958,7 +1018,7 @@ const microcode_preprocess: {
         } else if (exp.tag === "struct") {
           // nothing to do
         } else if (exp.tag === "struct-method") {
-          throw new Error("Not implemented.");
+          // nothing to do
         } else {
           throw new Error(`Invalid tag ${exp.tag} in global namespace.`);
         }
@@ -979,6 +1039,12 @@ const microcode_preprocess: {
             scope,
             type_check
           );
+        } else if (exp.tag === "struct") {
+          // nothing to do
+        } else if (exp.tag === "struct-method") {
+          preprocess(exp, scope, type_check);
+        } else {
+          throw new Error(`Invalid tag ${exp.tag} in global namespace.`);
         }
       }
     }

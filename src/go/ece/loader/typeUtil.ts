@@ -316,7 +316,7 @@ abstract class Type {
         return new SliceType(toType(comp.type));
       case "channel-type":
         return new ChannelType(toType(comp.type));
-      case "struct-type":
+      case "struct-decl-type":
         return new StructType(comp.name);
       default:
         throw new Error(`Invalid type tag ${comp.tag}.`);

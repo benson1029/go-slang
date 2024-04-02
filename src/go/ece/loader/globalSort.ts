@@ -27,6 +27,9 @@
  * do a topological sort of the strongly connected components. Within each
  * strongly connected component, we place the function declarations before
  * the variable declarations.
+ * 
+ * For struct declarations and struct methods, we place all struct declarations
+ * at the beginning and treat struct methods as if they are function declarations.
  */
 function sort_global_declarations(program: any, imports: any[], default_imports: any[]): void {
     // Compute the edges and back edges of the dependency graph.
@@ -34,11 +37,13 @@ function sort_global_declarations(program: any, imports: any[], default_imports:
     let back_edges: { [key: string]: string[] } = {};
 
     for (let stmt of program.body) {
+        if (stmt.tag === "struct") continue;
         edges[stmt.name] = [];
         back_edges[stmt.name] = [];
     }
 
     for (let stmt of program.body) {
+        if (stmt.tag === "struct") continue;
         for (let ref of stmt.captures) {
             if (imports.filter((imp) => imp.name === ref.name).length > 0) {
                 continue;
@@ -103,6 +108,7 @@ function sort_global_declarations(program: any, imports: any[], default_imports:
     // Check for cyclic dependencies.
     let type_lookup : { [key: string]: string } = {};
     for (let stmt of program.body) {
+        if (stmt.tag === "struct") continue;
         type_lookup[stmt.name] = stmt.tag;
     }
     for (let component of scc) {
@@ -120,7 +126,7 @@ function sort_global_declarations(program: any, imports: any[], default_imports:
         }
         let count_func = 0;
         for (let node of component) {
-            if (type_lookup[node] === 'function') {
+            if (type_lookup[node] !== 'var') {
                 count_func++;
             }
         }
@@ -170,15 +176,17 @@ function sort_global_declarations(program: any, imports: any[], default_imports:
 
     // Sort the declarations in the program.
     program.body.sort((a: any, b: any) => {
+        if (a.tag === "struct") return -1;
+        if (b.tag === "struct") return 1;
         const a_index = scc_index[a.name];
         const b_index = scc_index[b.name];
         if (a_index !== b_index) {
             return decl_order.indexOf(a_index) - decl_order.indexOf(b_index);
         }
-        if (a.tag === 'function' && b.tag === 'var') {
+        if (a.tag !== 'var' && b.tag === 'var') {
             return -1;
         }
-        if (a.tag === 'var' && b.tag === 'function') {
+        if (a.tag === 'var' && b.tag !== 'var') {
             return 1;
         }
         return 0;

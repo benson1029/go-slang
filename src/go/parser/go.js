@@ -440,7 +440,7 @@ function peg$parse(input, options) {
   var peg$f6 = function() { return text(); };
   var peg$f7 = function() { return text(); };
   var peg$f8 = function(content) { return content[1]; };
-  var peg$f9 = function(content1, content2) { return content1 + content2; };
+  var peg$f9 = function(content1, content2) { return content1 + content2.map(x => (x instanceof Array) ? x.join("") : x).join(""); };
   var peg$f10 = function(packageName, identifier) { return packageName + "." + identifier; };
   var peg$f11 = function(identifier) { return identifier; };
   var peg$f12 = function(identifier) { return { tag: "name", name: identifier }; };
