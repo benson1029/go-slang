@@ -407,7 +407,7 @@ ChannelReceiveStatement "channel receive"
 
 StatementList
     = ___ stmt:Statement __ ";" ___ stmts:StatementList { return { tag: "sequence", body: [stmt].concat(stmts.body) }; }
-    / ___ stmt:Statement LineTerminator ___ stmts:StatementList { return { tag: "sequence", body: [stmt].concat(stmts.body) }; }
+    / ___ stmt:Statement ___ stmts:StatementList { return { tag: "sequence", body: [stmt].concat(stmts.body) }; }
     / ___ stmt:Statement __ ";" { return { tag: "sequence", body: [stmt] }; }
     / ___ stmt:Statement ___ { return { tag: "sequence", body: [stmt] }; }
     / ___ { return { tag: "sequence", body: [] }; }

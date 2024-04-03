@@ -4551,17 +4551,11 @@ function peg$parse(input, options) {
       s1 = peg$parse___();
       s2 = peg$parseStatement();
       if (s2 !== peg$FAILED) {
-        s3 = peg$parseLineTerminator();
-        if (s3 !== peg$FAILED) {
-          s4 = peg$parse___();
-          s5 = peg$parseStatementList();
-          if (s5 !== peg$FAILED) {
-            peg$savedPos = s0;
-            s0 = peg$f88(s2, s5);
-          } else {
-            peg$currPos = s0;
-            s0 = peg$FAILED;
-          }
+        s3 = peg$parse___();
+        s4 = peg$parseStatementList();
+        if (s4 !== peg$FAILED) {
+          peg$savedPos = s0;
+          s0 = peg$f88(s2, s4);
         } else {
           peg$currPos = s0;
           s0 = peg$FAILED;
