@@ -97,6 +97,18 @@ function lookup_microcode_sequential(tag: number): Function {
       return constructor.evaluate_constructor;
     case tags.TAG_CONTROL_constructor_i:
       return constructor.evaluate_constructor_i;
+    case tags.TAG_CONTROL_struct:
+      return struct.evaluate_struct;
+    case tags.TAG_CONTROL_member_address:
+      return struct.evaluate_member_address;
+    case tags.TAG_CONTROL_member_address_i:
+      return struct.evaluate_member_address_i;
+    case tags.TAG_CONTROL_method:
+      return struct.evaluate_method;
+    case tags.TAG_CONTROL_method_member:
+      return struct.evaluate_method_member;
+    case tags.TAG_CONTROL_push_i:
+      return control_function.evaluate_push_i;
     case tags.TAG_PRIMITIVE_nil:
       return (...args: any[]) => {};
     default:

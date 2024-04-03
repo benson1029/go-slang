@@ -63,10 +63,15 @@ function sort_global_declarations(program: any, imports: any[], default_imports:
         if (stmt.tag === "struct-method" && ignore_structs) continue;
         if (stmt.tag === "struct") {
             for (let ref of stmt.fields) {
-                if (ref.type.tag === "struct-decl-type") {
-                    back_edges[get_name(stmt)].push(ref.type.name);
-                    edges[ref.type.name].push(get_name(stmt));
+                let dfs = (type: any) => {
+                    if (type.tag === "struct-decl-type") {
+                        back_edges[get_name(stmt)].push(type.name);
+                        edges[type.name].push(get_name(stmt));
+                    } else if (type.tag === "array-type") {
+                        dfs(type.type);
+                    }
                 }
+                dfs(ref.type);
             }
             continue;
         }
@@ -230,6 +235,14 @@ function sort_global_declarations(program: any, imports: any[], default_imports:
         }
         return 0;
     });
+
+    // Remove the METHOD. captures.
+    for (let stmt of program.body) {
+        if (stmt.tag === "struct") continue;
+        stmt.captures = stmt.captures.filter((ref: any) => {
+            return !ref.name.startsWith("METHOD.");
+        });
+    }
 }
 
 export { sort_global_declarations };

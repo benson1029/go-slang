@@ -4,11 +4,14 @@ import { ContextStash } from '../../heap/types/context/stash';
 import { Heap } from '../../heap';
 import { ControlMake } from '../../heap/types/control/make';
 import { auto_cast } from '../../heap/types/auto_cast';
-import { TAG_USER_type_array, TAG_USER_type_function } from '../../heap/types/tags';
+import { TAG_USER_type_array, TAG_USER_type_function, TAG_USER_type_struct_decl } from '../../heap/types/tags';
 import { ComplexArray } from '../../heap/types/complex/array';
 import { UserTypeArray } from '../../heap/types/user/type/array';
 import { UserVariable } from '../../heap/types/user/variable';
 import { ControlConstructor } from '../../heap/types/control/constructor';
+import { UserTypeStructDecl } from '../../heap/types/user/type/struct_decl';
+import { UserTypeStruct } from '../../heap/types/user/type/struct';
+import { UserStruct } from '../../heap/types/user/struct';
 
 function evaluate_make(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
     const make_cmd = auto_cast(heap, cmd) as ControlMake;
@@ -32,6 +35,13 @@ function evaluate_make(cmd: number, heap: Heap, C: ContextControl, S: ContextSta
             const nil_address = heap.allocate_any(null);
             S.push(nil_address);
             heap.free_object(nil_address);
+            break;
+        case TAG_USER_type_struct_decl:
+            const struct_decl = type as UserTypeStructDecl;
+            const struct = E.get_struct_frame().get_variable_address(struct_decl.get_name().address).get_value() as UserTypeStruct;
+            const struct_val = UserStruct.allocate(heap, struct);
+            S.push(struct_val);
+            heap.free_object(struct_val);
             break;
         default:
             throw new Error("evaluate_make: Invalid type");

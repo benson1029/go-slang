@@ -72,11 +72,15 @@ import { ControlLogicalImmI } from "./types/control/logical_imm_i";
 import { ControlMake } from "./types/control/make";
 import { ControlMember } from "./types/control/member";
 import { ControlMemberAddress } from "./types/control/member_address";
+import { ControlMemberAddressI } from "./types/control/member_address_i";
 import { ControlMemberI } from "./types/control/member_i";
+import { ControlMethod } from "./types/control/method";
+import { ControlMethodMember } from "./types/control/method_member";
 import { ControlName } from "./types/control/name";
 import { ControlNameAddress } from "./types/control/name_address";
 import { ControlPopI } from "./types/control/pop_i";
 import { ControlPostfix } from "./types/control/postfix";
+import { ControlPushI } from "./types/control/push_i";
 import { ControlRestoreEnvI } from "./types/control/restore_env_i";
 import { ControlReturn } from "./types/control/return";
 import { ControlReturnI } from "./types/control/return_i";
@@ -160,7 +164,12 @@ import {
     TAGSTRING_CONTROL_chan_receive_stmt,
     TAGSTRING_USER_type_channel,
     TAGSTRING_USER_type_struct_decl,
-    TAGSTRING_CONTROL_struct
+    TAGSTRING_CONTROL_struct,
+    TAGSTRING_USER_type_method,
+    TAGSTRING_CONTROL_method,
+    TAGSTRING_CONTROL_method_member,
+    TAGSTRING_CONTROL_member_address_i,
+    TAGSTRING_CONTROL_push_i
 } from "./types/tags";
 import { UserType } from "./types/user/type";
 import { UserTypeArray } from "./types/user/type/array";
@@ -169,6 +178,7 @@ import { UserTypeChannel } from "./types/user/type/channel";
 import { UserTypeFloat32 } from "./types/user/type/float32";
 import { UserTypeFunction } from "./types/user/type/function";
 import { UserTypeInt32 } from "./types/user/type/int32";
+import { UserTypeMethod } from "./types/user/type/method";
 import { UserTypeString } from "./types/user/type/string";
 import { UserTypeStructDecl } from "./types/user/type/struct_decl";
 
@@ -1025,8 +1035,63 @@ class Heap {
      * - 4 bytes address of the name (COMPLEX_string)
      * - 4 bytes * num_fields (name, type) of the fields (COMPLEX_string, USER_type)
      */
-    public allocate_CONTROL_struct(obj: { tag: string, name: string, fields: any[] }): number {
+    public allocate_CONTROL_struct(obj: { tag: string, name: any, fields: any[] }): number {
         return ControlStruct.allocate(this, obj.name, obj.fields);
+    }
+
+    /**
+     * CONTROL_method
+     * Fields    :
+     * - number of children
+     * - number of parameters
+     * - number of captures
+     * Children  :
+     * - 4 bytes address of the method body (any)
+     * - 4 bytes address of the method name (COMPLEX_string)
+     * - 4 bytes address of the struct name (COMPLEX_string)
+     * - 4 bytes address of the self name (COMPLEX_string)
+     * - 4 bytes * num_parameters address of the parameter names (COMPLEX_string)
+     * - 4 bytes * num_captures address of the capture names (COMPLEX_string)
+     */
+    public allocate_CONTROL_method(obj: { tag: string, name: string, struct: any, self: string,
+            params: any[], captures: any[], body: any }): number {
+        const param_names: string[] = obj.params.map(param => param.name);
+        const capture_names: string[] = obj.captures.map(capture => capture.name);
+        return ControlMethod.allocate(this, obj.name, obj.struct.name, obj.self,
+                param_names, capture_names, obj.body);
+    }
+
+    /**
+     * CONTROL_method_member
+     * Fields    : number of children
+     * Children  :
+     * - 4 bytes address of the object (expression)
+     * - 4 bytes address of the member name (COMPLEX_string)
+     * - 4 bytes address of the struct name (COMPLEX_string)
+     */
+    public allocate_CONTROL_method_member(obj: { tag: string, object: any, member: string, struct: { name: string } }): number {
+        return ControlMethodMember.allocate(this, obj.object, obj.member, obj.struct.name);
+    }
+
+    /**
+     * CONTROL_member_address_i
+     * Fields    : number of children
+     * Children  :
+     * - 4 bytes address of the member name (COMPLEX_string)
+     */
+    public allocate_CONTROL_member_address_i(obj: { tag: string, member: ComplexString }): number {
+        return ControlMemberAddressI.allocate(this, obj.member);
+    }
+
+    /**
+     * CONTROL_push_i
+     * Fields    :
+     * - number of children
+     * Children  :
+     * - 4 bytes address of the object (any)
+     */
+    public allocate_CONTROL_push_i(obj: { tag: string, object: any }): number {
+        return ControlPushI.allocate(this, obj.object);
     }
 
     /**
@@ -1133,6 +1198,17 @@ class Heap {
      */
     public allocate_USER_type_struct_decl(obj: { tag: string, name: string }): number {
         return UserTypeStructDecl.allocate(this, obj.name);
+    }
+
+    /**
+     * USER_type_method
+     * Fields    :
+     * - number of children
+     * Children  :
+     * - 4 bytes address of the name (COMPLEX_string)
+     */
+    public allocate_USER_type_method(obj: { tag: string }): number {
+        return UserTypeMethod.allocate(this);
     }
     
     public allocate_number(value: number): number {
@@ -1264,6 +1340,14 @@ class Heap {
                 return this.allocate_CONTROL_chan_receive_stmt(obj);
             case TAGSTRING_CONTROL_struct:
                 return this.allocate_CONTROL_struct(obj);
+            case TAGSTRING_CONTROL_method:
+                return this.allocate_CONTROL_method(obj);
+            case TAGSTRING_CONTROL_method_member:
+                return this.allocate_CONTROL_method_member(obj);
+            case TAGSTRING_CONTROL_member_address_i:
+                return this.allocate_CONTROL_member_address_i(obj);
+            case TAGSTRING_CONTROL_push_i:
+                return this.allocate_CONTROL_push_i(obj);
             case TAGSTRING_ENVIRONMENT_frame:
                 return this.allocate_ENVIRONMENT_frame(obj);
             case TAGSTRING_USER_type_array:
@@ -1282,6 +1366,8 @@ class Heap {
                 return this.allocate_USER_type_channel(obj);
             case TAGSTRING_USER_type_struct_decl:
                 return this.allocate_USER_type_struct_decl(obj);
+            case TAGSTRING_USER_type_method:
+                return this.allocate_USER_type_method(obj);
             default:
                 throw new Error("Unknown tag " + obj.tag);
         }

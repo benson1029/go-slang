@@ -3,6 +3,7 @@
  * Fields    : number of children
  * Children  :
  * - address of the environment (ENVIROMENT_frame)
+ * - address of the struct environment (ENVIRONMENT_frame)
  */
 
 import { Heap } from "../../heap";
@@ -71,6 +72,10 @@ class ContextEnv extends HeapObject {
     });
 
     this.push_frame();
+
+    // setup struct environment
+    const env = this.get_struct_frame();
+    this.set_child(1, env.push_frame().address);
   }
 
   /**
@@ -84,6 +89,19 @@ class ContextEnv extends HeapObject {
       throw new Error("ContextEnv.get_frame: Invalid tag");
     }
     return new EnvironmentFrame(this.heap, this.get_child(0));
+  }
+
+  /**
+   * Get the struct environment frame object.
+   * Important: This method does not return a reference to the environment frame.
+   * 
+   * @returns The struct environment frame object.
+   */
+  public get_struct_frame(): EnvironmentFrame {
+    if (this.get_tag() !== TAG_CONTEXT_env) {
+      throw new Error("ContextEnv.get_struct_frame: Invalid tag");
+    }
+    return new EnvironmentFrame(this.heap, this.get_child(1));
   }
 
   /**
@@ -116,7 +134,7 @@ class ContextEnv extends HeapObject {
   }
 
   public static allocate(heap: Heap): number {
-    const address = heap.allocate_object(TAG_CONTEXT_env, 1, 1);
+    const address = heap.allocate_object(TAG_CONTEXT_env, 1, 2);
     return address;
   }
 
