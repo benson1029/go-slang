@@ -74,6 +74,10 @@ export const TAG_CONTROL_chan_receive = 0xC030; // 1100 0000 0011 0000
 export const TAG_CONTROL_chan_receive_i = 0xC031; // 1100 0000 0011 0001
 export const TAG_CONTROL_chan_receive_stmt = 0xC032; // 1100 0000 0011 0010
 
+export const TAG_CONTROL_select_i = 0xC033; // 1100 0000 0011 0011
+export const TAG_CONTROL_select_case_i = 0xC034; // 1100 0000 0011 0100
+export const TAG_CONTROL_select_default_i = 0xC035; // 1100 0000 0011 0101
+
 export const TAG_ENVIRONMENT_entry = 0xC100; // 1100 0001 0000 0000
 export const TAG_ENVIRONMENT_frame = 0xC101; // 1100 0001 0000 0001
 export const TAG_ENVIRONMENT_hash_table = 0xC102; // 1100 0001 0000 0010
@@ -84,7 +88,7 @@ export const TAG_CONTEXT_env = 0xC202; // 1100 0010 0000 0010
 export const TAG_CONTEXT_thread = 0xC203; // 1100 0010 0000 0011
 export const TAG_CONTEXT_scheduler = 0xC204; // 1100 0010 0000 0100
 export const TAG_CONTEXT_waker = 0xC205; // 1100 0010 0000 0101
-
+export const TAG_CONTEXT_waiting_instance = 0xC206; // 1100 0010 0000 0110
 
 export const TAG_USER_variable = 0xC301; // 1100 0011 0000 0001
 export const TAG_USER_struct = 0xC302; // 1100 0011 0000 0010

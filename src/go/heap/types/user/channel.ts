@@ -3,8 +3,8 @@
  * Fields    : number of children, buffer size, whether channel is closed
  * Children  :
  * - address of the buffer queue of values (COMPLEX_queue)
- * - address of the queue of waiting senders (COMPLEX_queue of CONTEXT_waker)
- * - address of the queue of waiting receivers (COMPLEX_queue of CONTEXT_waker)
+ * - address of the queue of waiting senders (COMPLEX_queue of CONTEXT_waiting_instance)
+ * - address of the queue of waiting receivers (COMPLEX_queue of CONTEXT_waiting_instance)
  * - address of the type of the channel (USER_type)
  */
 
@@ -16,9 +16,9 @@ import { UserVariable } from "./variable";
 import { HeapObject } from "../objects";
 import { UserType } from "./type";
 import { PrimitiveNil } from "../primitive/nil";
-import { ContextWaker } from "../context/waker";
 import { ContextThread } from "../context/thread";
 import { ContextScheduler } from "../context/scheduler";
+import { ContextWaitingInstance } from "../context/waiting_instance";
 
 const IS_OPEN = 0;
 const IS_CLOSED = 1;
@@ -48,8 +48,8 @@ class UserChannel extends HeapObject {
     return auto_cast(this.heap, this.get_child(3)) as UserType;
   }
 
-  private zero(): UserVariable {
-    return new UserVariable(
+  private zero(): HeapObject {
+    const variable = new UserVariable(
       this.heap,
       UserVariable.allocate(
         this.heap,
@@ -57,6 +57,9 @@ class UserChannel extends HeapObject {
         PrimitiveNil.allocate_default(this.heap)
       )
     );
+    const zero = variable.get_value().reference();
+    variable.free();
+    return zero;
   }
 
   public close(): void {
@@ -69,7 +72,7 @@ class UserChannel extends HeapObject {
   public try_send(
     thread: ContextThread,
     scheduler: ContextScheduler,
-    value: UserVariable
+    value: HeapObject
   ): { success: boolean; waitingQueue: ComplexQueue } {
     if (this.isClosed()) {
       throw new Error("UserChannel.try_send: channel is closed");
@@ -79,16 +82,24 @@ class UserChannel extends HeapObject {
       this.buffer().enqueue(value);
 
       while (this.waitingRecv().length() > 0) {
-        const waiting = this.waitingRecv().dequeue() as ContextWaker;
-        if (waiting.isEmpty()) {
+        const waiting = this.waitingRecv().dequeue() as ContextWaitingInstance;
+        if (waiting.get_waker().isEmpty()) {
           waiting.free();
           continue;
         }
 
-        const new_value = this.buffer().dequeue() as UserVariable; // Guaranteed to be non-empty
-        waiting.get_thread().stash().push(new_value.address);
+        const new_value = this.buffer().dequeue(); // Guaranteed to be non-empty
+        waiting.get_waker().get_thread().stash().push(new_value.address);
+        if (!waiting.get_body().is_nil()) {
+          // For select case, push the case body to the thread's control stack
+          waiting
+            .get_waker()
+            .get_thread()
+            .control()
+            .push(waiting.get_body().address);
+        }
 
-        waiting.wake(scheduler);
+        waiting.get_waker().wake(scheduler);
 
         new_value.free();
         waiting.free();
@@ -104,7 +115,8 @@ class UserChannel extends HeapObject {
   public send(
     thread: ContextThread,
     scheduler: ContextScheduler,
-    value: UserVariable
+    value: HeapObject,
+    body: HeapObject
   ): void {
     if (this.isClosed()) {
       throw new Error("UserChannel.send: channel is closed");
@@ -113,10 +125,18 @@ class UserChannel extends HeapObject {
     if (result.success) {
       scheduler.enqueue(thread);
     } else {
-      thread.stash().push(value.address);
       const waker = thread.createWaker();
-      result.waitingQueue.enqueue(waker);
+      const waiting_instance = new ContextWaitingInstance(
+        this.heap,
+        ContextWaitingInstance.allocate(this.heap, waker)
+      );
+
+      waiting_instance.set_value(value);
+      waiting_instance.set_body(body);
+      result.waitingQueue.enqueue(waiting_instance);
+
       waker.free();
+      waiting_instance.free();
       // we don't enqueue the thread, because it needs to wait
     }
   }
@@ -133,22 +153,29 @@ class UserChannel extends HeapObject {
     scheduler: ContextScheduler
   ): { success: boolean; waitingQueue: ComplexQueue } {
     if (this.buffer().length() > 0) {
-      const value = this.buffer().dequeue() as UserVariable;
+      const value = this.buffer().dequeue();
       thread.stash().push(value.address);
       value.free();
 
       while (this.waitingSend().length() > 0) {
-        const waiting = this.waitingSend().dequeue() as ContextWaker;
-        if (waiting.isEmpty()) {
+        const waiting = this.waitingSend().dequeue() as ContextWaitingInstance;
+        if (waiting.get_waker().isEmpty()) {
           waiting.free();
           continue;
         }
 
-        const new_value_address = waiting.get_thread().stash().pop();
-        const new_value = new UserVariable(this.heap, new_value_address);
+        const new_value = waiting.get_value();
         this.buffer().enqueue(new_value);
+        if (!waiting.get_body().is_nil()) {
+          // For select case, push the case body to the thread's control stack
+          waiting
+            .get_waker()
+            .get_thread()
+            .control()
+            .push(waiting.get_body().address);
+        }
 
-        waiting.wake(scheduler);
+        waiting.get_waker().wake(scheduler);
 
         new_value.free();
         waiting.free();
@@ -167,14 +194,26 @@ class UserChannel extends HeapObject {
     }
   }
 
-  public recv(thread: ContextThread, scheduler: ContextScheduler): void {
+  public recv(
+    thread: ContextThread,
+    scheduler: ContextScheduler,
+    body: HeapObject
+  ): void {
     const result = this.try_recv(thread, scheduler);
     if (result.success) {
       scheduler.enqueue(thread);
     } else {
       const waker = thread.createWaker();
-      result.waitingQueue.enqueue(waker);
+      const waiting_instance = new ContextWaitingInstance(
+        this.heap,
+        ContextWaitingInstance.allocate(this.heap, waker)
+      );
+
+      waiting_instance.set_body(body);
+      result.waitingQueue.enqueue(waiting_instance);
+
       waker.free();
+      waiting_instance.free();
       // we don't enqueue the thread, because it needs to wait
     }
   }
