@@ -70,6 +70,12 @@ const config: Config = {
           label: 'Project Report',
         },
         {
+          type: 'docSidebar',
+          sidebarId: 'notesSidebar',
+          position: 'left',
+          label: 'Developer Notes',
+        },
+        {
           href: 'https://github.com/benson1029/go-slang',
           label: 'GitHub',
           position: 'right',

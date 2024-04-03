@@ -62,7 +62,7 @@ The capacity of a slice can be obtained using the `cap` function:
 fmt.Println(cap(slice)) // 5
 ```
 
-## Structs (Under Development)
+## Structs
 
 Structs are user-defined types that can hold multiple fields of different types. The syntax for declaring a struct is as follows:
 
