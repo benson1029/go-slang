@@ -38,8 +38,7 @@ class ComplexMutex extends HeapObject {
    */
   public lock(thread: ContextThread, scheduler: ContextScheduler): void {
     if (this.isLocked()) {
-      const waker_address = ContextWaker.allocate(this.heap, thread);
-      const waker = new ContextWaker(this.heap, waker_address);
+      const waker = thread.createWaker();
       this.get_queue().enqueue(waker);
       waker.free();
     } else {

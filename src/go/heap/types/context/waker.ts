@@ -13,13 +13,27 @@ import { ContextScheduler } from "./scheduler";
 import { ContextThread } from "./thread";
 
 class ContextWaker extends HeapObject {
-  public wake(scheduler: ContextScheduler): void {
+  public isEmpty(): boolean {
+    return this.get_child(0) === PrimitiveNil.allocate();
+  }
+
+  public get_thread(): ContextThread {
+    return new ContextThread(this.heap, this.get_child(0));
+  }
+
+  /**
+   * @param scheduler
+   * @returns whether a thread was woken
+   */
+  public wake(scheduler: ContextScheduler): boolean {
     const thread = new ContextThread(this.heap, this.get_child(0));
     if (!thread.is_nil()) {
       this.set_child(0, PrimitiveNil.allocate());
       scheduler.enqueue(thread);
       thread.free();
+      return true;
     }
+    return false;
   }
 
   public static allocate(heap: Heap, thread: ContextThread): number {

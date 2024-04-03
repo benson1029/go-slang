@@ -13,6 +13,7 @@ import { TAG_CONTEXT_thread } from "../tags";
 import { ContextControl } from "./control";
 import { ContextEnv } from "./env";
 import { ContextStash } from "./stash";
+import { ContextWaker } from "./waker";
 
 class ContextThread extends HeapObject {
   private static thread_id_counter = 0;
@@ -70,6 +71,11 @@ class ContextThread extends HeapObject {
 
     this.heap.set_cannnot_be_freed(forked_address, false);
     return new ContextThread(this.heap, forked_address);
+  }
+
+  public createWaker(): ContextWaker {
+    const w = ContextWaker.allocate(this.heap, this);
+    return new ContextWaker(this.heap, w);
   }
 
   public static allocate(heap: Heap): number {

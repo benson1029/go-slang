@@ -41,8 +41,7 @@ class ComplexSemaphore extends HeapObject {
   public lock(thread: ContextThread, scheduler: ContextScheduler): boolean {
     this.decrement_permits();
     if (this.get_permits() < 0) {
-      const waker_address = ContextWaker.allocate(this.heap, thread);
-      const waker = new ContextWaker(this.heap, waker_address);
+      const waker = thread.createWaker();
       this.get_queue().enqueue(waker);
       waker.free();
       return false;
