@@ -8,9 +8,11 @@
  */
 
 import { Heap } from "../../heap";
+import { auto_cast } from "../auto_cast";
 import { ComplexString } from "../complex/string";
 import { HeapObject } from "../objects";
 import { TAG_CONTROL_struct } from "../tags";
+import { UserType } from "../user/type";
 
 class ControlStruct extends HeapObject {
   public get_name(): ComplexString {
@@ -37,19 +39,19 @@ class ControlStruct extends HeapObject {
     return new ComplexString(this.heap, this.get_child(1 + 2 * index));
   }
 
-  public get_field_type(index: number): ComplexString {
+  public get_field_type(index: number): UserType {
     if (this.get_tag() !== TAG_CONTROL_struct) {
       throw new Error("ControlStruct.get_field_type: Invalid tag");
     }
     if (index < 0 || index >= this.get_number_of_fields()) {
       throw new Error("ControlStruct.get_field_type: Index out of range");
     }
-    return new ComplexString(this.heap, this.get_child(2 + 2 * index));
+    return auto_cast(this.heap, this.get_child(2 + 2 * index)) as UserType;
   }
 
   public static allocate(
     heap: Heap,
-    name: string,
+    name: { name: string },
     fields: Array<{ name: string; type: any }>
   ): number {
     const address = heap.allocate_object(
@@ -57,7 +59,7 @@ class ControlStruct extends HeapObject {
       1,
       1 + 2 * fields.length
     );
-    heap.set_child(address, 0, ComplexString.allocate(heap, name));
+    heap.set_child(address, 0, ComplexString.allocate(heap, name.name));
     for (let i = 0; i < fields.length; i++) {
       heap.set_child(
         address,

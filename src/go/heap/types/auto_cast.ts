@@ -3,6 +3,7 @@ import { ComplexArray } from "./complex/array";
 import { ComplexBuiltin } from "./complex/builtin";
 import { ComplexFunction } from "./complex/function";
 import { ComplexLinkedList } from "./complex/linked_list";
+import { ComplexMethod } from "./complex/method";
 import { ComplexPointer } from "./complex/pointer";
 import { ComplexString } from "./complex/string";
 import { ContextControl } from "./context/control";
@@ -40,11 +41,15 @@ import { ControlLogicalImmI } from "./control/logical_imm_i";
 import { ControlMake } from "./control/make";
 import { ControlMember } from "./control/member";
 import { ControlMemberAddress } from "./control/member_address";
+import { ControlMemberAddressI } from "./control/member_address_i";
 import { ControlMemberI } from "./control/member_i";
+import { ControlMethod } from "./control/method";
+import { ControlMethodMember } from "./control/method_member";
 import { ControlName } from "./control/name";
 import { ControlNameAddress } from "./control/name_address";
 import { ControlPopI } from "./control/pop_i";
 import { ControlPostfix } from "./control/postfix";
+import { ControlPushI } from "./control/push_i";
 import { ControlRestoreEnvI } from "./control/restore_env_i";
 import { ControlReturn } from "./control/return";
 import { ControlReturnI } from "./control/return_i";
@@ -142,6 +147,12 @@ import {
   TAG_CONTROL_chan_receive_stmt,
   TAG_USER_type_struct_decl,
   TAG_CONTROL_struct,
+  TAG_USER_type_method,
+  TAG_CONTROL_method,
+  TAG_CONTROL_member_address_i,
+  TAG_COMPLEX_method,
+  TAG_CONTROL_method_member,
+  TAG_CONTROL_push_i,
 } from "./tags"
 import { UserStruct } from "./user/struct";
 import { UserTypeArray } from "./user/type/array";
@@ -151,6 +162,7 @@ import { UserTypeChannel } from "./user/type/channel";
 import { UserTypeFloat32 } from "./user/type/float32";
 import { UserTypeFunction } from "./user/type/function";
 import { UserTypeInt32 } from "./user/type/int32";
+import { UserTypeMethod } from "./user/type/method";
 import { UserTypeNil } from "./user/type/nil";
 import { UserTypeSlice } from "./user/type/slice";
 import { UserTypeString } from "./user/type/string";
@@ -184,6 +196,8 @@ function auto_cast(heap: Heap, address: number): HeapObject {
       return new ComplexFunction(heap, address);
     case TAG_COMPLEX_builtin:
       return new ComplexBuiltin(heap, address);
+    case TAG_COMPLEX_method:
+      return new ComplexMethod(heap, address);
     case TAG_CONTROL_name:
       return new ControlName(heap, address);
     case TAG_CONTROL_literal:
@@ -276,6 +290,14 @@ function auto_cast(heap: Heap, address: number): HeapObject {
       return new ControlChanReceiveStmt(heap, address);
     case TAG_CONTROL_struct:
       return new ControlStruct(heap, address);
+    case TAG_CONTROL_method:
+      return new ControlMethod(heap, address);
+    case TAG_CONTROL_member_address_i:
+      return new ControlMemberAddressI(heap, address);
+    case TAG_CONTROL_method_member:
+      return new ControlMethodMember(heap, address);
+    case TAG_CONTROL_push_i:
+      return new ControlPushI(heap, address);
     case TAG_ENVIRONMENT_entry:
       return new EnvironmentEntry(heap, address);
     case TAG_ENVIRONMENT_frame:
@@ -318,6 +340,8 @@ function auto_cast(heap: Heap, address: number): HeapObject {
       return new UserTypeBuiltin(heap, address);
     case TAG_USER_type_struct_decl:
       return new UserTypeStructDecl(heap, address);
+    case TAG_USER_type_method:
+      return new UserTypeMethod(heap, address);
     default:
       throw new Error("Unknown tag " + tag.toString() + " at address " + address.toString());
   }

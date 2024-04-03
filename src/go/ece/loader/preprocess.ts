@@ -248,6 +248,7 @@ const microcode_preprocess: {
   member: (
     comp: {
       tag: string;
+      struct: any | null;
       object: any;
       member: string;
     },
@@ -268,6 +269,8 @@ const microcode_preprocess: {
     } catch (e) {
       return obj_t.getField(comp.member);
     }
+    comp.tag = "method-member";
+    comp.struct = { tag: "name", name: obj_t.name };
     if (scope.current_declaration != null) {
       scope.current_declaration.captures.push({ name: "METHOD." + obj_t.name + "." + comp.member, type: method });
     }
