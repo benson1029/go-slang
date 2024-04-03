@@ -19,19 +19,22 @@ import { ControlMethod } from '../../heap/types/control/method';
 import { ComplexMethod } from '../../heap/types/complex/method';
 import { ComplexString } from '../../heap/types/complex/string';
 import { ControlMethodMember } from '../../heap/types/control/method_member';
+import { HeapObject } from '../../heap/types/objects';
 
-function resolveType(heap: Heap, E: ContextEnv, type: UserType): UserType {
+function resolveType(heap: Heap, E: ContextEnv, type: UserType, toFree: HeapObject[]): UserType {
     switch (type.get_tag()) {
         case TAG_USER_type_struct_decl:
             return E.get_struct_frame().get_variable_address(
                 (type as UserTypeStructDecl).get_name().address
             ).get_value() as UserTypeStruct;
         case TAG_USER_type_array:
-            return auto_cast(heap, UserTypeArray.reallocate(
+            const type_obj = auto_cast(heap, UserTypeArray.reallocate(
                 heap,
                 (type as UserTypeArray).get_length(),
-                resolveType(heap, E, (type as UserTypeArray).get_inner_type())
+                resolveType(heap, E, (type as UserTypeArray).get_inner_type(), toFree)
             )) as UserTypeArray;
+            toFree.push(type_obj);
+            return type_obj;
         default:
             return type;
     }
@@ -40,10 +43,11 @@ function resolveType(heap: Heap, E: ContextEnv, type: UserType): UserType {
 function evaluate_struct(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
     const struct_cmd = new ControlStruct(heap, cmd);
     const name = struct_cmd.get_name();
+    let toFree = [];
     let members = [];
     for (let i = 0; i < struct_cmd.get_number_of_fields(); i++) {
         const member_name = struct_cmd.get_field_name(i);
-        const member_type = resolveType(heap, E, struct_cmd.get_field_type(i));
+        const member_type = resolveType(heap, E, struct_cmd.get_field_type(i), toFree);
         members.push({ name: member_name, type: member_type });
     }
     const type = auto_cast(heap, UserTypeStruct.allocate(
@@ -55,6 +59,7 @@ function evaluate_struct(cmd: number, heap: Heap, C: ContextControl, S: ContextS
     const variable = E.get_struct_frame().get_variable_address(name.address);
     variable.set_value(type);
     type.free();
+    toFree.forEach(obj => obj.free());
 }
 
 function evaluate_method(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
@@ -71,6 +76,8 @@ function evaluate_method(cmd: number, heap: Heap, C: ContextControl, S: ContextS
     E.get_struct_frame().insert_new_variable(method_name.address);
     const variable = E.get_struct_frame().get_variable_address(method_name.address);
     variable.set_value(method_object);
+    method_name.free();
+    method_object.free();
 }
 
 function evaluate_member(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {

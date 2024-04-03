@@ -113,6 +113,7 @@ function evaluate_call_i(cmd: number, heap: Heap, C: ContextControl, S: ContextS
         E.get_frame().insert_new_variable(self_name.address);
         const variable = E.get_frame().get_variable_address(self_name.address);
         variable.set_value(self);
+        self.free();
     }
 
     // Push the body
