@@ -8,8 +8,11 @@ import { ComplexPointer } from "./complex/pointer";
 import { ComplexString } from "./complex/string";
 import { ContextControl } from "./context/control";
 import { ContextEnv } from "./context/env";
+import { ContextScheduler } from "./context/scheduler";
 import { ContextStash } from "./context/stash";
 import { ContextThread } from "./context/thread";
+import { ContextWaitingInstance } from "./context/waiting_instance";
+import { ContextWaker } from "./context/waker";
 import { ControlIndex } from "./control";
 import { ControlAssign } from "./control/assign";
 import { ControlAssignI } from "./control/assign_i";
@@ -21,6 +24,7 @@ import { ControlCall } from "./control/call";
 import { ControlCallI } from "./control/call_i";
 import { ControlCallStmt } from "./control/call_stmt";
 import { ControlChanReceive } from "./control/chan_receive";
+import { ControlChanReceiveI } from "./control/chan_receive_i";
 import { ControlChanReceiveStmt } from "./control/chan_receive_stmt";
 import { ControlChanSend } from "./control/chan_send";
 import { ControlChanSendI } from "./control/chan_send_i";
@@ -40,6 +44,8 @@ import { ControlIndexAddressI } from "./control/index_address_i";
 import { ControlIndexI } from "./control/index_i";
 import { ControlLogicalI } from "./control/logical_i";
 import { ControlLogicalImmI } from "./control/logical_imm_i";
+import { ControlMake } from "./control/make";
+import { ControlMakeI } from "./control/make_i";
 import { ControlMember } from "./control/member";
 import { ControlMemberAddress } from "./control/member_address";
 import { ControlMemberAddressI } from "./control/member_address_i";
@@ -155,7 +161,15 @@ import {
   TAG_CONTROL_push_i,
   TAG_CONTROL_chan_send_i,
   TAG_CONTROL_default_make,
+  TAG_CONTROL_make,
+  TAG_CONTROL_make_i,
+  TAG_USER_channel,
+  TAG_CONTEXT_scheduler,
+  TAG_CONTEXT_waker,
+  TAG_CONTEXT_waiting_instance,
+  TAG_CONTROL_chan_receive_i,
 } from "./tags"
+import { UserChannel } from "./user/channel";
 import { UserStruct } from "./user/struct";
 import { UserTypeArray } from "./user/type/array";
 import { UserTypeBool } from "./user/type/bool";
@@ -272,6 +286,10 @@ function auto_cast(heap: Heap, address: number): HeapObject {
       return new ControlNameAddress(heap, address);
     case TAG_CONTROL_default_make:
       return new ControlDefaultMake(heap, address);
+    case TAG_CONTROL_make:
+      return new ControlMake(heap, address);   
+    case TAG_CONTROL_make_i:
+      return new ControlMakeI(heap, address);   
     case TAG_CONTROL_index:
       return new ControlIndex(heap, address);
     case TAG_CONTROL_index_i:
@@ -290,6 +308,8 @@ function auto_cast(heap: Heap, address: number): HeapObject {
       return new ControlChanSendI(heap, address);
     case TAG_CONTROL_chan_receive:
       return new ControlChanReceive(heap, address);
+    case TAG_CONTROL_chan_receive_i:
+      return new ControlChanReceiveI(heap, address);
     case TAG_CONTROL_chan_receive_stmt:
       return new ControlChanReceiveStmt(heap, address);
     case TAG_CONTROL_struct:
@@ -316,10 +336,18 @@ function auto_cast(heap: Heap, address: number): HeapObject {
       return new ContextStash(heap, address);
     case TAG_CONTEXT_env:
       return new ContextEnv(heap, address);
+    case TAG_CONTEXT_scheduler:
+      return new ContextScheduler(heap, address);
+    case TAG_CONTEXT_waker:
+      return new ContextWaker(heap, address);
+    case TAG_CONTEXT_waiting_instance:
+      return new ContextWaitingInstance(heap, address);
     case TAG_USER_variable:
       return new UserVariable(heap, address);
     case TAG_USER_struct:
       return new UserStruct(heap, address);
+    case TAG_USER_channel:
+      return new UserChannel(heap, address);
     case TAG_USER_type_array:
       return new UserTypeArray(heap, address);
     case TAG_USER_type_bool:

@@ -86,6 +86,10 @@ function lookup_microcode_sequential(tag: number): Function {
       return control_var.evaluate_name_address;
     case tags.TAG_CONTROL_default_make:
       return constructor.evaluate_default_make;
+    case tags.TAG_CONTROL_make:
+      return constructor.evaluate_make;
+    case tags.TAG_CONTROL_make_i:
+      return constructor.evaluate_make_i;
     case tags.TAG_CONTROL_index:
       return array.evaluate_index;
     case tags.TAG_CONTROL_index_i:
@@ -125,6 +129,12 @@ function lookup_microcode(tag: number): Function {
       return concurrent_channel.evaluate_chan_send;
     case tags.TAG_CONTROL_chan_send_i:
       return concurrent_channel.evaluate_chan_send_i;
+    case tags.TAG_CONTROL_chan_receive:
+      return concurrent_channel.evaluate_chan_receive;
+    case tags.TAG_CONTROL_chan_receive_stmt:
+      return concurrent_channel.evaluate_chan_receive_stmt;
+    case tags.TAG_CONTROL_chan_receive_i:
+      return concurrent_channel.evaluate_chan_receive_i;
     default:
       return (
         cmd: number,

@@ -70,6 +70,8 @@ import { ControlIndexI } from "./types/control/index_i";
 import { ControlLiteral } from "./types/control/literal";
 import { ControlLogicalI } from "./types/control/logical_i";
 import { ControlLogicalImmI } from "./types/control/logical_imm_i";
+import { ControlMake } from "./types/control/make";
+import { ControlMakeI } from "./types/control/make_i";
 import { ControlMember } from "./types/control/member";
 import { ControlMemberAddress } from "./types/control/member_address";
 import { ControlMemberAddressI } from "./types/control/member_address_i";
@@ -169,7 +171,9 @@ import {
     TAGSTRING_CONTROL_method_member,
     TAGSTRING_CONTROL_member_address_i,
     TAGSTRING_CONTROL_push_i,
-    TAGSTRING_CONTROL_default_make
+    TAGSTRING_CONTROL_default_make,
+    TAGSTRING_CONTROL_make_i,
+    TAGSTRING_CONTROL_make
 } from "./types/tags";
 import { UserType } from "./types/user/type";
 import { UserTypeArray } from "./types/user/type/array";
@@ -938,6 +942,28 @@ class Heap {
     }
 
     /**
+     * CONTROL_make
+     * Fields    : number of children
+     * Children  :
+     * - 4 bytes address of the type (type)
+     * - 4 bytes * num_arguments address of the arguments (expression)
+     */
+    public allocate_CONTROL_make(obj: { tag: string, type: any, args: any[] }): number {
+        return ControlMake.allocate(this, obj.type, obj.args);
+    }
+
+    /**
+     * CONTROL_make_i
+     * Fields    : number of children
+     * Children  :
+     * - 4 bytes address of the type (USER_type)
+     * - 4 bytes number of arguments (PRIMITIVE_int32)
+     */
+    public allocate_CONTROL_make_i(obj: { tag: string, type: UserType, num_args: number }): number {
+        return ControlMakeI.allocate(this, obj.type, obj.num_args);
+    }
+
+    /**
      * CONTROL_index
      * Fields    : number of children
      * Children  :
@@ -1024,8 +1050,8 @@ class Heap {
      * Children  :
      * - 4 bytes address of the name of the channel (COMPLEX_string)
      */
-    public allocate_CONTROL_chan_receive_stmt(obj: { tag: string, name: any }): number {
-        return ControlChanReceiveStmt.allocate(this, obj.name);
+    public allocate_CONTROL_chan_receive_stmt(obj: { tag: string, body: any }): number {
+        return ControlChanReceiveStmt.allocate(this, obj.body);
     }
 
     /**
@@ -1320,6 +1346,8 @@ class Heap {
                 return this.allocate_CONTROL_name_address(obj);
             case TAGSTRING_CONTROL_default_make:
                 return this.allocate_CONTROL_default_make(obj);
+            case TAGSTRING_CONTROL_make:
+                return this.allocate_CONTROL_make(obj);
             case TAGSTRING_CONTROL_index:
                 return this.allocate_CONTROL_index(obj);
             case TAGSTRING_CONTROL_index_i:
@@ -1332,6 +1360,8 @@ class Heap {
                 return this.allocate_CONTROL_constructor(obj);
             case TAGSTRING_CONTROL_constructor_i:
                 return this.allocate_CONTROL_constructor_i(obj);
+            case TAGSTRING_CONTROL_make_i:
+                return this.allocate_CONTROL_make_i(obj);
             case TAGSTRING_CONTROL_chan_send:
                 return this.allocate_CONTROL_chan_send(obj);
             case TAGSTRING_CONTROL_chan_receive:

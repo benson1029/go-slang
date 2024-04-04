@@ -105,18 +105,34 @@ class UserChannel extends HeapObject {
       throw new Error("UserChannel.try_send: channel is closed");
     }
 
-    if (this.buffer().length() < this.get_buffer_size()) {
+    while (this.waitingRecv().length() > 0) {
+      let waiting = this.waitingRecv().front() as ContextWaitingInstance;
+      if (waiting.get_waker().isEmpty()) {
+        waiting = this.waitingRecv().dequeue() as ContextWaitingInstance;
+        waiting.free();
+        continue;
+      } else {
+        break;
+      }
+    }
+
+    if (
+      this.buffer().length() < this.get_buffer_size() ||
+      this.waitingRecv().length() > 0
+    ) {
       this.buffer().enqueue(value);
 
-      while (this.waitingRecv().length() > 0) {
+      if (this.waitingRecv().length() > 0) {
         const waiting = this.waitingRecv().dequeue() as ContextWaitingInstance;
         if (waiting.get_waker().isEmpty()) {
-          waiting.free();
-          continue;
+          throw new Error(
+            "UserChannel.try_send: waiting receiver should have a waker"
+          );
         }
 
         const new_value = this.buffer().dequeue(); // Guaranteed to be non-empty
         waiting.get_waker().get_thread().stash().push(new_value.address);
+
         if (!waiting.get_body().is_nil()) {
           // For select case, push the case body to the thread's control stack
           waiting
@@ -127,10 +143,8 @@ class UserChannel extends HeapObject {
         }
 
         waiting.get_waker().wake(scheduler);
-
         new_value.free();
         waiting.free();
-        break;
       }
 
       return { success: true, waitingQueue: null };
@@ -185,36 +199,35 @@ class UserChannel extends HeapObject {
     if (this.get_tag() !== TAG_USER_channel) {
       throw new Error("UserChannel.get_buffer_size: invalid object tag");
     }
+
+    while (this.waitingSend().length() > 0) {
+      const waiting = this.waitingSend().dequeue() as ContextWaitingInstance;
+      if (waiting.get_waker().isEmpty()) {
+        waiting.free();
+        continue;
+      }
+
+      const new_value = waiting.get_value();
+      this.buffer().enqueue(new_value);
+
+      if (!waiting.get_body().is_nil()) {
+        // For select case, push the case body to the thread's control stack
+        waiting
+          .get_waker()
+          .get_thread()
+          .control()
+          .push(waiting.get_body().address);
+      }
+
+      waiting.get_waker().wake(scheduler);
+      waiting.free();
+      break;
+    }
+
     if (this.buffer().length() > 0) {
       const value = this.buffer().dequeue();
       thread.stash().push(value.address);
       value.free();
-
-      while (this.waitingSend().length() > 0) {
-        const waiting = this.waitingSend().dequeue() as ContextWaitingInstance;
-        if (waiting.get_waker().isEmpty()) {
-          waiting.free();
-          continue;
-        }
-
-        const new_value = waiting.get_value();
-        this.buffer().enqueue(new_value);
-        if (!waiting.get_body().is_nil()) {
-          // For select case, push the case body to the thread's control stack
-          waiting
-            .get_waker()
-            .get_thread()
-            .control()
-            .push(waiting.get_body().address);
-        }
-
-        waiting.get_waker().wake(scheduler);
-
-        new_value.free();
-        waiting.free();
-        break;
-      }
-
       return { success: true, waitingQueue: null };
     } else {
       if (this.isClosed()) {
@@ -272,7 +285,10 @@ class UserChannel extends HeapObject {
   public stringify_i(): string {
     let result = "";
     result += this.address.toString() + " ";
-
+    result += "channel ";
+    result += this.get_buffer_size().toString() + " ";
+    result += this.get_type().stringify() + " ";
+    result += this.isClosed() ? "closed" : "open";
     return result;
   }
 }

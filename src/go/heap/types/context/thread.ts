@@ -56,6 +56,10 @@ class ContextThread extends HeapObject {
   }
 
   public fork(): ContextThread {
+    if (this.get_tag() !== TAG_CONTEXT_thread) {
+      throw new Error("ContextThread.fork: Invalid tag");
+    }
+
     const forked_address = this.heap.allocate_object(TAG_CONTEXT_thread, 2, 3);
     this.heap.set_cannnot_be_freed(forked_address, true);
     this.heap.set_field(forked_address, 1, ContextThread.generate_thread_id());
@@ -74,6 +78,10 @@ class ContextThread extends HeapObject {
   }
 
   public createWaker(): ContextWaker {
+    if (this.get_tag() !== TAG_CONTEXT_thread) {
+      throw new Error("ContextThread.createWaker: Invalid tag");
+    }
+
     const w = ContextWaker.allocate(this.heap, this);
     return new ContextWaker(this.heap, w);
   }
