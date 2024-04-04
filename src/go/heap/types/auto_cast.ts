@@ -23,6 +23,7 @@ import { ControlCallStmt } from "./control/call_stmt";
 import { ControlChanReceive } from "./control/chan_receive";
 import { ControlChanReceiveStmt } from "./control/chan_receive_stmt";
 import { ControlChanSend } from "./control/chan_send";
+import { ControlChanSendI } from "./control/chan_send_i";
 import { ControlConstructor } from "./control/constructor";
 import { ControlConstructorI } from "./control/constructor_i";
 import { ControlContinue } from "./control/continue";
@@ -153,6 +154,7 @@ import {
   TAG_COMPLEX_method,
   TAG_CONTROL_method_member,
   TAG_CONTROL_push_i,
+  TAG_CONTROL_chan_send_i,
 } from "./tags"
 import { UserStruct } from "./user/struct";
 import { UserTypeArray } from "./user/type/array";
@@ -284,6 +286,8 @@ function auto_cast(heap: Heap, address: number): HeapObject {
       return new ControlConstructorI(heap, address);
     case TAG_CONTROL_chan_send:
       return new ControlChanSend(heap, address);
+    case TAG_CONTROL_chan_send_i:
+      return new ControlChanSendI(heap, address);
     case TAG_CONTROL_chan_receive:
       return new ControlChanReceive(heap, address);
     case TAG_CONTROL_chan_receive_stmt:

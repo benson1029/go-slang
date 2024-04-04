@@ -16,6 +16,10 @@ class ControlChanSend extends HeapObject {
     return auto_cast(this.heap, this.get_child(0));
   }
 
+  public get_value_address(): HeapObject {
+    return auto_cast(this.heap, this.get_child(1));
+  }
+
   public static allocate(heap: Heap, name: any, value: any) {
     const address = heap.allocate_object(TAG_CONTROL_chan_send, 1, 2);
     heap.set_cannnot_be_freed(address, true);

@@ -10,6 +10,7 @@ import * as struct from "./struct";
 import * as control_var from "./var";
 import * as tags from "../../heap/types/tags";
 import * as concurrent_go from "./concurrent/go";
+import * as concurrent_channel from "./concurrent/channel";
 import { Heap } from "../../heap";
 import { ContextThread } from "../../heap/types/context/thread";
 import { ContextScheduler } from "../../heap/types/context/scheduler";
@@ -120,6 +121,10 @@ function lookup_microcode(tag: number): Function {
   switch (tag) {
     case tags.TAG_CONTROL_go_call_stmt:
       return concurrent_go.evaluate_go_call_stmt;
+    case tags.TAG_CONTROL_chan_send:
+      return concurrent_channel.evaluate_chan_send;
+    case tags.TAG_CONTROL_chan_send_i:
+      return concurrent_channel.evaluate_chan_send_i;
     default:
       return (
         cmd: number,

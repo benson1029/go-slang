@@ -25,30 +25,51 @@ const IS_CLOSED = 1;
 
 class UserChannel extends HeapObject {
   private get_buffer_size(): number {
+    if (this.get_tag() !== TAG_USER_channel) {
+      throw new Error("UserChannel.get_buffer_size: invalid object tag");
+    }
     return this.get_field(1);
   }
 
   private isClosed(): boolean {
+    if (this.get_tag() !== TAG_USER_channel) {
+      throw new Error("UserChannel.get_buffer_size: invalid object tag");
+    }
     return this.get_field(2) === IS_CLOSED;
   }
 
   private buffer(): ComplexQueue {
+    if (this.get_tag() !== TAG_USER_channel) {
+      throw new Error("UserChannel.get_buffer_size: invalid object tag");
+    }
     return new ComplexQueue(this.heap, this.get_child(0));
   }
 
   private waitingSend(): ComplexQueue {
+    if (this.get_tag() !== TAG_USER_channel) {
+      throw new Error("UserChannel.get_buffer_size: invalid object tag");
+    }
     return new ComplexQueue(this.heap, this.get_child(1));
   }
 
   private waitingRecv(): ComplexQueue {
+    if (this.get_tag() !== TAG_USER_channel) {
+      throw new Error("UserChannel.get_buffer_size: invalid object tag");
+    }
     return new ComplexQueue(this.heap, this.get_child(2));
   }
 
   private get_type(): UserType {
+    if (this.get_tag() !== TAG_USER_channel) {
+      throw new Error("UserChannel.get_buffer_size: invalid object tag");
+    }
     return auto_cast(this.heap, this.get_child(3)) as UserType;
   }
 
   private zero(): HeapObject {
+    if (this.get_tag() !== TAG_USER_channel) {
+      throw new Error("UserChannel.get_buffer_size: invalid object tag");
+    }
     const variable = new UserVariable(
       this.heap,
       UserVariable.allocate(
@@ -63,6 +84,9 @@ class UserChannel extends HeapObject {
   }
 
   public close(): void {
+    if (this.get_tag() !== TAG_USER_channel) {
+      throw new Error("UserChannel.get_buffer_size: invalid object tag");
+    }
     if (this.isClosed()) {
       throw new Error("UserChannel.close: channel is already closed");
     }
@@ -74,6 +98,9 @@ class UserChannel extends HeapObject {
     scheduler: ContextScheduler,
     value: HeapObject
   ): { success: boolean; waitingQueue: ComplexQueue } {
+    if (this.get_tag() !== TAG_USER_channel) {
+      throw new Error("UserChannel.get_buffer_size: invalid object tag");
+    }
     if (this.isClosed()) {
       throw new Error("UserChannel.try_send: channel is closed");
     }
@@ -118,6 +145,9 @@ class UserChannel extends HeapObject {
     value: HeapObject,
     body: HeapObject
   ): void {
+    if (this.get_tag() !== TAG_USER_channel) {
+      throw new Error("UserChannel.get_buffer_size: invalid object tag");
+    }
     if (this.isClosed()) {
       throw new Error("UserChannel.send: channel is closed");
     }
@@ -152,6 +182,9 @@ class UserChannel extends HeapObject {
     thread: ContextThread,
     scheduler: ContextScheduler
   ): { success: boolean; waitingQueue: ComplexQueue } {
+    if (this.get_tag() !== TAG_USER_channel) {
+      throw new Error("UserChannel.get_buffer_size: invalid object tag");
+    }
     if (this.buffer().length() > 0) {
       const value = this.buffer().dequeue();
       thread.stash().push(value.address);
@@ -199,6 +232,9 @@ class UserChannel extends HeapObject {
     scheduler: ContextScheduler,
     body: HeapObject
   ): void {
+    if (this.get_tag() !== TAG_USER_channel) {
+      throw new Error("UserChannel.get_buffer_size: invalid object tag");
+    }
     const result = this.try_recv(thread, scheduler);
     if (result.success) {
       scheduler.enqueue(thread);

@@ -27,6 +27,7 @@ export const TAG_CONTROL_return_i = 0x8005; // 1000 0000 0000 0101
 export const TAG_CONTROL_assign_i = 0x8006; // 1000 0000 0000 0110
 export const TAG_CONTROL_index_i = 0x8007; // 1000 0000 0000 0111
 export const TAG_CONTROL_index_address_i = 0x8008; // 1000 0000 0000 1000
+export const TAG_CONTROL_chan_send_i = 0x8009; // 1000 0000 0000 1001
 
 export const TAG_CONTROL_name = 0xC001; // 1100 0000 0000 0001
 export const TAG_CONTROL_literal = 0xC002; // 1100 0000 0000 0010
@@ -36,6 +37,7 @@ export const TAG_CONTROL_unary = 0xC005; // 1100 0000 0000 0101
 export const TAG_CONTROL_postfix = 0xC006; // 1100 0000 0000 0110
 export const TAG_CONTROL_binary = 0xC007; // 1100 0000 0000 0111
 export const TAG_CONTROL_sequence = 0xC008; // 1100 0000 0000 1000
+
 // export const TAG_CONTROL_block             = 0xC009; // 1100 0000 0000 1001
 // export const TAG_CONTROL_if                = 0xC00A; // 1100 0000 0000 1010
 // export const TAG_CONTROL_for               = 0xC00B; // 1100 0000 0000 1011
@@ -70,7 +72,6 @@ export const TAG_CONTROL_index_address = 0xC02B; // 1100 0000 0010 1011
 export const TAG_CONTROL_constructor = 0xC02C; // 1100 0000 0010 1100
 export const TAG_CONTROL_constructor_i = 0xC02D; // 1100 0000 0010 1101
 export const TAG_CONTROL_chan_send = 0xC02E; // 1100 0000 0010 1110
-export const TAG_CONTROL_chan_send_i = 0xC02F; // 1100 0000 0010 1111
 export const TAG_CONTROL_chan_receive = 0xC030; // 1100 0000 0011 0000
 export const TAG_CONTROL_chan_receive_i = 0xC031; // 1100 0000 0011 0001
 export const TAG_CONTROL_chan_receive_stmt = 0xC032; // 1100 0000 0011 0010

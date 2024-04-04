@@ -87,6 +87,12 @@ class ECE {
       }
       thread.free();
     }
+
+    if (!main_thread.control().empty()) {
+      throw new Error(
+        "All goroutines are asleep - deadlock! (main thread control stack not empty)"
+      );
+    }
     scheduler.free();
 
     // console.log(S.stringify());
