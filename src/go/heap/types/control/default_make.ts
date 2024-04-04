@@ -1,5 +1,5 @@
 /**
- * CONTROL_make
+ * CONTROL_default_make
  * Fields    :
  * - number of children
  * Children  :
@@ -10,9 +10,9 @@
 import { Heap } from "../../heap";
 import { auto_cast } from "../auto_cast";
 import { HeapObject } from "../objects";
-import { TAG_CONTROL_make } from "../tags";
+import { TAG_CONTROL_default_make } from "../tags";
 
-class ControlMake extends HeapObject {
+class ControlDefaultMake extends HeapObject {
   public get_type_address(): number {
     return this.get_child(0);
   }
@@ -30,7 +30,7 @@ class ControlMake extends HeapObject {
   }
 
   public static allocate(heap: Heap, type: any, args: any[]): number {
-    const address = heap.allocate_object(TAG_CONTROL_make, 2, 1 + args.length);
+    const address = heap.allocate_object(TAG_CONTROL_default_make, 2, 1 + args.length);
     heap.set_cannnot_be_freed(address, true);
 
     const type_address = heap.allocate_any(type);
@@ -51,7 +51,7 @@ class ControlMake extends HeapObject {
 
   public stringify_i(): string {
     let result = "";
-    result += this.address.toString() + " (make): ";
+    result += this.address.toString() + " (default-make): ";
     result += this.get_type().stringify();
     result += "(";
     for (let i = 0; i < this.get_number_of_args(); i++) {
@@ -65,4 +65,4 @@ class ControlMake extends HeapObject {
   }
 }
 
-export { ControlMake };
+export { ControlDefaultMake };

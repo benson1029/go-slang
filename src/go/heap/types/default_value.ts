@@ -19,7 +19,7 @@ function default_value(heap: Heap, type: any, value: any) {
     case "channel-type":
     case "slice-type":
     case "struct-decl-type":
-      return { tag: "make", type: type, args: [] };
+      return { tag: "default-make", type: type, args: [] };
     default:
       throw new Error(`Unknown type: ${type.tag}`);
   }

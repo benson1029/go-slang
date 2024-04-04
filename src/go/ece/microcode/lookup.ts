@@ -84,8 +84,8 @@ function lookup_microcode_sequential(tag: number): Function {
       return struct.evaluate_member_i;
     case tags.TAG_CONTROL_name_address:
       return control_var.evaluate_name_address;
-    case tags.TAG_CONTROL_make:
-      return constructor.evaluate_make;
+    case tags.TAG_CONTROL_default_make:
+      return constructor.evaluate_default_make;
     case tags.TAG_CONTROL_index:
       return array.evaluate_index;
     case tags.TAG_CONTROL_index_i:

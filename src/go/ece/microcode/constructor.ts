@@ -2,7 +2,6 @@ import { ContextControl } from '../../heap/types/context/control';
 import { ContextEnv } from '../../heap/types/context/env';
 import { ContextStash } from '../../heap/types/context/stash';
 import { Heap } from '../../heap';
-import { ControlMake } from '../../heap/types/control/make';
 import { auto_cast } from '../../heap/types/auto_cast';
 import { TAG_USER_type_array, TAG_USER_type_channel, TAG_USER_type_function, TAG_USER_type_struct_decl } from '../../heap/types/tags';
 import { ComplexArray } from '../../heap/types/complex/array';
@@ -12,9 +11,10 @@ import { ControlConstructor } from '../../heap/types/control/constructor';
 import { UserTypeStructDecl } from '../../heap/types/user/type/struct_decl';
 import { UserTypeStruct } from '../../heap/types/user/type/struct';
 import { UserStruct } from '../../heap/types/user/struct';
+import { ControlDefaultMake } from '../../heap/types/control/default_make';
 
-function evaluate_make(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
-    const make_cmd = auto_cast(heap, cmd) as ControlMake;
+function evaluate_default_make(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
+    const make_cmd = auto_cast(heap, cmd) as ControlDefaultMake;
     const type = make_cmd.get_type();
 
     switch (type.get_tag()) {
@@ -103,7 +103,7 @@ function evaluate_constructor_i(cmd: number, heap: Heap, C: ContextControl, S: C
 }
 
 export {
-    evaluate_make,
+    evaluate_default_make,
     evaluate_constructor,
     evaluate_constructor_i,
 };

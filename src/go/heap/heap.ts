@@ -56,6 +56,7 @@ import { ControlChanSend } from "./types/control/chan_send";
 import { ControlConstructor } from "./types/control/constructor";
 import { ControlConstructorI } from "./types/control/constructor_i";
 import { ControlContinue } from "./types/control/continue";
+import { ControlDefaultMake } from "./types/control/default_make";
 import { ControlExitScopeI } from "./types/control/exit_scope";
 import { ControlFor } from "./types/control/for";
 import { ControlForI } from "./types/control/for_i";
@@ -69,7 +70,6 @@ import { ControlIndexI } from "./types/control/index_i";
 import { ControlLiteral } from "./types/control/literal";
 import { ControlLogicalI } from "./types/control/logical_i";
 import { ControlLogicalImmI } from "./types/control/logical_imm_i";
-import { ControlMake } from "./types/control/make";
 import { ControlMember } from "./types/control/member";
 import { ControlMemberAddress } from "./types/control/member_address";
 import { ControlMemberAddressI } from "./types/control/member_address_i";
@@ -146,7 +146,6 @@ import {
     TAGSTRING_CONTROL_member_address,
     TAGSTRING_CONTROL_member_i,
     TAGSTRING_CONTROL_name_address,
-    TAGSTRING_CONTROL_make,
     TAGSTRING_USER_type_array,
     TAGSTRING_USER_type_bool,
     TAGSTRING_USER_type_float32,
@@ -169,7 +168,8 @@ import {
     TAGSTRING_CONTROL_method,
     TAGSTRING_CONTROL_method_member,
     TAGSTRING_CONTROL_member_address_i,
-    TAGSTRING_CONTROL_push_i
+    TAGSTRING_CONTROL_push_i,
+    TAGSTRING_CONTROL_default_make
 } from "./types/tags";
 import { UserType } from "./types/user/type";
 import { UserTypeArray } from "./types/user/type/array";
@@ -927,14 +927,14 @@ class Heap {
     }
 
     /**
-     * CONTROL_make
+     * CONTROL_default_make
      * Fields    : number of children
      * Children  :
      * - 4 bytes address of the type (type)
      * - 4 bytes * num_arguments address of the arguments (expression)
      */
-    public allocate_CONTROL_make(obj: { tag: string, type: any, args: any[] }): number {
-        return ControlMake.allocate(this, obj.type, obj.args);
+    public allocate_CONTROL_default_make(obj: { tag: string, type: any, args: any[] }): number {
+        return ControlDefaultMake.allocate(this, obj.type, obj.args);
     }
 
     /**
@@ -1318,8 +1318,8 @@ class Heap {
                 return this.allocate_CONTROL_member_i(obj);
             case TAGSTRING_CONTROL_name_address:
                 return this.allocate_CONTROL_name_address(obj);
-            case TAGSTRING_CONTROL_make:
-                return this.allocate_CONTROL_make(obj);
+            case TAGSTRING_CONTROL_default_make:
+                return this.allocate_CONTROL_default_make(obj);
             case TAGSTRING_CONTROL_index:
                 return this.allocate_CONTROL_index(obj);
             case TAGSTRING_CONTROL_index_i:

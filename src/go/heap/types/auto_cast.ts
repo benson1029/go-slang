@@ -27,6 +27,7 @@ import { ControlChanSendI } from "./control/chan_send_i";
 import { ControlConstructor } from "./control/constructor";
 import { ControlConstructorI } from "./control/constructor_i";
 import { ControlContinue } from "./control/continue";
+import { ControlDefaultMake } from "./control/default_make";
 import { ControlExitScopeI } from "./control/exit_scope";
 import { ControlFor } from "./control/for";
 import { ControlForI } from "./control/for_i";
@@ -39,7 +40,6 @@ import { ControlIndexAddressI } from "./control/index_address_i";
 import { ControlIndexI } from "./control/index_i";
 import { ControlLogicalI } from "./control/logical_i";
 import { ControlLogicalImmI } from "./control/logical_imm_i";
-import { ControlMake } from "./control/make";
 import { ControlMember } from "./control/member";
 import { ControlMemberAddress } from "./control/member_address";
 import { ControlMemberAddressI } from "./control/member_address_i";
@@ -136,7 +136,6 @@ import {
   TAG_CONTROL_member_address,
   TAG_USER_variable,
   TAG_CONTROL_name_address,
-  TAG_CONTROL_make,
   TAG_CONTROL_index,
   TAG_CONTROL_index_i,
   TAG_CONTROL_index_address,
@@ -155,6 +154,7 @@ import {
   TAG_CONTROL_method_member,
   TAG_CONTROL_push_i,
   TAG_CONTROL_chan_send_i,
+  TAG_CONTROL_default_make,
 } from "./tags"
 import { UserStruct } from "./user/struct";
 import { UserTypeArray } from "./user/type/array";
@@ -270,8 +270,8 @@ function auto_cast(heap: Heap, address: number): HeapObject {
       return new ControlMemberI(heap, address);
     case TAG_CONTROL_name_address:
       return new ControlNameAddress(heap, address);
-    case TAG_CONTROL_make:
-      return new ControlMake(heap, address);
+    case TAG_CONTROL_default_make:
+      return new ControlDefaultMake(heap, address);
     case TAG_CONTROL_index:
       return new ControlIndex(heap, address);
     case TAG_CONTROL_index_i:
