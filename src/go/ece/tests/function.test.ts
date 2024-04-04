@@ -379,6 +379,29 @@ describe("Functions can be recursive", () => {
     ),
 
     test(
+        "Factorial with a stack trace",
+        () => {
+            const functions = `
+            func factorial(n int32) int32 {
+                if n <= 0 {
+                    fmt.Println(n, 1)
+                    return 1
+                }
+                ret := factorial(n - 1) * n
+                fmt.Println(n, ret)
+                return ret
+            }
+
+            func main() {
+                factorial(5)
+            }
+            `
+            const result = evaluateFunctions(functions, true);
+            expect(result).toBe("0 1\n1 1\n2 2\n3 6\n4 24\n5 120\n");
+        }
+    )
+
+    test(
         "Can compute fibonacci",
         () => {
             const functions = `

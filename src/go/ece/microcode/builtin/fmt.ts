@@ -10,6 +10,7 @@ import { ComplexArray } from '../../../heap/types/complex/array';
 import { UserVariable } from '../../../heap/types/user/variable';
 import { HeapObject } from '../../../heap/types/objects';
 import { NilType, Type } from '../../loader/typeUtil';
+import { PrimitiveNil } from '../../../heap/types/primitive/nil';
 
 function print(heap: Heap, output: Function, obj: HeapObject): void {
     if (obj.get_tag() === TAG_COMPLEX_array) {
@@ -33,6 +34,7 @@ function evaluate_builtin(name: string, heap: Heap, C: ContextControl, S: Contex
             const value = auto_cast(heap, addr);
             print(heap, output, value);
         });
+        S.push(PrimitiveNil.allocate());
     } else if (name === "Println") {
         args.forEach((addr, index) => {
             if (index > 0) output(" ");
@@ -40,6 +42,7 @@ function evaluate_builtin(name: string, heap: Heap, C: ContextControl, S: Contex
             print(heap, output, value);
         });
         output("\n");
+        S.push(PrimitiveNil.allocate());
     } else {
         throw new Error("evaluate_builtin: Builtin not found");
     }
