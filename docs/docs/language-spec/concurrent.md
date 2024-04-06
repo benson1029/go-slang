@@ -93,3 +93,37 @@ The `send` and `receive` operations are used to send and receive data through a 
 unbuffered <- 5 // send
 x := <-unbuffered // receive
 ```
+
+The following example demonstrates the use of channels to synchronize goroutines.
+
+```go
+package main
+
+import "fmt"
+
+func producer(ch chan int32) {
+    for i := 0; i < 5; i++ {
+        // the producer gets blocked if there is no consumer
+        ch <- i
+    }
+    fmt.Println("Producer done") // this does not get printed
+    // making the channel buffered will allow the producer to continue
+    // by changing the channel declaration to "ch := make(chan int32, 1)"
+}
+
+func consumer(ch chan int32) {
+    for i := 0; i < 4; i++ {
+        fmt.Println(<-ch)
+    }
+    fmt.Println("Consumer done")
+}
+
+func main() {
+    ch := make(chan int32)
+    go producer(ch)
+    go consumer(ch)
+    for i := 0; i <= 1000; i++ {
+        // busy wait
+    }
+}
+```
