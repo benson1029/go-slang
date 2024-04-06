@@ -7,8 +7,6 @@ import { ControlChanReceiveI } from "../../../heap/types/control/chan_receive_i"
 import { ControlChanReceiveStmt } from "../../../heap/types/control/chan_receive_stmt";
 import { ControlChanSend } from "../../../heap/types/control/chan_send";
 import { ControlChanSendI } from "../../../heap/types/control/chan_send_i";
-import { ControlName } from "../../../heap/types/control/name";
-import { ControlNameAddress } from "../../../heap/types/control/name_address";
 import { PrimitiveNil } from "../../../heap/types/primitive/nil";
 import { UserChannel } from "../../../heap/types/user/channel";
 import { UserVariable } from "../../../heap/types/user/variable";
@@ -20,16 +18,14 @@ function evaluate_chan_send(
   scheduler: ContextScheduler
 ) {
   const cmd_object = auto_cast(heap, cmd) as ControlChanSend;
-  const name = cmd_object.get_name_address() as ControlName;
+  const name = cmd_object.get_name_address();
   const value = cmd_object.get_value_address();
 
   const chan_send_i = ControlChanSendI.allocate(heap);
   thread.control().push(chan_send_i);
   heap.free_object(chan_send_i);
 
-  const name_address = ControlNameAddress.allocate(heap, name.get_name());
-  thread.control().push(name_address);
-  heap.free_object(name_address);
+  thread.control().push(name.address);
 
   thread.control().push(value.address);
 
@@ -68,15 +64,13 @@ function evaluate_chan_receive(
   scheduler: ContextScheduler
 ) {
   const cmd_object = auto_cast(heap, cmd) as ControlChanReceive;
-  const name = cmd_object.get_name_address() as ControlName;
+  const name = cmd_object.get_name_address();
 
   const chan_receive_i = ControlChanReceiveI.allocate(heap);
   thread.control().push(chan_receive_i);
   heap.free_object(chan_receive_i);
 
-  const name_address = ControlNameAddress.allocate(heap, name.get_name());
-  thread.control().push(name_address);
-  heap.free_object(name_address);
+  thread.control().push(name.address);
 
   scheduler.enqueue(thread);
 }

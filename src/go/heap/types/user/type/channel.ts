@@ -23,7 +23,9 @@ class UserTypeChannel extends UserType {
     if (this.get_tag() !== TAG_USER_type_channel) {
       throw new Error("UserTypeChannel.construct_default: Invalid tag");
     }
-    throw new Error("UserTypeChannel.construct_default: Not implemented");
+    const nil = auto_cast(this.heap, this.heap.allocate_any(null));
+    variable.set_value(nil);
+    nil.free();
   }
 
   public static allocate(heap: Heap, type: any): number {
