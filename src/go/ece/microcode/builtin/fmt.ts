@@ -55,15 +55,15 @@ function get_builtin_type(name: string, args: Type[]): Type {
     throw new Error("get_builtin_type: Builtin not found");
 }
 
-function link_imports(name: string): { name: string; value: any }[] {
+function link_imports(name: string): { type: string; name: string; value: any }[] {
     let imports = []
     if (name === "" || name === "Print") {
-        imports.push({ name: "Print", value: "fmt.Print" });
+        imports.push({ name: "Print", value: { tag: "builtin", name: "fmt.Print" } });
     }
     if (name === "" || name === "Println") {
-        imports.push({ name: "Println", value: "fmt.Println" });
+        imports.push({ name: "Println", value: { tag: "builtin", name: "fmt.Println" } });
     }
-    return [ { name: "fmt", value: imports } ];
+    return [ { type: "package", name: "fmt", value: imports } ];
 }
 
 export {

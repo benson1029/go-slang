@@ -4,6 +4,7 @@ import { ComplexBuiltin } from "./complex/builtin";
 import { ComplexFunction } from "./complex/function";
 import { ComplexLinkedList } from "./complex/linked_list";
 import { ComplexMethod } from "./complex/method";
+import { ComplexMutex } from "./complex/mutex";
 import { ComplexPointer } from "./complex/pointer";
 import { ComplexString } from "./complex/string";
 import { ContextControl } from "./context/control";
@@ -168,6 +169,8 @@ import {
   TAG_CONTEXT_waker,
   TAG_CONTEXT_waiting_instance,
   TAG_CONTROL_chan_receive_i,
+  TAG_USER_type_mutex,
+  TAG_COMPLEX_mutex,
 } from "./tags"
 import { UserChannel } from "./user/channel";
 import { UserStruct } from "./user/struct";
@@ -179,6 +182,7 @@ import { UserTypeFloat32 } from "./user/type/float32";
 import { UserTypeFunction } from "./user/type/function";
 import { UserTypeInt32 } from "./user/type/int32";
 import { UserTypeMethod } from "./user/type/method";
+import { UserTypeMutex } from "./user/type/mutex";
 import { UserTypeNil } from "./user/type/nil";
 import { UserTypeSlice } from "./user/type/slice";
 import { UserTypeString } from "./user/type/string";
@@ -214,6 +218,8 @@ function auto_cast(heap: Heap, address: number): HeapObject {
       return new ComplexBuiltin(heap, address);
     case TAG_COMPLEX_method:
       return new ComplexMethod(heap, address);
+    case TAG_COMPLEX_mutex:
+      return new ComplexMutex(heap, address);
     case TAG_CONTROL_name:
       return new ControlName(heap, address);
     case TAG_CONTROL_literal:
@@ -374,6 +380,8 @@ function auto_cast(heap: Heap, address: number): HeapObject {
       return new UserTypeStructDecl(heap, address);
     case TAG_USER_type_method:
       return new UserTypeMethod(heap, address);
+    case TAG_USER_type_mutex:
+      return new UserTypeMutex(heap, address);
     default:
       throw new Error("Unknown tag " + tag.toString() + " at address " + address.toString());
   }

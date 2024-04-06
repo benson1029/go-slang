@@ -64,6 +64,35 @@ class UserTypeStruct extends UserType {
     return address;
   }
 
+  public static allocate_load(
+    heap: Heap,
+    name: string,
+    members: Array<{ name: string; type: any }>
+  ): number {
+    const address = heap.allocate_object(
+      TAG_USER_type_struct,
+      1,
+      1 + 2 * members.length
+    );
+    heap.set_cannnot_be_freed(address, true);
+
+    const name_address = ComplexString.allocate(heap, name);
+    heap.set_child(address, 0, name_address);
+
+    for (let i = 0; i < members.length; i++) {
+      const member_name_address = ComplexString.allocate(heap, members[i].name);
+      heap.set_child(address, 1 + 2 * i, member_name_address);
+
+      const member_type_address = heap.allocate_any(members[i].type);
+      heap.set_child(address, 2 + 2 * i, member_type_address);
+    }
+
+    // Unmark cannot-be-free
+    heap.set_cannnot_be_freed(address, false);
+
+    return address;
+  }
+
   public stringify_i(): string {
     let result = "";
     result += this.get_name().get_string();

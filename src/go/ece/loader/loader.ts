@@ -16,12 +16,11 @@ function load(
   E: ContextEnv,
   heap: Heap,
   imports: any[],
-  default_imports: any[]
 ) {
-  preprocess_program(program, imports, default_imports);
-  sort_global_declarations(program, imports, default_imports, true);
-  preprocess_program(program, imports, default_imports, true);
-  sort_global_declarations(program, imports, default_imports, false);
+  preprocess_program(program, imports);
+  sort_global_declarations(program, imports, true);
+  preprocess_program(program, imports, true);
+  sort_global_declarations(program, imports, false);
 
   tag_struct_methods(program);
 

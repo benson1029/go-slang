@@ -34,10 +34,10 @@ function get_builtin_type(name: string, args: Type[]): Type {
     throw new Error("get_builtin_type: Builtin not found");
 }
 
-function link_imports(): { name: string; value: any }[] {
+function link_imports(): { type: string; name: string; value: any }[] {
     return [
-        { name: "append", value: "default.append" },
-        { name: "len", value: "default.len" },
+        { type: "function", name: "append", value: { tag: "builtin", name: "default.append" } },
+        { type: "function", name: "len", value: { tag: "builtin", name: "default.len" } },
     ];
 }
 

@@ -35,7 +35,7 @@
  * will be placed at the end of the program. This is to accomodate the two-stage
  * preprocessing and sorting algorithm.
  */
-function sort_global_declarations(program: any, imports: any[], default_imports: any[], ignore_structs: boolean): void {
+function sort_global_declarations(program: any, imports: any[], ignore_structs: boolean): void {
     // Utility functions
     const get_name = (stmt: any) => {
         if (stmt.tag === "struct") {
@@ -65,6 +65,9 @@ function sort_global_declarations(program: any, imports: any[], default_imports:
             for (let ref of stmt.fields) {
                 let dfs = (type: any) => {
                     if (type.tag === "struct-decl-type") {
+                        if (imports.filter((imp) => imp.type === "struct" && imp.value.name === type.name).length > 0) {
+                            return;
+                        }
                         back_edges[get_name(stmt)].push(type.name);
                         edges[type.name].push(get_name(stmt));
                     } else if (type.tag === "array-type") {
@@ -77,9 +80,6 @@ function sort_global_declarations(program: any, imports: any[], default_imports:
         }
         for (let ref of stmt.captures) {
             if (imports.filter((imp) => imp.name === ref.name).length > 0) {
-                continue;
-            }
-            if (default_imports.filter((imp) => imp.name === ref.name).length > 0) {
                 continue;
             }
             if (ref.name === get_name(stmt) && stmt.tag === 'var') {

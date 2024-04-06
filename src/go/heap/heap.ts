@@ -173,7 +173,9 @@ import {
     TAGSTRING_CONTROL_push_i,
     TAGSTRING_CONTROL_default_make,
     TAGSTRING_CONTROL_make_i,
-    TAGSTRING_CONTROL_make
+    TAGSTRING_CONTROL_make,
+    TAGSTRING_USER_type_struct,
+    TAGSTRING_USER_type_mutex,
 } from "./types/tags";
 import { UserType } from "./types/user/type";
 import { UserTypeArray } from "./types/user/type/array";
@@ -183,7 +185,9 @@ import { UserTypeFloat32 } from "./types/user/type/float32";
 import { UserTypeFunction } from "./types/user/type/function";
 import { UserTypeInt32 } from "./types/user/type/int32";
 import { UserTypeMethod } from "./types/user/type/method";
+import { UserTypeMutex } from "./types/user/type/mutex";
 import { UserTypeString } from "./types/user/type/string";
+import { UserTypeStruct } from "./types/user/type/struct";
 import { UserTypeStructDecl } from "./types/user/type/struct_decl";
 
 class Heap {
@@ -1227,6 +1231,18 @@ class Heap {
     }
 
     /**
+     * USER_type_struct
+     * Fields    :
+     * - number of children
+     * Children  :
+     * - 4 bytes address of the name (COMPLEX_string)
+     * - 4 bytes * num_members (name, type) of the members (COMPLEX_string, USER_type)
+     */
+    public allocate_USER_type_struct(obj: { tag: string, name: any, members: any[] }): number {
+        return UserTypeStruct.allocate_load(this, obj.name, obj.members);
+    }
+
+    /**
      * USER_type_method
      * Fields    :
      * - number of children
@@ -1236,7 +1252,18 @@ class Heap {
     public allocate_USER_type_method(obj: { tag: string }): number {
         return UserTypeMethod.allocate(this);
     }
-    
+
+    /**
+     * USER_type_mutex
+     * Fields    :
+     * - number of children
+     * Children  :
+     * - 4 bytes address of the name (COMPLEX_string)
+     */
+    public allocate_USER_type_mutex(): number {
+        return UserTypeMutex.allocate(this);
+    }
+
     public allocate_number(value: number): number {
         return value;
     }
@@ -1396,8 +1423,12 @@ class Heap {
                 return this.allocate_USER_type_channel(obj);
             case TAGSTRING_USER_type_struct_decl:
                 return this.allocate_USER_type_struct_decl(obj);
+            case TAGSTRING_USER_type_struct:
+                return this.allocate_USER_type_struct(obj);
             case TAGSTRING_USER_type_method:
                 return this.allocate_USER_type_method(obj);
+            case TAGSTRING_USER_type_mutex:
+                return this.allocate_USER_type_mutex();
             default:
                 throw new Error("Unknown tag " + obj.tag);
         }

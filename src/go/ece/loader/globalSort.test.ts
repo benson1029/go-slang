@@ -3,22 +3,22 @@ import { sort_global_declarations } from "./globalSort";
 import { preprocess_program } from './preprocess';
 
 function check_declaration_order(program: any, expected_order: string[]) {
-    preprocess_program(program, [], []);
-    sort_global_declarations(program, [], [], true);
+    preprocess_program(program, []);
+    sort_global_declarations(program, [], true);
     const decl_order = program.body.map((stmt: any) => stmt.name);
     expect(decl_order).toEqual(expected_order);
 }
 
 function check_cyclic_dependency(program: any) {
-    preprocess_program(program, [], []);
-    expect(() => sort_global_declarations(program, [], [], true)).toThrow();
+    preprocess_program(program, []);
+    expect(() => sort_global_declarations(program, [], true)).toThrow();
 }
 
 function check_declaration_order_two_stage(program: any, expected_order: string[]) {
-    preprocess_program(program, [], []);
-    sort_global_declarations(program, [], [], true);
-    preprocess_program(program, [], [], true);
-    sort_global_declarations(program, [], [], false);
+    preprocess_program(program, []);
+    sort_global_declarations(program, [], true);
+    preprocess_program(program, [], true);
+    sort_global_declarations(program, [], false);
 
     const decl_order = program.body.map((stmt: any) => {
         if (stmt.tag === "struct") {
@@ -32,10 +32,10 @@ function check_declaration_order_two_stage(program: any, expected_order: string[
 
 function check_cyclic_dependency_two_stage(program: any) {
     expect(() => {
-        preprocess_program(program, [], []);
-        sort_global_declarations(program, [], [], true);
-        preprocess_program(program, [], [], true);
-        sort_global_declarations(program, [], [], false);
+        preprocess_program(program, []);
+        sort_global_declarations(program, [], true);
+        preprocess_program(program, [], true);
+        sort_global_declarations(program, [], false);
     }).toThrow();
 }
 

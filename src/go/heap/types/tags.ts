@@ -113,10 +113,11 @@ export const TAG_USER_type_nil = 0xC30B; // 1100 0011 0000 1011
 export const TAG_USER_type_builtin = 0xC30C; // 1100 0011 0000 1100
 export const TAG_USER_type_struct_decl = 0xC30D; // 1100 0011 0000 1101
 export const TAG_USER_type_method = 0xC30E; // 1100 0011 0000 1110
+export const TAG_USER_type_mutex = 0xC311; // 1100 0011 0001 0001
 
-export const TAG_USER_variable = 0xC311; // 1100 0011 0000 0001
-export const TAG_USER_struct = 0xC312; // 1100 0011 0000 0010
-export const TAG_USER_channel = 0xC313; // 1100 0011 0000 0011
+export const TAG_USER_variable = 0xC411; // 1100 0100 0001 0001
+export const TAG_USER_struct = 0xC412; // 1100 0100 0001 0010
+export const TAG_USER_channel = 0xC413; // 1100 0100 0001 0011
 
 export const TAGSTRING_PRIMITIVE_nil = "nil";
 export const TAGSTRING_PRIMITIVE_bool = "bool";
@@ -198,5 +199,7 @@ export const TAGSTRING_USER_type_slice = "slice-type";
 export const TAGSTRING_USER_type_struct_decl = "struct-decl-type";
 export const TAGSTRING_USER_type_struct = "struct-type";
 export const TAGSTRING_USER_type_method = "method-type";
+export const TAGSTRING_USER_type_builtin = "builtin-type";
+export const TAGSTRING_USER_type_mutex = "mutex-type";
 
 export const TAGSTRING_ENVIRONMENT_frame = "frame";

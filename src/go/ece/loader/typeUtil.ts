@@ -257,6 +257,17 @@ abstract class Type {
       };
     }
   }
+
+  class MutexType extends Type {
+    constructor() {
+      super();
+      this.tag = "mutex";
+    }
+  
+    public toObject(): any {
+      return { tag: "mutex-type" };
+    }
+  }
   
   class AnyType extends Type {
     constructor() {
@@ -318,6 +329,8 @@ abstract class Type {
         return new ChannelType(toType(comp.type));
       case "struct-decl-type":
         return new StructType(comp.name);
+      case "mutex-type":
+        return new MutexType();
       default:
         throw new Error(`Invalid type tag ${comp.tag}.`);
     }

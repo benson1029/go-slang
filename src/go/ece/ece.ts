@@ -2,7 +2,7 @@ import { Heap } from "../heap";
 import { lookup_microcode } from "./microcode";
 import { load } from "./loader";
 import { ContextThread } from "../heap/types/context/thread";
-import { get_default_imports, link_imports } from "./microcode/builtin";
+import { link_imports } from "./microcode/builtin";
 import { ContextScheduler } from "../heap/types/context/scheduler";
 
 /**
@@ -39,13 +39,12 @@ class ECE {
     let E = thread.env();
 
     // Link imports
-    let imports = [];
+    let imports = link_imports("default");
     for (let imp of this.program.imports) {
       imports = imports.concat(link_imports(imp));
     }
-    const default_imports = get_default_imports();
-    E.create_global_environment(imports, default_imports);
-    load(this.program, C, S, E, this.heap, imports, default_imports);
+    E.create_global_environment(imports);
+    load(this.program, C, S, E, this.heap, imports);
 
     return thread;
   }

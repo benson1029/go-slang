@@ -51,7 +51,7 @@ class DeclarationObject {
 class StructObject {
   name: string;
   fields: Map<string, Type>;
-  methods: Map<string, FunctionType>;
+  methods: Map<string, FunctionType | BuiltinType>;
 
   constructor(name: string, fields: Array<{ name: string; type: Type }>) {
     this.name = name;
@@ -62,14 +62,14 @@ class StructObject {
     }
   }
 
-  addMethod(name: string, type: FunctionType) {
+  addMethod(name: string, type: FunctionType | BuiltinType) {
     if (this.methods.has(name)) {
       throw new Error(`Method ${name} already declared in struct.`);
     }
     this.methods.set(name, type);
   }
 
-  getMethod(name: string): FunctionType {
+  getMethod(name: string): FunctionType | BuiltinType {
     let method = this.methods.get(name);
     if (method === undefined) {
       throw new Error(`Method ${name} not declared in struct.`);
@@ -271,6 +271,9 @@ const microcode_preprocess: {
     }
     comp.tag = "method-member";
     comp.struct = { tag: "name", name: obj_t.name };
+    if (method instanceof BuiltinType) {
+      return method;
+    }
     if (scope.current_declaration != null) {
       scope.current_declaration.captures.push({ name: "METHOD." + obj_t.name + "." + comp.member, type: method });
     }
@@ -1116,18 +1119,27 @@ function preprocess(comp: any, scope: Scope, type_check: boolean): Type {
 function preprocess_program(
   program: any,
   imports: any[],
-  default_imports: any[],
   type_check: boolean = false
 ) {
   let scope = new Scope();
   for (let imp of imports) {
-    scope.addStruct("IMPORT." + imp.name, imp.value.map((f: any) => {
-      return { name: f.name, type: new BuiltinType(f.value) };
-    }))
-    scope.addVariable(imp.name, new StructType("IMPORT." + imp.name));
-  }
-  for (let imp of default_imports) {
-    scope.addVariable(imp.name, new BuiltinType(imp.value));
+    if (imp.type === "package") {
+      scope.addStruct("IMPORT." + imp.name, imp.value.map((f: any) => {
+        return { name: f.name, type: new BuiltinType(f.value.name) };
+      }))
+      scope.addVariable(imp.name, new StructType("IMPORT." + imp.name));
+    } else if (imp.type === "function") {
+      scope.addVariable(imp.name, new BuiltinType(imp.value.name));
+    } else if (imp.type === "struct") {
+      scope.addStruct(imp.value.name, imp.value.members
+        .map((f: any) => {
+          return { name: f.name, type: toType(f.type) };
+        }))
+      const struct_obj = scope.getType(imp.value.name) as StructObject;
+      imp.value.functions.forEach((f: any) => {
+        struct_obj.addMethod(f.name, new BuiltinType(f.value.name));
+      })
+    }
   }
   preprocess(program, scope, type_check);
 }

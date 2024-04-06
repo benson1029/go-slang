@@ -63,6 +63,7 @@ class ComplexMutex extends HeapObject {
     }
     this.toggle_lock();
     if (this.get_queue().length() > 0) {
+      this.toggle_lock();
       const waker = this.get_queue().dequeue() as ContextWaker;
       waker.wake(scheduler);
       waker.free();

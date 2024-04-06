@@ -17,6 +17,8 @@ import { ControlCallStmt } from '../../heap/types/control/call_stmt';
 import { ControlPushI } from '../../heap/types/control/push_i';
 import { UserStruct } from '../../heap/types/user/struct';
 import { ComplexMethod } from '../../heap/types/complex/method';
+import { ContextThread } from '../../heap/types/context/thread';
+import { ContextScheduler } from '../../heap/types/context/scheduler';
 
 function evaluate_function(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
     const cmd_object = auto_cast(heap, cmd) as ControlFunction;
@@ -41,7 +43,11 @@ function evaluate_call(cmd: number, heap: Heap, C: ContextControl, S: ContextSta
     C.push(function_object.address);
 }
 
-function evaluate_call_i(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv, output: Function): void {
+function evaluate_call_i(cmd: number, heap: Heap, thread: ContextThread, scheduler: ContextScheduler, output: Function): void {
+    const C = thread.control();
+    const S = thread.stash();
+    const E = thread.env();
+
     const cmd_object = auto_cast(heap, cmd) as ControlCallI;
 
     // Pop arguments from the stash
@@ -79,7 +85,7 @@ function evaluate_call_i(cmd: number, heap: Heap, C: ContextControl, S: ContextS
 
     if (function_object.get_tag() === TAG_COMPLEX_builtin) {
         const name = (function_object as unknown as ComplexBuiltin).get_name();
-        evaluate_builtin(name, heap, C, S, E, output, args);
+        evaluate_builtin(name, heap, C, S, E, thread, scheduler, output, args);
         deferred_free();
         return;
     }
@@ -120,6 +126,7 @@ function evaluate_call_i(cmd: number, heap: Heap, C: ContextControl, S: ContextS
     C.push(function_object.get_body_address().address);
 
     deferred_free();
+    scheduler.enqueue(thread);
 }
 
 function evaluate_return(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
