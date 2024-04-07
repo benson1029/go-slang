@@ -48,6 +48,21 @@ class ComplexMutex extends HeapObject {
   }
 
   /**
+   * Try to lock the mutex.
+   * If the mutex is already locked, the method returns false.
+   * If the mutex is not locked, the mutex is locked and the method returns true.
+   * 
+   * This method will not enqueue the thread in the queue or the scheduler.
+   */
+  public try_lock(): boolean {
+    if (this.isLocked()) {
+      return false;
+    }
+    this.toggle_lock();
+    return true;
+  }
+
+  /**
    * Unlock the mutex.
    * If the mutex is not locked, an error is thrown.
    * If the mutex is locked, the mutex is unlocked and the first thread in the queue is dequeued and woken.

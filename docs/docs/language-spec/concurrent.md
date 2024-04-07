@@ -20,6 +20,15 @@ m.Lock()
 m.Unlock()
 ```
 
+The `TryLock` method is used to try to lock the mutex without blocking.
+
+```go
+if m.TryLock() {
+    // code
+    m.Unlock()
+}
+```
+
 The following example demonstrates the use of a mutex to synchronize access to a shared variable.
 
 - Before synchronization:

@@ -176,4 +176,73 @@ describe("Mutex", () => {
         const result = evaluateFunctions(functions);
         expect(result).toBe("");
     })
+
+    it("tryLock should return false if the mutex is locked", () => {
+        const functions = `
+        var m sync.Mutex
+
+        func main() {
+            m.Lock()
+            fmt.Println(m.TryLock())
+        }
+        `
+        const result = evaluateFunctions(functions);
+        expect(result).toBe("false\n");
+    })
+
+    it("tryLock should return true if the mutex is unlocked", () => {
+        const functions = `
+        var m sync.Mutex
+
+        func main() {
+            fmt.Println(m.TryLock())
+        }
+        `
+        const result = evaluateFunctions(functions);
+        expect(result).toBe("true\n");
+    })
+
+    it("tryLock should return true if the mutex is locked and then unlocked", () => {
+        const functions = `
+        var m sync.Mutex
+
+        func main() {
+            m.Lock()
+            m.Unlock()
+            fmt.Println(m.TryLock())
+        }
+        `
+        const result = evaluateFunctions(functions);
+        expect(result).toBe("true\n");
+    })
+
+    it("tryLock should enforce mutual exclusion", () => {
+        const functions = `
+        var m sync.Mutex
+
+        func main() {
+            cnt := 0
+            go func() {
+                for i := 0; i < 50; i++ {
+                    for ; !m.TryLock(); {}
+                    cnt++
+                    m.Unlock()
+                }
+            }()
+            go func() {
+                for i := 0; i < 50; i++ {
+                    for ; !m.TryLock(); {}
+                    cnt++
+                    m.Unlock()
+                }
+            }()
+            for i := 0; i < 500; i++ {
+                // busy waiting
+            }
+            fmt.Println(cnt)
+        }
+        `
+        const result = evaluateFunctions(functions);
+        expect(result).toBe("100\n");
+    })
 })

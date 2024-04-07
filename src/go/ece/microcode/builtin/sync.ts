@@ -1,5 +1,5 @@
 import { Heap } from '../../../heap';
-import { Int32Type, NilType, Type } from '../../loader/typeUtil';
+import { BoolType, Int32Type, NilType, Type } from '../../loader/typeUtil';
 import { auto_cast } from '../../../heap/types/auto_cast';
 import { UserStruct } from '../../../heap/types/user/struct';
 import { ComplexString } from '../../../heap/types/complex/string';
@@ -9,6 +9,7 @@ import { ContextScheduler } from '../../../heap/types/context/scheduler';
 import { PrimitiveNil } from '../../../heap/types/primitive/nil';
 import { PrimitiveInt32 } from '../../../heap/types/primitive/int32';
 import { ComplexWaitGroup } from '../../../heap/types/complex/wait_group';
+import { PrimitiveBool } from '../../../heap/types/primitive/bool';
 
 function evaluate_builtin(name: string, heap: Heap, thread: ContextThread, scheduler: ContextScheduler, output: Function, args: number[]): void {
     const S = thread.stash();
@@ -21,6 +22,17 @@ function evaluate_builtin(name: string, heap: Heap, thread: ContextThread, sched
         S.push(PrimitiveNil.allocate());
         heap.free_object(mutex_string);
         struct.free();
+    }
+    else if (name === "MutexTryLock") {
+        const struct = auto_cast(heap, S.pop()) as UserStruct;
+        const mutex_string = ComplexString.allocate(heap, "INTERNAL.mutex");
+        const mutex = struct.get_frame().get_variable_address(mutex_string).get_value() as ComplexMutex;
+        const result = PrimitiveBool.allocate(heap, mutex.try_lock());
+        S.push(result);
+        heap.free_object(result);
+        heap.free_object(mutex_string);
+        struct.free();
+        scheduler.enqueue(thread);
     }
     else if (name === "MutexUnlock") {
         const struct = auto_cast(heap, S.pop()) as UserStruct;
@@ -77,6 +89,12 @@ function get_builtin_type(name: string, args: Type[]): Type {
         }
         return new NilType();
     }
+    else if (name === "MutexTryLock") {
+        if (args.length !== 0) {
+            throw new Error("Mutex.TryLock(): Unexpected arguments");
+        }
+        return new BoolType();
+    }
     else if (name === "MutexUnlock") {
         if (args.length !== 0) {
             throw new Error("Mutex.Unlock(): Unexpected arguments");
@@ -118,6 +136,7 @@ function link_imports(name: string): { type: string; name: string; value: any }[
             ],
             functions: [
                 { name: "Lock", value: { tag: "builtin", name: "sync.MutexLock" } },
+                { name: "TryLock", value: { tag: "builtin", name: "sync.MutexTryLock" } },
                 { name: "Unlock", value: { tag: "builtin", name: "sync.MutexUnlock" } },
             ]
         } });
