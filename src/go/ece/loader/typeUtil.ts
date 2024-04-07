@@ -268,6 +268,17 @@ abstract class Type {
       return { tag: "mutex-type" };
     }
   }
+
+  class WaitGroupType extends Type {
+    constructor() {
+      super();
+      this.tag = "wait-group";
+    }
+  
+    public toObject(): any {
+      return { tag: "wait-group-type" };
+    }
+  }
   
   class AnyType extends Type {
     constructor() {
@@ -331,6 +342,8 @@ abstract class Type {
         return new StructType(comp.name);
       case "mutex-type":
         return new MutexType();
+      case "wait-group-type":
+        return new WaitGroupType();
       default:
         throw new Error(`Invalid type tag ${comp.tag}.`);
     }

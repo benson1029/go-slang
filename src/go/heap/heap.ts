@@ -185,6 +185,7 @@ import {
     TAGSTRING_CONTROL_slice_i,
     TAGSTRING_CONTROL_slice_address,
     TAGSTRING_CONTROL_slice_address_i,
+    TAGSTRING_USER_type_wait_group,
 } from "./types/tags";
 import { UserType } from "./types/user/type";
 import { UserTypeArray } from "./types/user/type/array";
@@ -199,6 +200,7 @@ import { UserTypeSlice } from "./types/user/type/slice";
 import { UserTypeString } from "./types/user/type/string";
 import { UserTypeStruct } from "./types/user/type/struct";
 import { UserTypeStructDecl } from "./types/user/type/struct_decl";
+import { UserTypeWaitGroup } from "./types/user/type/wait_group";
 
 class Heap {
     private alloc: BuddyAllocator;
@@ -1326,6 +1328,17 @@ class Heap {
         return UserTypeSlice.allocate(this, obj.type);
     }
 
+    /**
+     * USER_type_wait_group
+     * Fields    :
+     * - number of children
+     * Children  :
+     * - 4 bytes address of the name (COMPLEX_string)
+     */
+    public allocate_USER_type_wait_group(): number {
+        return UserTypeWaitGroup.allocate(this);
+    }
+
     public allocate_number(value: number): number {
         return value;
     }
@@ -1501,6 +1514,8 @@ class Heap {
                 return this.allocate_USER_type_mutex();
             case TAGSTRING_USER_type_slice:
                 return this.allocate_USER_type_slice(obj);
+            case TAGSTRING_USER_type_wait_group:
+                return this.allocate_USER_type_wait_group();
             default:
                 throw new Error("Unknown tag " + obj.tag);
         }

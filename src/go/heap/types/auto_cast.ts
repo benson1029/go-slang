@@ -7,6 +7,7 @@ import { ComplexMethod } from "./complex/method";
 import { ComplexMutex } from "./complex/mutex";
 import { ComplexPointer } from "./complex/pointer";
 import { ComplexString } from "./complex/string";
+import { ComplexWaitGroup } from "./complex/wait_group";
 import { ContextControl } from "./context/control";
 import { ContextEnv } from "./context/env";
 import { ContextScheduler } from "./context/scheduler";
@@ -180,6 +181,8 @@ import {
   TAG_CONTROL_slice_i,
   TAG_CONTROL_slice_address,
   TAG_CONTROL_slice_address_i,
+  TAG_COMPLEX_wait_group,
+  TAG_USER_type_wait_group,
 } from "./tags"
 import { UserChannel } from "./user/channel";
 import { UserSlice } from "./user/slice";
@@ -198,6 +201,7 @@ import { UserTypeSlice } from "./user/type/slice";
 import { UserTypeString } from "./user/type/string";
 import { UserTypeStruct } from "./user/type/struct";
 import { UserTypeStructDecl } from "./user/type/struct_decl";
+import { UserTypeWaitGroup } from "./user/type/wait_group";
 import { UserVariable } from "./user/variable";
 
 
@@ -230,6 +234,8 @@ function auto_cast(heap: Heap, address: number): HeapObject {
       return new ComplexMethod(heap, address);
     case TAG_COMPLEX_mutex:
       return new ComplexMutex(heap, address);
+    case TAG_COMPLEX_wait_group:
+      return new ComplexWaitGroup(heap, address);
     case TAG_CONTROL_name:
       return new ControlName(heap, address);
     case TAG_CONTROL_literal:
@@ -402,6 +408,8 @@ function auto_cast(heap: Heap, address: number): HeapObject {
       return new UserTypeMethod(heap, address);
     case TAG_USER_type_mutex:
       return new UserTypeMutex(heap, address);
+    case TAG_USER_type_wait_group:
+      return new UserTypeWaitGroup(heap, address);
     default:
       throw new Error("Unknown tag " + tag.toString() + " at address " + address.toString());
   }

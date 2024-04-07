@@ -15,8 +15,9 @@ export const TAG_COMPLEX_builtin = 0x4008; // 0100 0000 0000 1000
 export const TAG_COMPLEX_queue = 0x4009; // 0100 0000 0000 1001
 export const TAG_COMPLEX_mutex = 0x400A; // 0100 0000 0000 1010
 export const TAG_COMPLEX_method = 0x400B; // 0100 0000 0000 1011
+export const TAG_COMPLEX_wait_group = 0x400C; // 0100 0000 0000 1100
 
-export const TAG_COMPLEX_semaphore = 0x400C; // 0100 0000 0000 1100
+export const TAG_COMPLEX_semaphore = 0x400D; // 0100 0000 0000 1101
 
 
 export const TAG_CONTROL_pop_i = 0x8001; // 1000 0000 0000 0001
@@ -118,6 +119,7 @@ export const TAG_USER_type_builtin = 0xC30C; // 1100 0011 0000 1100
 export const TAG_USER_type_struct_decl = 0xC30D; // 1100 0011 0000 1101
 export const TAG_USER_type_method = 0xC30E; // 1100 0011 0000 1110
 export const TAG_USER_type_mutex = 0xC311; // 1100 0011 0001 0001
+export const TAG_USER_type_wait_group = 0xC312; // 1100 0011 0001 0010
 
 export const TAG_USER_variable = 0xC411; // 1100 0100 0001 0001
 export const TAG_USER_struct = 0xC412; // 1100 0100 0001 0010
@@ -210,5 +212,6 @@ export const TAGSTRING_USER_type_struct = "struct-type";
 export const TAGSTRING_USER_type_method = "method-type";
 export const TAGSTRING_USER_type_builtin = "builtin-type";
 export const TAGSTRING_USER_type_mutex = "mutex-type";
+export const TAGSTRING_USER_type_wait_group = "wait-group-type";
 
 export const TAGSTRING_ENVIRONMENT_frame = "frame";
