@@ -145,7 +145,7 @@ Literal "literal"
     / StringLiteral
 
 ReservedWord "reserved"
-    = "var" / "func" / "return" / "if" / "else" / "for" / "defer" / "go" / "package" / "import" / "break" / "continue"
+    = "var" / "func" / "return" / "if" / "else" / "for" / "go" / "package" / "import" / "break" / "continue"
 
 PackageName "packageName"
     = [a-zA-Z_][a-zA-Z0-9_]* { return text(); }
@@ -358,7 +358,6 @@ Statement
     / ChannelSendStatement
     / IfStatement
     / ForStatement
-    / DeferStatement
     / ReturnStatement
     / BreakStatement
     / ContinueStatement
@@ -372,9 +371,6 @@ PackageStatement "package"
 ImportStatement "import"
     = "import" WhiteSpace ___ lib:StringLiteral { return { tag: "import", libs: [lib] }; }
     / "import" WhiteSpace ___ "(" ___ lib:StringLiteral libs:((___ StringLiteral)*) ___ ")" { return { tag: "import", libs: [lib].concat(libs.map(x => x[1])) }; }
-
-DeferStatement "defer"
-    = "defer" WhiteSpace __ stmt:Statement { return { tag: "defer", stmt: stmt }; }
 
 ReturnStatement "return"
     = "return" WhiteSpace __ exp:Expression { return { tag: "return", value: exp }; }
