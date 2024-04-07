@@ -85,7 +85,7 @@ function addressToValue(name) {
     } else if (name.tag === "index-address") {
         return { tag: "index", array: addressToValue(name.array), index: name.index };
     } else if (name.tag === "slice-address") {
-        return { tag: "slice", array: addressToValue(name.array), left: name.left, right: name.right };
+        return { tag: "slice", array: addressToValue(name.array), start: name.start, end: name.end };
     } else if (name.tag === "member-address") {
         return { tag: "member", object: addressToValue(name.object), member: name.member };
     }
@@ -225,7 +225,7 @@ SliceExpression
     / ___ { return null; }
 
 SliceOperator
-    = "[" ___ expr:SliceExpression ___ ":" ___ expr2:SliceExpression ___ "]" { return { tag: "slice", left: expr, right: expr2 }; }
+    = "[" ___ expr:SliceExpression ___ ":" ___ expr2:SliceExpression ___ "]" { return { tag: "slice", start: expr, end: expr2 }; }
 
 CallOperator
     = "(" ___ args:FunctionArgList ___ ")" { return buildFunctionCall(null, args); }
@@ -244,7 +244,7 @@ PostfixExpressionCompulsory
             if (element.tag === "index") {
                 return { tag: "index", array: result, index: element.index };
             } else if (element.tag === "slice") {
-                return { tag: "slice", array: result, left: element.left, right: element.right };
+                return { tag: "slice", array: result, start: element.start, end: element.end };
             } else if (element.tag === "call") {
                 return { tag: "call", func: result, args: element.args };
             } else if (element.tag === "member") {
@@ -262,7 +262,7 @@ VariableAddress "variable"
             if (element.tag === "index") {
                 return { tag: "index-address", array: result, index: element.index };
             } else if (element.tag === "slice") {
-                return { tag: "slice-address", array: result, left: element.left, right: element.right };
+                return { tag: "slice-address", array: result, start: element.start, end: element.end };
             } else if (element.tag === "member") {
                 return { tag: "member-address", object: result, member: element.member };
             }

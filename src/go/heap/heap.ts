@@ -87,6 +87,10 @@ import { ControlRestoreEnvI } from "./types/control/restore_env_i";
 import { ControlReturn } from "./types/control/return";
 import { ControlReturnI } from "./types/control/return_i";
 import { ControlSequence } from "./types/control/sequence";
+import { ControlSlice } from "./types/control/slice";
+import { ControlSliceAddress } from "./types/control/slice_address";
+import { ControlSliceAddressI } from "./types/control/slice_address_i";
+import { ControlSliceI } from "./types/control/slice_i";
 import { ControlStruct } from "./types/control/struct";
 import { ControlUnary } from "./types/control/unary";
 import { ControlUnaryI } from "./types/control/unary_i";
@@ -176,6 +180,11 @@ import {
     TAGSTRING_CONTROL_make,
     TAGSTRING_USER_type_struct,
     TAGSTRING_USER_type_mutex,
+    TAGSTRING_USER_type_slice,
+    TAGSTRING_CONTROL_slice,
+    TAGSTRING_CONTROL_slice_i,
+    TAGSTRING_CONTROL_slice_address,
+    TAGSTRING_CONTROL_slice_address_i,
 } from "./types/tags";
 import { UserType } from "./types/user/type";
 import { UserTypeArray } from "./types/user/type/array";
@@ -186,6 +195,7 @@ import { UserTypeFunction } from "./types/user/type/function";
 import { UserTypeInt32 } from "./types/user/type/int32";
 import { UserTypeMethod } from "./types/user/type/method";
 import { UserTypeMutex } from "./types/user/type/mutex";
+import { UserTypeSlice } from "./types/user/type/slice";
 import { UserTypeString } from "./types/user/type/string";
 import { UserTypeStruct } from "./types/user/type/struct";
 import { UserTypeStructDecl } from "./types/user/type/struct_decl";
@@ -1125,6 +1135,46 @@ class Heap {
     }
 
     /**
+     * CONTROL_slice
+     * Fields    : number of children
+     * Children  :
+     * - 4 bytes address of the array (expression)
+     * - 4 bytes address of the start index (expression)
+     * - 4 bytes address of the end index (expression)
+     */
+    public allocate_CONTROL_slice(obj: { tag: string, array: any, start: any, end: any }): number {
+        return ControlSlice.allocate(this, obj.array, obj.start, obj.end);
+    }
+
+    /**
+     * CONTROL_slice_i
+     * Fields    : none
+     */
+    public allocate_CONTROL_slice_i(): number {
+        return ControlSliceI.allocate(this);
+    }
+
+    /**
+     * CONTROL_slice_address
+     * Fields    : number of children
+     * Children  :
+     * - 4 bytes address of the array (expression)
+     * - 4 bytes address of the start index (expression)
+     * - 4 bytes address of the end index (expression)
+     */
+    public allocate_CONTROL_slice_address(obj: { tag: string, array: any, start: any, end: any }): number {
+        return ControlSliceAddress.allocate(this, obj.array, obj.start, obj.end);
+    }
+
+    /**
+     * CONTROL_slice_address_i
+     * Fields    : none
+     */
+    public allocate_CONTROL_slice_address_i(): number {
+        return ControlSliceAddressI.allocate(this);
+    }
+
+    /**
      * ENVIRONMENT_frame
      * Fields    : number of children
      * Children  :
@@ -1262,6 +1312,18 @@ class Heap {
      */
     public allocate_USER_type_mutex(): number {
         return UserTypeMutex.allocate(this);
+    }
+
+    /**
+     * USER_type_slice
+     * Fields    :
+     * - number of children
+     * Children  :
+     * - 4 bytes address of the name (COMPLEX_string)
+     * - 4 bytes address of the type of the slice (USER_type)
+     */
+    public allocate_USER_type_slice(obj: { tag: string, type: any }): number {
+        return UserTypeSlice.allocate(this, obj.type);
     }
 
     public allocate_number(value: number): number {
@@ -1403,6 +1465,14 @@ class Heap {
                 return this.allocate_CONTROL_method_member(obj);
             case TAGSTRING_CONTROL_member_address_i:
                 return this.allocate_CONTROL_member_address_i(obj);
+            case TAGSTRING_CONTROL_slice:
+                return this.allocate_CONTROL_slice(obj);
+            case TAGSTRING_CONTROL_slice_i:
+                return this.allocate_CONTROL_slice_i();
+            case TAGSTRING_CONTROL_slice_address:
+                return this.allocate_CONTROL_slice_address(obj);
+            case TAGSTRING_CONTROL_slice_address_i:
+                return this.allocate_CONTROL_slice_address_i();
             case TAGSTRING_CONTROL_push_i:
                 return this.allocate_CONTROL_push_i(obj);
             case TAGSTRING_ENVIRONMENT_frame:
@@ -1429,6 +1499,8 @@ class Heap {
                 return this.allocate_USER_type_method(obj);
             case TAGSTRING_USER_type_mutex:
                 return this.allocate_USER_type_mutex();
+            case TAGSTRING_USER_type_slice:
+                return this.allocate_USER_type_slice(obj);
             default:
                 throw new Error("Unknown tag " + obj.tag);
         }

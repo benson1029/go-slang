@@ -30,19 +30,49 @@ The length of an array can be obtained using the `len` function:
 fmt.Println(len(arr)) // 5
 ```
 
-## Slices (Under Development)
+## Slices
 
-Slices are dynamic arrays that can grow or shrink in size. The syntax for declaring a slice is as follows:
+Slices are dynamic arrays that can grow or shrink in size.
 
-```go
-var slice []int32
-```
+The syntax for declaring a slice is as follows:
 
-This initializes a slice of integers. You can also initialize a slice with values:
+1. Declaring an empty slice:
 
-```go
-slice := []int32{1, 2, 3, 4, 5}
-```
+   ```go
+   var slice []int32
+   ```
+
+2. Declaring a slice with values:
+
+   ```go
+    slice := []int32{1, 2, 3, 4, 5}
+    ```
+
+3. Declaring a slice with a specific length and capacity:
+
+   ```go
+   slice := make([]int32, 5, 10)
+   ```
+
+   This initializes a slice of integers with a length of 5 and a capacity of 10.
+
+4. Declaring a slice with a specific length:
+
+   ```go
+   slice := make([]int32, 5)
+   ```
+
+   This initializes a slice of integers with a length of 5 and a capacity of 5.
+
+5. Slice of an array or another slice:
+
+   ```go
+   arr := [5]int32{1, 2, 3, 4, 5}
+   slice := arr[1:4]
+   ```
+
+   This initializes a slice of integers with the elements of the array `arr` from index 1 to 4.  
+   The slice has length 3 and capacity 4.
 
 Slices can be accessed using the index operator:
 
@@ -60,6 +90,12 @@ The capacity of a slice can be obtained using the `cap` function:
 
 ```go
 fmt.Println(cap(slice)) // 5
+```
+
+Slices can be appended to using the `append` function:
+
+```go
+slice = append(slice, 6)
 ```
 
 ## Structs

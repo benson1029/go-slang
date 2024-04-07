@@ -29,6 +29,8 @@ export const TAG_CONTROL_index_i = 0x8007; // 1000 0000 0000 0111
 export const TAG_CONTROL_index_address_i = 0x8008; // 1000 0000 0000 1000
 export const TAG_CONTROL_chan_send_i = 0x8009; // 1000 0000 0000 1001
 export const TAG_CONTROL_chan_receive_i = 0x800A; // 1000 0000 0000 1010
+export const TAG_CONTROL_slice_i = 0x800B; // 1000 0000 0000 1011
+export const TAG_CONTROL_slice_address_i = 0x800C; // 1000 0000 0000 1100
 
 
 export const TAG_CONTROL_name = 0xC001; // 1100 0000 0000 0001
@@ -82,11 +84,13 @@ export const TAG_CONTROL_member_address_i = 0xC035; // 1100 0000 0011 0101
 export const TAG_CONTROL_push_i = 0xC036; // 1100 0000 0011 0110
 export const TAG_CONTROL_make = 0xC037; // 1100 0000 0011 0111
 export const TAG_CONTROL_make_i = 0xC038; // 1100 0000 0011 1000
+export const TAG_CONTROL_slice = 0xC039; // 1100 0000 0011 1001
+export const TAG_CONTROL_slice_address = 0xC03A; // 1100 0000 0011 1010
 
 
-export const TAG_CONTROL_select_i = 0xC033; // 1100 0000 0011 0011
-export const TAG_CONTROL_select_case_i = 0xC034; // 1100 0000 0011 0100
-export const TAG_CONTROL_select_default_i = 0xC035; // 1100 0000 0011 0101
+export const TAG_CONTROL_select_i = 0xC03B; // 1100 0000 0011 1011
+export const TAG_CONTROL_select_case_i = 0xC03C; // 1100 0000 0011 1100
+export const TAG_CONTROL_select_default_i = 0xC03D; // 1100 0000 0011 1101
 
 export const TAG_ENVIRONMENT_entry = 0xC100; // 1100 0001 0000 0000
 export const TAG_ENVIRONMENT_frame = 0xC101; // 1100 0001 0000 0001
@@ -118,6 +122,7 @@ export const TAG_USER_type_mutex = 0xC311; // 1100 0011 0001 0001
 export const TAG_USER_variable = 0xC411; // 1100 0100 0001 0001
 export const TAG_USER_struct = 0xC412; // 1100 0100 0001 0010
 export const TAG_USER_channel = 0xC413; // 1100 0100 0001 0011
+export const TAG_USER_slice = 0xC414; // 1100 0100 0001 0100
 
 export const TAGSTRING_PRIMITIVE_nil = "nil";
 export const TAGSTRING_PRIMITIVE_bool = "bool";
@@ -166,6 +171,8 @@ export const TAGSTRING_CONTROL_chan_receive_stmt = "chan-receive-stmt";
 export const TAGSTRING_CONTROL_struct = "struct";
 export const TAGSTRING_CONTROL_method = "struct-method";
 export const TAGSTRING_CONTROL_method_member = "method-member";
+export const TAGSTRING_CONTROL_slice = "slice";
+export const TAGSTRING_CONTROL_slice_address = "slice-address";
 
 export const TAGSTRING_CONTROL_unary_i = "unary_i";
 export const TAGSTRING_CONTROL_binary_i = "binary_i";
@@ -186,6 +193,8 @@ export const TAGSTRING_CONTROL_index_address_i = "index_address_i";
 export const TAGSTRING_CONTROL_constructor_i = "constructor_i";
 export const TAGSTRING_CONTROL_member_address_i = "member_address_i";
 export const TAGSTRING_CONTROL_push_i = "push_i";
+export const TAGSTRING_CONTROL_slice_i = "slice_i";
+export const TAGSTRING_CONTROL_slice_address_i = "slice_address_i";
 
 
 export const TAGSTRING_USER_type_bool = "bool-type";

@@ -62,6 +62,10 @@ import { ControlRestoreEnvI } from "./control/restore_env_i";
 import { ControlReturn } from "./control/return";
 import { ControlReturnI } from "./control/return_i";
 import { ControlSequence } from "./control/sequence";
+import { ControlSlice } from "./control/slice";
+import { ControlSliceAddress } from "./control/slice_address";
+import { ControlSliceAddressI } from "./control/slice_address_i";
+import { ControlSliceI } from "./control/slice_i";
 import { ControlStruct } from "./control/struct";
 import { ControlUnary } from "./control/unary";
 import { ControlUnaryI } from "./control/unary_i";
@@ -171,8 +175,14 @@ import {
   TAG_CONTROL_chan_receive_i,
   TAG_USER_type_mutex,
   TAG_COMPLEX_mutex,
+  TAG_USER_slice,
+  TAG_CONTROL_slice,
+  TAG_CONTROL_slice_i,
+  TAG_CONTROL_slice_address,
+  TAG_CONTROL_slice_address_i,
 } from "./tags"
 import { UserChannel } from "./user/channel";
+import { UserSlice } from "./user/slice";
 import { UserStruct } from "./user/struct";
 import { UserTypeArray } from "./user/type/array";
 import { UserTypeBool } from "./user/type/bool";
@@ -328,6 +338,14 @@ function auto_cast(heap: Heap, address: number): HeapObject {
       return new ControlMethodMember(heap, address);
     case TAG_CONTROL_push_i:
       return new ControlPushI(heap, address);
+    case TAG_CONTROL_slice:
+      return new ControlSlice(heap, address);
+    case TAG_CONTROL_slice_i:
+      return new ControlSliceI(heap, address);
+    case TAG_CONTROL_slice_address:
+      return new ControlSliceAddress(heap, address);
+    case TAG_CONTROL_slice_address_i:
+      return new ControlSliceAddressI(heap, address);
     case TAG_ENVIRONMENT_entry:
       return new EnvironmentEntry(heap, address);
     case TAG_ENVIRONMENT_frame:
@@ -354,6 +372,8 @@ function auto_cast(heap: Heap, address: number): HeapObject {
       return new UserStruct(heap, address);
     case TAG_USER_channel:
       return new UserChannel(heap, address);
+    case TAG_USER_slice:
+      return new UserSlice(heap, address);
     case TAG_USER_type_array:
       return new UserTypeArray(heap, address);
     case TAG_USER_type_bool:

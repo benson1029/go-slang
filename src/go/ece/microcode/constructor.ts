@@ -16,6 +16,8 @@ import { ControlMake } from '../../heap/types/control/make';
 import { ControlMakeI } from '../../heap/types/control/make_i';
 import { PrimitiveInt32 } from '../../heap/types/primitive/int32';
 import { UserChannel } from '../../heap/types/user/channel';
+import { UserSlice } from '../../heap/types/user/slice';
+import { UserTypeSlice } from '../../heap/types/user/type/slice';
 
 function evaluate_default_make(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
     const make_cmd = auto_cast(heap, cmd) as ControlDefaultMake;
@@ -53,6 +55,14 @@ function evaluate_default_make(cmd: number, heap: Heap, C: ContextControl, S: Co
             const nil_address = heap.allocate_any(null);
             S.push(nil_address);
             heap.free_object(nil_address);
+            break;
+        }
+        case TAG_USER_type_slice: {
+            const array = auto_cast(heap, ComplexArray.allocate(heap, 0)) as ComplexArray;
+            const slice_address = UserSlice.allocate(heap, 0, 0, 0, array);
+            S.push(slice_address);
+            array.free();
+            heap.free_object(slice_address);
             break;
         }
         default: {
@@ -101,7 +111,39 @@ function evaluate_make_i(cmd: number, heap: Heap, C: ContextControl, S: ContextS
             break;
         }
         case TAG_USER_type_slice: {
-            throw new Error("evaluate_make: Not implemented");
+            if (num_args > 2) {
+                throw new Error("evaluate_make: slice expects 1 or 2 arguments");
+            }
+            let len: number, cap: number;
+            if (num_args === 0) {
+                len = 0;
+                cap = 0;
+            } else if (num_args === 1) {
+                const len_value = auto_cast(heap, S.pop()) as PrimitiveInt32;
+                len = len_value.get_value();
+                cap = len;
+                len_value.free();
+            } else {
+                const len_value = auto_cast(heap, S.pop()) as PrimitiveInt32;
+                const cap_value = auto_cast(heap, S.pop()) as PrimitiveInt32;
+                len = len_value.get_value();
+                cap = cap_value.get_value();
+                len_value.free();
+                cap_value.free();
+            }
+            const array = auto_cast(heap, ComplexArray.allocate(heap, cap)) as ComplexArray;
+            const inner_type = (type as UserTypeSlice).get_inner_type();
+            for (let i = 0; i < cap; i++) {
+                const variable = auto_cast(heap, UserVariable.allocate_nil(heap)) as UserVariable;
+                inner_type.construct_default(variable);
+                array.set_value_address(i, variable);
+                variable.free();
+            }
+            const slice = UserSlice.allocate(heap, len, cap, 0, array);
+            S.push(slice);
+            array.free();
+            heap.free_object(slice);
+            break;
         }
         default: {
             throw new Error("evaluate_make: Invalid type");
@@ -147,6 +189,23 @@ function evaluate_constructor_i(cmd: number, heap: Heap, C: ContextControl, S: C
             }
             S.push(array.address);
             array.free();
+            break;
+        }
+        case TAG_USER_type_slice: {
+            const len = constructor_i_cmd.get_number_of_arguments();
+            const array = auto_cast(heap, ComplexArray.allocate(heap, len)) as ComplexArray;
+            for (let i = 0; i < len; i++) {
+                const value = auto_cast(heap, S.pop());
+                const variable = auto_cast(heap, UserVariable.allocate_nil(heap)) as UserVariable;
+                variable.set_value(value);
+                array.set_value_address(i, variable);
+                value.free();
+                variable.free();
+            }
+            const slice = UserSlice.allocate(heap, len, len, 0, array);
+            S.push(slice);
+            array.free();
+            heap.free_object(slice);
             break;
         }
         default:

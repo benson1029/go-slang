@@ -212,6 +212,8 @@ const microcode_preprocess: {
     }
     if (arr_t.isArray()) {
       return (arr_t as ArrayType).type;
+    } else if (arr_t.isSlice()) {
+      return (arr_t as SliceType).type;
     } else {
       throw new Error("Indexing non-array type.");
     }
@@ -221,25 +223,25 @@ const microcode_preprocess: {
     comp: {
       tag: string;
       array: any;
-      left: any;
-      right: any;
+      start: any;
+      end: any;
     },
     scope: Scope,
     type_check: boolean
   ) => {
-    const left_t = preprocess(comp.left, scope, type_check);
-    const right_t = preprocess(comp.right, scope, type_check);
+    const start_t = preprocess(comp.start, scope, type_check);
+    const end_t = preprocess(comp.end, scope, type_check);
     const arr_t = preprocess(comp.array, scope, type_check);
     if (!type_check) {
       return new NilType();
     }
-    if (!arr_t.isArray()) {
+    if (!arr_t.isArray() && !arr_t.isSlice()) {
       throw new Error("Slicing non-array type.");
     }
-    if (!left_t.isInt32()) {
+    if (!start_t.isInt32() && !start_t.isNil()) {
       throw new Error("Slicing with non-int32 type.");
     }
-    if (!right_t.isInt32()) {
+    if (!end_t.isInt32() && !end_t.isNil()) {
       throw new Error("Slicing with non-int32 type.");
     }
     return new SliceType((arr_t as ArrayType).type);
@@ -315,14 +317,14 @@ const microcode_preprocess: {
     comp: {
       tag: string;
       array: any;
-      left: any;
-      right: any;
+      start: any;
+      end: any;
     },
     scope: Scope,
     type_check: boolean
   ) => {
     return preprocess(
-      { tag: "slice", array: comp.array, left: comp.left, right: comp.right },
+      { tag: "slice", array: comp.array, start: comp.start, end: comp.end },
       scope,
       type_check
     );
@@ -842,7 +844,7 @@ const microcode_preprocess: {
       if (!type_check) {
         continue;
       }
-      if (!t.isArray()) {
+      if (!t.isArray() && !t.isSlice()) {
         throw new Error("Constructor on non-array type.");
       }
       const expected_t = (t as ArrayType).type;

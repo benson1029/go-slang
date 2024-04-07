@@ -112,6 +112,14 @@ function lookup_microcode_sequential(tag: number): Function {
       return struct.evaluate_method_member;
     case tags.TAG_CONTROL_push_i:
       return control_function.evaluate_push_i;
+    case tags.TAG_CONTROL_slice:
+      return array.evaluate_slice;
+    case tags.TAG_CONTROL_slice_i:
+      return array.evaluate_slice_i;
+    case tags.TAG_CONTROL_slice_address:
+      return array.evaluate_slice_address;
+    case tags.TAG_CONTROL_slice_address_i:
+      return array.evaluate_slice_address_i;
     case tags.TAG_PRIMITIVE_nil:
       return (...args: any[]) => {};
     default:

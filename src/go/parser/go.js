@@ -90,7 +90,7 @@ function addressToValue(name) {
     } else if (name.tag === "index-address") {
         return { tag: "index", array: addressToValue(name.array), index: name.index };
     } else if (name.tag === "slice-address") {
-        return { tag: "slice", array: addressToValue(name.array), left: name.left, right: name.right };
+        return { tag: "slice", array: addressToValue(name.array), start: name.start, end: name.end };
     } else if (name.tag === "member-address") {
         return { tag: "member", object: addressToValue(name.object), member: name.member };
     }
@@ -473,7 +473,7 @@ function peg$parse(input, options) {
   var peg$f39 = function(expr) { return { tag: "index", index: expr }; };
   var peg$f40 = function(expr) { return expr; };
   var peg$f41 = function() { return null; };
-  var peg$f42 = function(expr, expr2) { return { tag: "slice", left: expr, right: expr2 }; };
+  var peg$f42 = function(expr, expr2) { return { tag: "slice", start: expr, end: expr2 }; };
   var peg$f43 = function(args) { return buildFunctionCall(null, args); };
   var peg$f44 = function(member) { return { tag: "member", member: member }; };
   var peg$f45 = function(exp) { return exp; };
@@ -482,7 +482,7 @@ function peg$parse(input, options) {
             if (element.tag === "index") {
                 return { tag: "index", array: result, index: element.index };
             } else if (element.tag === "slice") {
-                return { tag: "slice", array: result, left: element.left, right: element.right };
+                return { tag: "slice", array: result, start: element.start, end: element.end };
             } else if (element.tag === "call") {
                 return { tag: "call", func: result, args: element.args };
             } else if (element.tag === "member") {
@@ -495,7 +495,7 @@ function peg$parse(input, options) {
             if (element.tag === "index") {
                 return { tag: "index-address", array: result, index: element.index };
             } else if (element.tag === "slice") {
-                return { tag: "slice-address", array: result, left: element.left, right: element.right };
+                return { tag: "slice-address", array: result, start: element.start, end: element.end };
             } else if (element.tag === "member") {
                 return { tag: "member-address", object: result, member: element.member };
             }
