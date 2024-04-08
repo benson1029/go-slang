@@ -6,7 +6,6 @@ import { StreamLanguage } from '@codemirror/language';
 import { go } from '@codemirror/legacy-modes/mode/go';
 import { EditorView } from "@codemirror/view"
 import { basicDark } from '@uiw/codemirror-theme-basic';
-import { run } from './go/index.ts';
 
 const sampleCode = `package main
 
@@ -15,6 +14,8 @@ import "fmt"
 func main() {
   fmt.Println("Hello, World!")
 }`;
+
+const worker = new Worker(new URL('./EvalWorker.js', import.meta.url));
 
 function CodeEditor() {
     const [code, setCode] = useState(
@@ -25,8 +26,11 @@ function CodeEditor() {
 
     const handleRunCode = async (code) => {
         setOutput("Running...");
-        let output = await run(code, heapSize);
-        setOutput(output);
+        worker.onmessage = (e) => {
+            const { output, time } = e.data;
+            setOutput(output + `==============\nTime: ${time}ms`);
+        }
+        worker.postMessage({ code, heapSize });
     };
 
     const resetCode = () => {

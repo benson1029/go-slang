@@ -45,9 +45,7 @@ export async function run(code: string, heapSize: number): Promise<string> {
     });
 
     const executionPromise = new Promise<string>((resolve) => {
-        setTimeout(() => {
-            resolve(parseAndExecute(code, heapSize));
-        }, 1000);
+        resolve(parseAndExecute(code, heapSize));
     });
 
     const result = await Promise.race([executionPromise, timeoutPromise]);
