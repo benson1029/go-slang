@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBackward, faBook, faExclamationTriangle, faForward, faPlay, faRefresh } from '@fortawesome/free-solid-svg-icons';
+import { faBackward, faBook, faForward, faGear, faPlay, faRefresh } from '@fortawesome/free-solid-svg-icons';
 import CodeMirror from '@uiw/react-codemirror';
 import { StreamLanguage } from '@codemirror/language';
 import { go } from '@codemirror/legacy-modes/mode/go';
@@ -217,7 +217,7 @@ function CodeEditor() {
                                 {
                                     snapshots[snapshotStep]?.map(thread => (
                                         <Tab>
-                                            Thread {thread.id} {thread.current ? <FontAwesomeIcon icon={faExclamationTriangle} /> : <></>}
+                                            Thread {thread.id} {thread.current ? <FontAwesomeIcon icon={faGear} /> : <></>}
                                         </Tab>
                                     ))
                                 }
