@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBackward, faBook, faForward, faGear, faPlay, faRefresh } from '@fortawesome/free-solid-svg-icons';
+import { faBackward, faBook, faForward, faGear, faPause, faPlay, faRefresh } from '@fortawesome/free-solid-svg-icons';
 import CodeMirror from '@uiw/react-codemirror';
 import { StreamLanguage } from '@codemirror/language';
 import { go } from '@codemirror/legacy-modes/mode/go';
@@ -32,6 +32,8 @@ function CodeEditor() {
     const [visualize, setVisualize] = useState(false);
     const [snapshots, setSnapshots] = useState([]);
     const [snapshotStep, setSnapshotStep] = useState(0);
+    const [autoPlay, setAutoPlay] = useState(false);
+    const [tabIndex, setTabIndex] = useState(0);
 
     const handleRunCode = async (code) => {
         setOutput("Running...");
@@ -48,6 +50,30 @@ function CodeEditor() {
         setCode(sampleCode);
         localStorage.setItem("code", sampleCode);
     };
+
+    useEffect(() => {
+        const autoPlayTask = setInterval(() => {
+            if (autoPlay) {
+                if (snapshotStep < snapshots.length - 1) {
+                    setSnapshotStep(snapshotStep + 1);
+                    const currentThread = snapshots[snapshotStep][tabIndex];
+                    const currentThreadIndex = snapshots[snapshotStep + 1].findIndex(thread => thread.id === currentThread?.id);
+                    const newTabIndex = snapshots[snapshotStep + 1].findIndex(thread => thread.current);
+                    if (currentThreadIndex == null || currentThreadIndex === -1) {
+                        setTabIndex(newTabIndex);
+                    } else {
+                        setTabIndex(currentThreadIndex);
+                        setTimeout(() => setTabIndex(newTabIndex), 1000);
+                    }
+                } else {
+                    setAutoPlay(false);
+                }
+            }
+        }, 2000);
+        return () => {
+            clearInterval(autoPlayTask);
+        }
+    }, [autoPlay, snapshotStep, snapshots, tabIndex]);
 
     return (
         <>
@@ -191,6 +217,24 @@ function CodeEditor() {
                         </button>
                         <button
                             onClick={() => {
+                                setAutoPlay(!autoPlay);
+                            }}
+                            style={{
+                                padding: '10px',
+                                borderRadius: '5px',
+                                backgroundColor: '#2e3235',
+                                color: 'white',
+                                border: 'none',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                marginLeft: '10px'
+                            }}
+                        >
+                            <FontAwesomeIcon icon={autoPlay ? faPause : faPlay} />
+                        </button>
+                        <button
+                            onClick={() => {
                                 if (snapshotStep < snapshots.length - 1)
                                     setSnapshotStep(snapshotStep + 1);
                             }}
@@ -212,7 +256,7 @@ function CodeEditor() {
                         <span style={{ color: 'white', marginLeft: '10px' }}>
                             {snapshotStep + 1} / {snapshots.length}
                         </span>
-                        <Tabs>
+                        <Tabs selectedIndex={tabIndex} onSelect={(index) => setTabIndex(index)}>
                             <TabList>
                                 {
                                     snapshots[snapshotStep]?.map(thread => (
