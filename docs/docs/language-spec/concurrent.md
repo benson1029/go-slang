@@ -4,9 +4,61 @@ sidebar_position: 4
 
 # Concurrent Constructs
 
+## Wait Groups
+
+The `sync` package provides the `WaitGroup` type for synchronizing goroutines. The syntax for declaring a `WaitGroup` is as follows:
+
+```go
+var wg sync.WaitGroup
+```
+
+The `Add` method is used to increment the counter of the `WaitGroup`.
+
+```go
+wg.Add(1)
+```
+
+The `Done` method is used to decrement the counter of the `WaitGroup`.
+
+```go
+wg.Done()
+```
+
+The `Wait` method is used to block until the counter of the `WaitGroup` becomes zero.
+
+```go
+wg.Wait()
+```
+
+The following example demonstrates the use of a `WaitGroup` to synchronize goroutines.
+
+```go
+package main
+
+import (
+    "fmt"
+    "sync"
+)
+
+func worker(id int32, wg sync.WaitGroup) {
+    fmt.Println("Worker", id, "starting")
+    wg.Done()
+}
+
+func main() {
+    var wg sync.WaitGroup
+    for i := 1; i <= 5; i++ {
+        wg.Add(1)
+        go worker(i, wg)
+    }
+    wg.Wait()
+    fmt.Println("All workers done")
+}
+```
+
 ## Mutex
 
-The syntax for declaring a mutex is as follows:
+The `sync` package also provides the `Mutex` type for synchronizing access to shared variables. The syntax for declaring a mutex is as follows:
 
 ```go
 var m sync.Mutex
@@ -36,22 +88,26 @@ The following example demonstrates the use of a mutex to synchronize access to a
     ```go
     package main
 
-    import "fmt"
+    import (
+        "fmt"
+        "sync"
+    )
 
     var count int32
+    var wg sync.WaitGroup
 
     func increment() {
         for i := 0; i < 100; i++ {
             count++
         }
+        wg.Done()
     }
 
     func main() {
+        wg.Add(2)
         go increment()
         go increment()
-        for i := 0; i <= 1000; i++ {
-            // busy wait
-        }
+        wg.Wait()
         fmt.Println(count) // prints 100
     }
     ```
@@ -67,6 +123,7 @@ The following example demonstrates the use of a mutex to synchronize access to a
     )
 
     var count int32
+    var wg sync.WaitGroup
     var m sync.Mutex
 
     func increment() {
@@ -75,14 +132,14 @@ The following example demonstrates the use of a mutex to synchronize access to a
             count++
             m.Unlock()
         }
+        wg.Done()
     }
 
     func main() {
+        wg.Add(2)
         go increment()
         go increment()
-        for i := 0; i <= 1000; i++ {
-            // busy wait
-        }
+        wg.Wait()
         fmt.Println(count) // prints 200
     }
     ```
@@ -108,7 +165,12 @@ The following example demonstrates the use of channels to synchronize goroutines
 ```go
 package main
 
-import "fmt"
+import (
+    "fmt"
+    "sync"
+)
+
+var wg sync.WaitGroup
 
 func producer(ch chan int32) {
     for i := 0; i < 5; i++ {
@@ -118,6 +180,7 @@ func producer(ch chan int32) {
     fmt.Println("Producer done") // this does not get printed
     // making the channel buffered will allow the producer to continue
     // by changing the channel declaration to "ch := make(chan int32, 1)"
+    wg.Done()
 }
 
 func consumer(ch chan int32) {
@@ -125,14 +188,14 @@ func consumer(ch chan int32) {
         fmt.Println(<-ch)
     }
     fmt.Println("Consumer done")
+    wg.Done()
 }
 
 func main() {
+    wg.Add(2)
     ch := make(chan int32)
     go producer(ch)
     go consumer(ch)
-    for i := 0; i <= 1000; i++ {
-        // busy wait
-    }
+    wg.Wait()
 }
 ```

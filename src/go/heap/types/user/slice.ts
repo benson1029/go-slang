@@ -13,6 +13,7 @@ import { Heap } from "../../heap";
 import { TAG_USER_slice } from "../tags";
 import { HeapObject } from "../objects";
 import { ComplexArray } from "../complex/array";
+import { UserVariable } from "./variable";
 
 class UserSlice extends HeapObject {
   public get_length(): number {
@@ -45,6 +46,18 @@ class UserSlice extends HeapObject {
   public stringify_i(): string {
     return "slice (" + this.get_length() + "/" + this.get_capacity() + ")"
         + " of " + this.get_underlying_array().stringify_i() + " at " + this.get_offset();
+  }
+
+  public to_object(): any {
+    let result = "(" + this.get_length() + "/" + this.get_capacity() + ") [";
+    for (let i = 0; i < this.get_length(); i++) {
+      result += (this.get_underlying_array().get_value_address(i + this.get_offset()) as UserVariable).get_value().to_object();
+      if (i + 1 < this.get_length()) {
+        result += " ";
+      }
+    }
+    result += "]";
+    return result;
   }
 }
 

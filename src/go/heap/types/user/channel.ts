@@ -291,6 +291,11 @@ class UserChannel extends HeapObject {
     result += this.isClosed() ? "closed" : "open";
     return result;
   }
+
+  public to_object(): any {
+    const buffer = this.buffer().to_object();
+    return "Channel [" + buffer.join(" ") + "]";
+  }
 }
 
 export { UserChannel };
