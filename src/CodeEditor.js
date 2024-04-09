@@ -37,7 +37,7 @@ function CodeEditor() {
         setOutput("Running...");
         worker.onmessage = (e) => {
             const { output, time, snapshots } = e.data;
-            setOutput(output + `==============\nTime: ${time}ms`);
+            setOutput(output + `\n==============\nTime: ${time}ms`);
             setSnapshots(snapshots);
             setSnapshotStep(0);
         }

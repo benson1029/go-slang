@@ -53,7 +53,7 @@ class ECE {
     return thread;
   }
 
-  public evaluate(check_all_free: boolean = false) {
+  public evaluate(check_all_free: boolean = false): { output: string; snapshots: any[] } {
     // return JSON.stringify(this.program, null, 2);
     const scheduler = new ContextScheduler(
       this.heap,

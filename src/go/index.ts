@@ -8,26 +8,31 @@ import { ECE, UnsupportedCommandError } from './ece';
  * @param code The code to parse and execute
  * @returns The result of the execution
  */
-function parseAndExecute(code: string, heapSize: number, visualize: boolean): string {
+function parseAndExecute(code: string, heapSize: number, visualize: boolean): { output: string; snapshots: any[] } {
     let parsed_program: object;
     try {
         parsed_program = parse(code);
     } catch (error) {
         if (error instanceof SyntaxError) {
-            return `Syntax error (${error.location.start.line}:${error.location.start.column}): ${error.message}`;
+            return {
+                output: `Syntax error (${error.location.start.line}:${error.location.start.column}): ${error.message}`,
+                snapshots: []
+            };
         } else {
-            return `Unknown error: ${error.message}`;
+            return {
+                output: `Unknown parsing error: ${error.message}`,
+                snapshots: []
+            };
         }
     }
     let result;
     try {
         result = (new ECE(heapSize, parsed_program, visualize)).evaluate();
     } catch (error) {
-        if (error instanceof UnsupportedCommandError) {
-            return `${error.message}\n${JSON.stringify(parsed_program, null, 2)}`;
-        } else {
-            return `Execution error: ${error.message}\n${error.stack}`;
-        }
+        return {
+            output: `Execution error: ${error.message}\n${error.stack}`,
+            snapshots: []
+        };
     }
     return result;
 }
@@ -39,12 +44,15 @@ function parseAndExecute(code: string, heapSize: number, visualize: boolean): st
  * @param code The code to run
  * @returns The result of the execution
  */
-export async function run(code: string, heapSize: number, visualize: boolean): Promise<string> {
-    const timeoutPromise = new Promise<string>((resolve) => {
-        setTimeout(() => resolve('Execution timeout'), 10000);
+export async function run(code: string, heapSize: number, visualize: boolean): Promise<{ output: string; snapshots: any[] }> {
+    const timeoutPromise = new Promise<{ output: string; snapshots: any[] }>((resolve) => {
+        setTimeout(() => resolve({
+            output: "Execution timeout",
+            snapshots: []
+        }), 10000);
     });
 
-    const executionPromise = new Promise<string>((resolve) => {
+    const executionPromise = new Promise<{ output: string; snapshots: any[] }>((resolve) => {
         resolve(parseAndExecute(code, heapSize, visualize));
     });
 

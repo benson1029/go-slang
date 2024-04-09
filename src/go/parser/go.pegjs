@@ -489,9 +489,16 @@ SelectStatement
     = "select" WhiteSpace ___ "{" ___ cases:SelectCaseList ___ "}" { return { tag: "select", body: cases }; }
 
 SelectCase
-    = "case" WhiteSpace __ stmt:ChannelSendStatement __ ":" ___ body:StatementList { return { tag: "select-case", case: stmt, body: body }; }
-    / "case" WhiteSpace __ stmt:Assignment __ ":" ___ body:StatementList { return { tag: "select-case", case: stmt, body: body }; }
-    / "default" __ ":" ___ body:StatementList { return { tag: "select-default", body: body }; }
+    = "case" WhiteSpace ___ stmt:ChannelSendStatement __ ":" ___ body:StatementList {
+        return { tag: "case-send", channel: stmt.name, value: stmt.value, body: body };
+    }
+    / "case" WhiteSpace ___ name:VariableAddress __ "=" ___ "<-" __ channel:VariableAddress  __ ":" ___ body:StatementList {
+        return { tag: "case-receive", channel: channel, assign: name, body: body };
+    }
+    / "case" WhiteSpace ___ "<-" __ channel:VariableAddress  __ ":" ___ body:StatementList {
+        return { tag: "case-receive", channel: channel, assign: null, body: body };
+    }
+    / "default" __ ":" ___ body:StatementList { return { tag: "case-default", body: body }; }
 
 SelectCaseList
     = ___ case0:SelectCase ___ cases:((___ SelectCase)*) ___ { return [case0].concat(cases.map(x => x[1])); }
