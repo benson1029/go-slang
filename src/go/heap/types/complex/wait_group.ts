@@ -29,10 +29,10 @@ class ComplexWaitGroup extends HeapObject {
     }
 
     public add(delta: number, scheduler: ContextScheduler): void {
-        this.set_value(this.get_value() + delta);
-        if (this.get_value() < 0) {
+        if (delta < 0 && this.get_value() < -delta) {
             throw new Error("negative wait group counter");
         }
+        this.set_value(this.get_value() + delta);
         if (this.get_value() === 0) {
             this.wake(scheduler);
         }

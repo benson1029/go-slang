@@ -82,4 +82,26 @@ describe("WaitGroup", () => {
         `
         expect(() => evaluateFunctions(functions)).toThrow();
     })
+
+    it("throws if Done() is called more times than Add()", () => {
+        const functions = `
+        func main() {
+            var wg sync.WaitGroup
+            wg.Add(1)
+            wg.Done()
+            wg.Done()
+        }
+        `
+        expect(() => evaluateFunctions(functions)).toThrow();
+    })
+
+    it("throws if Add() is called with a negative number", () => {
+        const functions = `
+        func main() {
+            var wg sync.WaitGroup
+            wg.Add(-1)
+        }
+        `
+        expect(() => evaluateFunctions(functions)).toThrow();
+    })
 })
