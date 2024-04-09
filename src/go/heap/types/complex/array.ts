@@ -9,6 +9,7 @@ import { Heap } from "../../heap";
 import { auto_cast } from "../auto_cast";
 import { HeapObject } from "../objects";
 import { TAG_COMPLEX_array } from "../tags";
+import { UserVariable } from "../user/variable";
 
 class ComplexArray extends HeapObject {
   /**
@@ -68,7 +69,7 @@ class ComplexArray extends HeapObject {
   public to_object(): any {
     let result = "[";
     for (let i = 0; i < this.get_length(); i++) {
-      result += this.get_value_address(i).to_object();
+      result += (this.get_value_address(i) as UserVariable).get_value().to_object();
       if (i < this.get_length() - 1) {
         result += " ";
       }

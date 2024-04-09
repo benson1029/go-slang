@@ -93,7 +93,7 @@ class UserVariable extends HeapObject {
   }
 
   public to_object(): any {
-    return this.get_value().to_object();
+    return "(address " + this.address + ") " + this.get_value().to_object();
   }
 }
 

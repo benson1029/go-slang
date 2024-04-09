@@ -79,7 +79,7 @@ class EnvironmentEntry extends HeapObject {
   public to_object(): any {
     return {
       name: this.get_key_address().get_string(),
-      value: this.get_variable_address().to_object(),
+      value: this.get_variable_address().get_value().to_object(),
     }
   }
 }
