@@ -227,56 +227,8 @@ function CodeEditor() {
                                     <TabPanel>
                                         <Stage width={775} height={window.innerHeight * 0.8}>
                                             <Layer>
-                                                {
-                                                    thread.control.map((item, i) => (
-                                                        <>
-                                                            <Rect
-                                                                x={10}
-                                                                y={10 + i * 55}
-                                                                width={200}
-                                                                height={55}
-                                                                stroke={(thread.current === true && i === 0) ? "cyan" : "white"}
-                                                                strokeWidth={1}
-                                                            />
-                                                            <Text
-                                                                x={15}
-                                                                y={15 + i * 55}
-                                                                text={item}
-                                                                ellipsis={true}
-                                                                width={190}
-                                                                height={50}
-                                                                fill="white"
-                                                                border={1}
-                                                                fontFamily='Roboto Mono'
-                                                            />
-                                                        </>
-                                                    ))
-                                                }
-                                                {
-                                                    thread.stash.map((item, i) => (
-                                                        <>
-                                                            <Rect
-                                                                x={240}
-                                                                y={10 + i * 55}
-                                                                width={200}
-                                                                height={55}
-                                                                stroke="white"
-                                                                strokeWidth={1}
-                                                            />
-                                                            <Text
-                                                                x={245}
-                                                                y={15 + i * 55}
-                                                                text={item}
-                                                                ellipsis={true}
-                                                                width={190}
-                                                                height={50}
-                                                                fill="white"
-                                                                border={1}
-                                                                fontFamily='Roboto Mono'
-                                                            />
-                                                        </>
-                                                    ))
-                                                }
+                                                <Control control={thread.control} current={thread.current} />
+                                                <Stash stash={thread.stash} />
                                                 <Env env={thread.env} />
                                             </Layer>
                                         </Stage>
@@ -294,6 +246,58 @@ function CodeEditor() {
             </div>
         </>
     );
+}
+
+function Control(thread) {
+    return thread.control.map((item, i) => (
+        <>
+            <Rect
+                x={10}
+                y={10 + i * 55}
+                width={200}
+                height={55}
+                stroke={(thread.current === true && i === 0) ? "cyan" : "white"}
+                strokeWidth={1}
+            />
+            <Text
+                x={15}
+                y={15 + i * 55}
+                text={item}
+                ellipsis={true}
+                width={190}
+                height={50}
+                fill={(thread.current === true && i === 0) ? "cyan" : "white"}
+                border={1}
+                fontFamily='Roboto Mono'
+            />
+        </>
+    ));
+}
+
+function Stash(thread) {
+    return thread.stash.map((item, i) => (
+        <>
+            <Rect
+                x={240}
+                y={10 + i * 55}
+                width={200}
+                height={55}
+                stroke="white"
+                strokeWidth={1}
+            />
+            <Text
+                x={245}
+                y={15 + i * 55}
+                text={item}
+                ellipsis={true}
+                width={190}
+                height={50}
+                fill="white"
+                border={1}
+                fontFamily='Roboto Mono'
+            />
+        </>
+    ));
 }
 
 function Env(thread) {

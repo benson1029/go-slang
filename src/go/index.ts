@@ -1,5 +1,5 @@
 import { parse, SyntaxError } from './parser/go';
-import { ECE, UnsupportedCommandError } from './ece';
+import { ECE } from './ece';
 
 /**
  * Parses and executes the given code. If the code has a syntax error or the
