@@ -15,6 +15,10 @@ class ControlContinue extends HeapObject {
     public stringify_i(): string {
         return this.address.toString() + " (continue)";
     }
+
+    public to_object(): any {
+        return "continue";
+    }
 }
 
 export { ControlContinue };

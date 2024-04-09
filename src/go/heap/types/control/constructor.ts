@@ -61,6 +61,20 @@ class ControlConstructor extends HeapObject {
     result += ")";
     return result;
   }
+
+  public to_object(): any {
+    let result = "";
+    result += this.get_type().to_object();
+    result += "{";
+    for (let i = 0; i < this.get_number_of_arguments(); i++) {
+      if (i > 0) {
+        result += ", ";
+      }
+      result += this.get_argument(i).to_object();
+    }
+    result += "}";
+    return result;
+  }
 }
 
 export { ControlConstructor };

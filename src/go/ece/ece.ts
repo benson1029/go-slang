@@ -14,15 +14,19 @@ class ECE {
 
   private program: any;
 
+  private visualize: boolean;
+  private snapshots: any[] = [];
+
   /**
    * Creates a new instance of the ECE.
    *
    * @param memory The amount of memory to allocate for the heap.
    */
-  constructor(memory: number, program: any) {
+  constructor(memory: number, program: any, visualize: boolean = false) {
     this.memory = memory;
     this.heap = new Heap(this.memory);
     this.program = program;
+    this.visualize = visualize;
   }
 
   private startup_thread(): ContextThread {
@@ -71,6 +75,9 @@ class ECE {
 
     // Evaluate the program.
     while (!scheduler.empty()) {
+      if (this.visualize) {
+        this.take_snapshot(scheduler);
+      }
       const thread = scheduler.dequeue();
       if (!thread.control().empty()) {
         const cmd = thread.control().pop();
@@ -119,7 +126,19 @@ class ECE {
 
     //console.log("Check all objects are freed:", this.heap.check_all_free());
 
-    return output_buffer;
+    return {
+      output: output_buffer,
+      snapshots: this.snapshots,
+    };
+  }
+
+  private take_snapshot(scheduler: ContextScheduler) {
+    let snapshot = scheduler.to_object();
+    const front_thread = scheduler.get_front_address().thread_id();
+    snapshot.forEach((thread: any) => {
+      thread.current = thread.id === front_thread;
+    });
+    this.snapshots.push(snapshot);
   }
 }
 

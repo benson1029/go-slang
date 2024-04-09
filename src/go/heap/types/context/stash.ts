@@ -71,6 +71,10 @@ class ContextStash extends HeapObject {
   public stringify_i(): string {
     return this.address.toString() + " (stash): " + this.get_stash().stringify();
   }
+
+  public to_object(): any {
+    return this.get_stash().to_object();
+  }
 }
 
 export { ContextStash };

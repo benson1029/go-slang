@@ -39,6 +39,10 @@ class ControlLogicalI extends HeapObject {
   public stringify_i(): string {
     return this.address.toString() + " (logical_i): " + this.get_operator_address().stringify();
   }
+
+  public to_object(): any {
+    return "LOGICAL_I " + this.get_operator();
+  }
 }
 
 export { ControlLogicalI };

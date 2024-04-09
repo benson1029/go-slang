@@ -31,6 +31,10 @@ class ContextScheduler extends HeapObject {
     this.get_queue_address().enqueue(thread);
   }
 
+  public get_front_address(): ContextThread {
+    return this.get_queue_address().front() as ContextThread;
+  }
+
   public empty(): boolean {
     return this.get_queue_address().length() === 0;
   }
@@ -49,6 +53,10 @@ class ContextScheduler extends HeapObject {
     result += this.get_queue_address().stringify();
     result += "]";
     return result;
+  }
+
+  public to_object(): any {
+    return this.get_queue_address().to_object().sort((a: any, b: any) => a.id - b.id);
   }
 }
 

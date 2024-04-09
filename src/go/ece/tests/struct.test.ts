@@ -11,7 +11,7 @@ function evaluateFunctions(functions) {
     `
     const parsed_program = parse(program);
     const heapSize = 1048576;
-    return (new ECE(heapSize, parsed_program)).evaluate(true);
+    return (new ECE(heapSize, parsed_program)).evaluate(true).output;
 }
 
 describe("Structs", () => {

@@ -17,6 +17,10 @@ class ControlChanReceiveI extends HeapObject {
     result += this.address.toString() + " (chan_receive_i): ";
     return result;
   }
+
+  public to_object(): any {
+    return "CHAN_RECEIVE_I";
+  }
 }
 
 export { ControlChanReceiveI };

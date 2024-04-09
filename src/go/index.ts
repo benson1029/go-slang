@@ -8,7 +8,7 @@ import { ECE, UnsupportedCommandError } from './ece';
  * @param code The code to parse and execute
  * @returns The result of the execution
  */
-function parseAndExecute(code: string, heapSize: number): string {
+function parseAndExecute(code: string, heapSize: number, visualize: boolean): string {
     let parsed_program: object;
     try {
         parsed_program = parse(code);
@@ -21,7 +21,7 @@ function parseAndExecute(code: string, heapSize: number): string {
     }
     let result;
     try {
-        result = (new ECE(heapSize, parsed_program)).evaluate();
+        result = (new ECE(heapSize, parsed_program, visualize)).evaluate();
     } catch (error) {
         if (error instanceof UnsupportedCommandError) {
             return `${error.message}\n${JSON.stringify(parsed_program, null, 2)}`;
@@ -39,13 +39,13 @@ function parseAndExecute(code: string, heapSize: number): string {
  * @param code The code to run
  * @returns The result of the execution
  */
-export async function run(code: string, heapSize: number): Promise<string> {
+export async function run(code: string, heapSize: number, visualize: boolean): Promise<string> {
     const timeoutPromise = new Promise<string>((resolve) => {
         setTimeout(() => resolve('Execution timeout'), 10000);
     });
 
     const executionPromise = new Promise<string>((resolve) => {
-        resolve(parseAndExecute(code, heapSize));
+        resolve(parseAndExecute(code, heapSize, visualize));
     });
 
     const result = await Promise.race([executionPromise, timeoutPromise]);

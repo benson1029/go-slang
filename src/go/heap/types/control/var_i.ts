@@ -28,6 +28,10 @@ class ControlVarI extends HeapObject {
   public stringify_i(): string {
     return this.address.toString() + " (var_i): " + this.get_name();
   }
+  
+  public to_object(): any {
+    return "VAR_I " + this.get_name();
+  }
 }
 
 export { ControlVarI };

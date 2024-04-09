@@ -159,6 +159,10 @@ class ContextEnv extends HeapObject {
   public stringify_i(): string {
     return this.address.toString() + " (env): " + this.get_frame().stringify();
   }
+
+  public to_object(): any[] {
+    return this.get_frame().to_object();
+  }
 }
 
 export { ContextEnv };

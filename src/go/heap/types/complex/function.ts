@@ -126,6 +126,19 @@ class ComplexFunction extends HeapObject {
     result += "]";
     return result;
   }
+
+  public to_object(): any {
+    let result = "func (";
+    for (let i = 0; i < this.get_number_of_params(); i++) {
+      result += this.get_param_name_address(i).get_string();
+      if (i < this.get_number_of_params() - 1) {
+        result += ", ";
+      }
+    }
+    result += ") ";
+    result += this.get_body_address().to_object();
+    return result;
+  }
 }
 
 export { ComplexFunction };

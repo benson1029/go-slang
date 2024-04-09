@@ -167,6 +167,16 @@ class ComplexQueue extends HeapObject {
     }
     return result;
   }
+
+  public to_object(): any {
+    let result = [];
+    let front = this.front_linked_list();
+    for (let i = 0; i < this.length(); i++) {
+      result.push(front.get_value_address().to_object());
+      front = front.get_next_address();
+    }
+    return result;
+  }
 }
 
 export { ComplexQueue };

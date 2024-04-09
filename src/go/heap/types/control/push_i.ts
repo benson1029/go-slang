@@ -7,6 +7,7 @@
  */
 
 import { Heap } from "../../heap";
+import { auto_cast } from "../auto_cast";
 import { HeapObject } from "../objects";
 import { TAG_CONTROL_push_i } from "../tags";
 
@@ -22,7 +23,7 @@ class ControlPushI extends HeapObject {
     if (this.get_tag() !== TAG_CONTROL_push_i) {
       throw new Error("Invalid tag for ControlPushI");
     }
-    return new HeapObject(this.heap, this.get_object_address());
+    return auto_cast(this.heap, this.get_object_address());
   }
 
   public static allocate(heap: Heap, object: HeapObject): number {
@@ -33,6 +34,10 @@ class ControlPushI extends HeapObject {
 
   public stringify_i(): string {
     return "[" + this.get_object().stringify_i() + "] (push_i)";
+  }
+
+  public to_object(): any {
+    return "PUSH_I " + this.get_object().to_object();
   }
 }
 

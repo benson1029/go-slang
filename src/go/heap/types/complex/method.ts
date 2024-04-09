@@ -1,5 +1,5 @@
 /**
- * CONTROL_method
+ * COMPLEX_method
  * Fields    :
  * - number of children
  * - number of parameters
@@ -136,7 +136,22 @@ class ComplexMethod extends HeapObject {
         result += this.get_environment_address().stringify();
         result += "]";
         return result;
-      }    
+    }
+
+    public to_object(): any {
+        let result = "(";
+        result += this.get_self_name_address().to_object();
+        result += ") func (";
+        for (let i = 0; i < this.get_number_of_params(); i++) {
+            result += this.get_param_name_address(i).get_string();
+            if (i < this.get_number_of_params() - 1) {
+                result += ", ";
+            }
+        }
+        result += ") ";
+        result += this.get_body_address().to_object();
+        return result;
+    }
 }
 
 export { ComplexMethod };

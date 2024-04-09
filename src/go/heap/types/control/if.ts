@@ -58,6 +58,11 @@ class ControlIf extends HeapObject {
         result += "else_body: " + this.get_else_body_address().stringify();
         return result;
     }
+
+    public to_object(): any {
+        return "if (" + this.get_condition_address().to_object() + ") "
+                + this.get_then_body_address().to_object() + " else " + this.get_else_body_address().to_object();
+    }
 }
 
 export { ControlIf };

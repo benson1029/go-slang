@@ -75,6 +75,13 @@ class EnvironmentEntry extends HeapObject {
     // result += this.get_variable_address().stringify();
     return result;
   }
+
+  public to_object(): any {
+    return {
+      name: this.get_key_address().get_string(),
+      value: this.get_variable_address().to_object(),
+    }
+  }
 }
 
 export { EnvironmentEntry };

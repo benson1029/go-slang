@@ -17,6 +17,10 @@ class ControlChanSendI extends HeapObject {
     result += this.address.toString() + " (chan_send_i): ";
     return result;
   }
+
+  public to_object(): any {
+    return "CHAN_SEND_I";
+  }
 }
 
 export { ControlChanSendI };

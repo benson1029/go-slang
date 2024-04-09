@@ -32,6 +32,10 @@ class ControlBinaryI extends HeapObject {
         result += this.get_operator_address().stringify();
         return result;
     }
+
+    public to_object(): any {
+        return "BINARY_I " + this.get_operator();
+    }
 }
 
 export { ControlBinaryI };

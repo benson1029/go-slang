@@ -97,6 +97,10 @@ class ContextControl extends HeapObject {
       this.address.toString() + " (control): " + this.get_control().stringify()
     );
   }
+
+  public to_object(): any {
+    return this.get_control().to_object();
+  }
 }
 
 export { ContextControl };

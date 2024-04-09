@@ -70,6 +70,15 @@ class ControlFor extends HeapObject {
         result += "body: " + this.get_body_address().stringify();
         return result;
     }
+
+    public to_object(): any {
+        let result = "for (";
+        result += this.get_init_address().to_object() + "; ";
+        result += this.get_condition_address().to_object() + "; ";
+        result += this.get_update_address().to_object() + ") ";
+        result += this.get_body_address().to_object();
+        return result;
+    }
 }
 
 export { ControlFor };

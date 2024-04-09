@@ -63,6 +63,18 @@ class ControlMake extends HeapObject {
     result += ")";
     return result;
   }
+
+  public to_object(): any {
+    let result = "make(" + this.get_type().to_object() + ", ";
+    for (let i = 0; i < this.get_number_of_args(); i++) {
+      if (i > 0) {
+        result += ", ";
+      }
+      result += this.get_arg_address(i).to_object();
+    }
+    result += ")";
+    return result;
+  }
 }
 
 export { ControlMake };

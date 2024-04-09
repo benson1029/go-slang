@@ -47,6 +47,10 @@ class ControlChanSend extends HeapObject {
     result += this.get_name_address().stringify();
     return result;
   }
+
+  public to_object(): any {
+    return this.get_name_address().to_object() + " <- " + this.get_value_address().to_object();
+  }
 }
 
 export { ControlChanSend };

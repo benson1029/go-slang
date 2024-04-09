@@ -8,6 +8,7 @@
  */
 
 import { Heap } from "../../heap";
+import { auto_cast } from "../auto_cast";
 import { ComplexString } from "../complex/string";
 import { HeapObject } from "../objects";
 import { TAG_CONTROL_member } from "../tags";
@@ -24,7 +25,7 @@ class ControlMember extends HeapObject {
     if (this.get_tag() !== TAG_CONTROL_member) {
       throw new Error("Invalid tag for ControlMember");
     }
-    return new HeapObject(this.heap, this.get_object_address());
+    return auto_cast(this.heap, this.get_object_address());
   }
 
   public get_member_name_address(): ComplexString {
@@ -64,6 +65,10 @@ class ControlMember extends HeapObject {
 
   public stringify_i(): string {
     return this.get_object().stringify_i() + "." + this.get_member_name();
+  }
+
+  public to_object(): any {
+    return this.get_object().to_object() + "." + this.get_member_name();
   }
 }
 

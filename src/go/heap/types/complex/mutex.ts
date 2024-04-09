@@ -102,6 +102,10 @@ class ComplexMutex extends HeapObject {
     result += "]";
     return result;
   }
+
+  public to_object(): any {
+    return "mutex (" + (this.isLocked() ? "locked" : "unlocked") + ")";
+  }
 }
 
 export { ComplexMutex };

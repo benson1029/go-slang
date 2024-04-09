@@ -53,6 +53,10 @@ class ControlVar extends HeapObject {
   public stringify_i(): string {
     return this.address.toString() + " (var): " + this.get_name() + " = " + this.get_expression().stringify();
   }
+
+  public to_object(): any {
+    return this.get_name() + " := " + this.get_expression().to_object();
+  }
 }
 
 export { ControlVar };

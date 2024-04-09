@@ -45,6 +45,10 @@ class ControlConstructorI extends HeapObject {
     result += this.get_number_of_arguments().toString();
     return result;
   }
+
+  public to_object(): any {
+    return "CONSTRUCTOR_I " + this.get_type().to_object() + " " + this.get_number_of_arguments();
+  }
 }
 
 export { ControlConstructorI };

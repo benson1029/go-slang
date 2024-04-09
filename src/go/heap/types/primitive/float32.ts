@@ -54,6 +54,10 @@ class PrimitiveFloat32 extends Primitive {
       this.address.toString() + " (float32): " + this.get_value().toString()
     );
   }
+
+  public to_object(): any {
+    return this.get_value().toString();
+  }
 }
 
 export { PrimitiveFloat32 };

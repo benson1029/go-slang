@@ -15,6 +15,10 @@ class ControlSliceI extends HeapObject {
     public stringify_i(): string {
         return this.address.toString() + " (slice_i)";
     }
+
+    public to_object(): any {
+        return "SLICE_I";
+    }
 }
 
 export { ControlSliceI };

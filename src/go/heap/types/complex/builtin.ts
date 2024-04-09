@@ -50,6 +50,10 @@ class ComplexBuiltin extends HeapObject {
   public stringify_i(): string {
     return this.address.toString() + " (builtin): " + this.get_name();
   }
+
+  public to_object(): any {
+    return this.get_name() + " (builtin)";
+  }
 }
 
 export { ComplexBuiltin };

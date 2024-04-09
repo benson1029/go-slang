@@ -109,6 +109,16 @@ class ComplexLinkedList extends HeapObject {
     result += "]";
     return result;
   }
+
+  public to_object(): any {
+    let result: any[] = [];
+    let current: ComplexLinkedList = this;
+    while (!current.is_nil()) {
+      result.push(current.get_value_address().to_object());
+      current = current.get_next_address();
+    }
+    return result;
+  }
 }
 
 export { ComplexLinkedList };

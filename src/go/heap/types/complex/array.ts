@@ -64,6 +64,18 @@ class ComplexArray extends HeapObject {
     result += "]";
     return result;
   }
+
+  public to_object(): any {
+    let result = "[";
+    for (let i = 0; i < this.get_length(); i++) {
+      result += this.get_value_address(i).to_object();
+      if (i < this.get_length() - 1) {
+        result += " ";
+      }
+    }
+    result += "]";
+    return result;
+  }
 }
 
 export { ComplexArray };

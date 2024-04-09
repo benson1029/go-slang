@@ -15,6 +15,10 @@ class ControlIndexAddressI extends HeapObject {
     public stringify_i(): string {
         return this.address.toString() + " (index_address_i)";
     }
+
+    public to_object(): any {
+        return "INDEX_ADDRESS_I";
+    }
 }
 
 export { ControlIndexAddressI };

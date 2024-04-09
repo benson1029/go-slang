@@ -40,6 +40,10 @@ class PrimitiveNil extends Primitive {
   public stringify_i(): string {
     return this.address.toString() + " (nil)";
   }
+
+  public to_object(): any {
+    return "nil";
+  }
 }
 
 export { PrimitiveNil };

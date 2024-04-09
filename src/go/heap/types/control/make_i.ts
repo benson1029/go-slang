@@ -47,6 +47,10 @@ class ControlMakeI extends HeapObject {
     result += this.get_number_of_arguments().toString();
     return result;
   }
+
+  public to_object(): any {
+    return "MAKE_I " + this.get_type().to_object() + " " + this.get_number_of_arguments().toString();
+  }
 }
 
 export { ControlMakeI };

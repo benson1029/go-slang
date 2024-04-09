@@ -29,6 +29,10 @@ class ControlRestoreEnvI extends HeapObject {
   public stringify_i(): string {
     return this.address.toString() + " (restore_env_i): " + this.get_frame_address().stringify();
   }
+
+  public to_object(): any {
+    return "RESTORE_ENV_I";
+  }
 }
 
 export { ControlRestoreEnvI };

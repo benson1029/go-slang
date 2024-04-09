@@ -15,13 +15,12 @@ import {
 } from "../../heap/types/tags";
 import { ControlBinary } from '../../heap/types/control/binary';
 import { ControlBinaryI } from '../../heap/types/control/binary_i';
-import { HeapObject } from '../../heap/types/objects';
 import { ControlLogicalImmI } from '../../heap/types/control/logical_imm_i';
 import { ControlLogicalI } from '../../heap/types/control/logical_i';
 import { ComplexString } from '../../heap/types/complex/string';
 
 function evaluate_literal(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
-    const cmd_object = new HeapObject(heap, cmd);
+    const cmd_object = auto_cast(heap, cmd);
     S.push(cmd_object.address);
 }
 

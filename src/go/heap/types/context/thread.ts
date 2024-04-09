@@ -116,6 +116,16 @@ class ContextThread extends HeapObject {
     result += "]";
     return result;
   }
+
+  public to_object(): any {
+    return {
+      tag: "thread",
+      id: this.thread_id(),
+      control: this.control().to_object(),
+      stash: this.stash().to_object(),
+      env: this.env().to_object(),
+    };
+  }
 }
 
 export { ContextThread };

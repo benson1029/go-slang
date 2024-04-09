@@ -32,6 +32,10 @@ class PrimitiveRune extends Primitive {
   public stringify_i(): string {
     return this.address.toString() + " (rune): " + String.fromCodePoint(this.get_value());
   }
+
+  public to_object(): any {
+    return String.fromCodePoint(this.get_value());
+  }
 }
 
 export { PrimitiveRune };

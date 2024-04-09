@@ -13,7 +13,7 @@ function evaluateExpression(expression) {
     `
     const parsed_program = parse(program);
     const heapSize = 8196;
-    return (new ECE(heapSize, parsed_program)).evaluate(true);
+    return (new ECE(heapSize, parsed_program)).evaluate(true).output;
 }
 
 describe('Evaluating expressions', () => {

@@ -33,6 +33,11 @@ class ControlSequence extends HeapObject {
   public stringify_i(): string {
     return this.address.toString() + " (sequence): " + this.get_linked_list_address().stringify();
   }
+
+  public to_object(): any {
+    let seq = this.get_linked_list_address().to_object();
+    return seq.map(str => str + ";").join(" ");
+  }
 }
 
 export { ControlSequence };

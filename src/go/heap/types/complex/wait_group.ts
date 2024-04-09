@@ -72,6 +72,10 @@ class ComplexWaitGroup extends HeapObject {
 
         return address;
     }
+
+    public to_object(): any {
+        return "wait group (" + this.get_value() + ")";
+    }
 }
 
 export { ComplexWaitGroup };

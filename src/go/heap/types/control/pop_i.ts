@@ -15,6 +15,10 @@ class ControlPopI extends HeapObject {
     public stringify_i(): string {
         return this.address.toString() + " (pop_i)";
     }
+
+    public to_object(): any {
+        return "POP_I";
+    }
 }
 
 export { ControlPopI };

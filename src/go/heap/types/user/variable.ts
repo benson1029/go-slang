@@ -91,6 +91,10 @@ class UserVariable extends HeapObject {
       this.get_value().stringify()
     );
   }
+
+  public to_object(): any {
+    return this.get_value().to_object();
+  }
 }
 
 export { UserVariable };

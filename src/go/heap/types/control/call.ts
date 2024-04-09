@@ -7,17 +7,17 @@
  */
 
 import { Heap } from "../../heap";
-import { ComplexString } from "../complex/string";
+import { auto_cast } from "../auto_cast";
 import { HeapObject } from "../objects";
 import { TAG_CONTROL_call } from "../tags";
 
 class ControlCall extends HeapObject {
-  public get_func_address(): ComplexString {
-    return new ComplexString(this.heap, this.get_child(0));
+  public get_func_address(): HeapObject {
+    return auto_cast(this.heap, this.get_child(0));
   }
 
   public get_arg_address(index: number): HeapObject {
-    return new HeapObject(this.heap, this.get_child(index + 1));
+    return auto_cast(this.heap, this.get_child(index + 1));
   }
 
   public get_number_of_args(): number {
@@ -54,6 +54,20 @@ class ControlCall extends HeapObject {
         result += ", ";
       }
       result += this.get_arg_address(i).stringify();
+    }
+    result += ")";
+    return result;
+  }
+
+  public to_object(): any {
+    let result = "";
+    result += this.get_func_address().to_object();
+    result += "(";
+    for (let i = 0; i < this.get_number_of_args(); i++) {
+      if (i > 0) {
+        result += ", ";
+      }
+      result += this.get_arg_address(i).to_object();
     }
     result += ")";
     return result;

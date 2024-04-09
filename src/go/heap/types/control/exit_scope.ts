@@ -15,6 +15,10 @@ class ControlExitScopeI extends HeapObject {
     public stringify_i(): string {
         return this.address.toString() + " (exit_scope)";
     }
+
+    public to_object(): any {
+        return "EXIT_SCOPE_I";
+    }
 }
 
 export { ControlExitScopeI };

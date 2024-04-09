@@ -39,6 +39,10 @@ class ControlCallI extends HeapObject {
   public stringify_i(): string {
     return this.address.toString() + " (call_i): " + this.get_number_of_args_address().stringify();
   }
+
+  public to_object(): any {
+    return "CALL_I " + this.get_number_of_args();
+  }
 }
 
 export { ControlCallI };

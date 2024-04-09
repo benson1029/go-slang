@@ -15,6 +15,10 @@ class ControlBreak extends HeapObject {
     public stringify_i(): string {
         return this.address.toString() + " (break)";
     }
+
+    public to_object(): any {
+        return "break";
+    }
 }
 
 export { ControlBreak };

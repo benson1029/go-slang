@@ -73,6 +73,10 @@ class HeapObject {
   public stringify_i(): string {
     return "Not implemented";
   }
+
+  public to_object(): any {
+    return this.stringify();
+  }
 }
 
 export { HeapObject };

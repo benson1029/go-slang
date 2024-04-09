@@ -41,6 +41,10 @@ class PrimitiveBool extends Primitive {
       (this.get_value() ? "true" : "false")
     );
   }
+
+  public to_object(): any {
+    return (this.get_value() ? "true" : "false");
+  }
 }
 
 export { PrimitiveBool };

@@ -10,10 +10,11 @@ import { Heap } from "../../heap";
 import { HeapObject } from "../objects";
 import { ComplexString } from "../complex/string";
 import { TAG_CONTROL_logical_imm_i } from "../tags";
+import { auto_cast } from "../auto_cast";
 
 class ControlLogicalImmI extends HeapObject {
   public get_right_address(): HeapObject {
-    return new HeapObject(this.heap, this.get_child(0));
+    return auto_cast(this.heap, this.get_child(0));
   }
 
   public get_operator_address(): ComplexString {
@@ -47,6 +48,10 @@ class ControlLogicalImmI extends HeapObject {
 
   public stringify_i(): string {
     return this.address.toString() + " (logical_imm_i): " + this.get_right_address().stringify() + " " + this.get_operator();
+  }
+
+  public to_object(): any {
+    return "LOGICAL_IMM_I " + this.get_operator() + " " + this.get_right_address().to_object();
   }
 }
 

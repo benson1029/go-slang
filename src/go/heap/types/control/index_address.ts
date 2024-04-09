@@ -7,6 +7,7 @@
  */
 
 import { Heap } from "../../heap";
+import { auto_cast } from "../auto_cast";
 import { HeapObject } from "../objects";
 import { TAG_CONTROL_index_address } from "../tags";
 
@@ -22,7 +23,7 @@ class ControlIndexAddress extends HeapObject {
     if (this.get_tag() !== TAG_CONTROL_index_address) {
       throw new Error("Invalid tag for ControlIndexAddress");
     }
-    return new HeapObject(this.heap, this.get_array_address());
+    return auto_cast(this.heap, this.get_array_address());
   }
 
   public get_index_address(): number {
@@ -36,7 +37,7 @@ class ControlIndexAddress extends HeapObject {
     if (this.get_tag() !== TAG_CONTROL_index_address) {
       throw new Error("Invalid tag for ControlIndexAddress");
     }
-    return new HeapObject(this.heap, this.get_index_address());
+    return auto_cast(this.heap, this.get_index_address());
   }
 
   public static allocate(heap: Heap, array: any, index: any): number {
@@ -58,6 +59,10 @@ class ControlIndexAddress extends HeapObject {
     heap.set_cannnot_be_freed(index_address, false);
 
     return address;
+  }
+
+  public to_object(): any {
+    return this.get_array().to_object() + "[" + this.get_index().to_object() + "]";
   }
 }
 

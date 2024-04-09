@@ -154,6 +154,20 @@ class ControlMethod extends HeapObject {
     result += "]";
     return result;
   }
+
+  public to_object(): any {
+    let result = "(" + this.get_self_name_address().get_string() + " " + this.get_struct_name_address().get_string() + ") func ";
+    result += this.get_name_address().get_string() + "(";
+    for (let i = 0; i < this.get_number_of_params(); i++) {
+      if (i > 0) {
+        result += ", ";
+      }
+      result += this.get_param_name_address(i).get_string();
+    }
+    result += ") ";
+    result += this.get_body_address().to_object();
+    return result;
+  }
 }
 
 export { ControlMethod };

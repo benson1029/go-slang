@@ -51,6 +51,11 @@ class ControlForI extends HeapObject {
         result += "loopVar: " + this.get_loop_var().stringify();
         return result;
     }
+
+    public to_object(): any {
+        return "FOR_I loop: " + this.get_loop_var().to_object() + " cond: " + this.get_condition_address().to_object()
+                + " upd: " + this.get_update_address().to_object() + " body: " + this.get_body_address().to_object();
+    }
 }
 
 export { ControlForI };

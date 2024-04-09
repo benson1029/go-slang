@@ -35,6 +35,10 @@ class ControlChanReceiveStmt extends HeapObject {
     result += this.get_body_address().stringify();
     return result;
   }
+
+  public to_object(): any {
+    return this.get_body_address().to_object();
+  }
 }
 
 export { ControlChanReceiveStmt };

@@ -71,6 +71,10 @@ class ComplexString extends HeapObject {
   public stringify_i(): string {
     return this.address.toString() + " (string): " + this.get_string();
   }
+
+  public to_object(): any {
+    return this.get_string();
+  }
 }
 
 export { ComplexString };

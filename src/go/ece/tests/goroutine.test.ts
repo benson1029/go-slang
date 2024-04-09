@@ -11,7 +11,7 @@ function evaluateFunctions(functions, isRecursive = false) {
     `
     const parsed_program = parse(program);
     const heapSize = 1048576;
-    return (new ECE(heapSize, parsed_program)).evaluate(!isRecursive);
+    return (new ECE(heapSize, parsed_program)).evaluate(!isRecursive).output;
 }
 
 describe("Goroutines", () => {

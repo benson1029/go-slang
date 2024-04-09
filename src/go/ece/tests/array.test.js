@@ -13,13 +13,13 @@ function evaluateSequence(sequence, checkAllFree = true) {
     `
     const parsed_program = parse(program);
     const heapSize = 1048576;
-    return (new ECE(heapSize, parsed_program)).evaluate(checkAllFree);
+    return (new ECE(heapSize, parsed_program)).evaluate(checkAllFree).output;
 }
 
 function evaluateProgram(program, checkAllFree = true) {
     const parsed_program = parse(program);
     const heapSize = 1048576;
-    return (new ECE(heapSize, parsed_program)).evaluate(checkAllFree);
+    return (new ECE(heapSize, parsed_program)).evaluate(checkAllFree).output;
 }
 
 describe("Fixed size array", () => {

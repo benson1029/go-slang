@@ -50,6 +50,10 @@ class PrimitiveInt32 extends Primitive {
   public stringify_i(): string {
     return this.address.toString() + " (int32): " + this.get_value().toString();
   }
+
+  public to_object(): any {
+    return this.get_value().toString();
+  }
 }
 
 export { PrimitiveInt32 };

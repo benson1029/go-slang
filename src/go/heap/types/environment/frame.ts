@@ -259,6 +259,22 @@ class EnvironmentFrame extends HeapObject {
     // result += ", cache: " + this.get_cache_hash_table_address().stringify();
     return result;
   }
+
+  public to_object(): any[] {
+    let result = [
+      this.get_lookup_hash_table_address().is_nil()
+        ? []
+        : this.get_lookup_hash_table_address().to_object()
+    ];
+    if (!this.get_parent_frame_address().is_nil()) {
+      this.get_parent_frame_address().to_object().forEach(
+        (parent_frame: any) => {
+          result.push(parent_frame);
+        }
+      );
+    }
+    return result;
+  }
 }
 
 export { EnvironmentFrame };

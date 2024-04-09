@@ -19,7 +19,7 @@ class ComplexPointer extends HeapObject {
 
   public static allocate(heap: Heap, value: number): number {
     const address = heap.allocate_object(TAG_COMPLEX_pointer, 1, 1);
-    const value_address = new HeapObject(heap, value);
+    const value_address = auto_cast(heap, value);
     heap.set_child(address, 0, value_address.reference().address);
     return address;
   }

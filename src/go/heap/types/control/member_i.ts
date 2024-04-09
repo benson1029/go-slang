@@ -35,6 +35,10 @@ class ControlMemberI extends HeapObject {
   public stringify_i(): string {
     return "." + this.get_member_name();
   }
+
+  public to_object(): any {
+    return "MEMBER_I " + this.get_member_name();
+  }
 }
 
 export { ControlMemberI };

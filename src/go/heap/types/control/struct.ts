@@ -92,6 +92,20 @@ class ControlStruct extends HeapObject {
     result += "}";
     return result;
   }
+
+  public to_object(): any {
+    let result = "type " + this.get_name().to_object() + " struct { ";
+    for (let i = 0; i < this.get_number_of_fields(); i++) {
+      result += this.get_field_name(i).to_object();
+      result += ": ";
+      result += this.get_field_type(i).to_object();
+      if (i < this.get_number_of_fields() - 1) {
+        result += ", ";
+      }
+    }
+    result += " }";
+    return result;
+  }
 }
 
 export { ControlStruct };

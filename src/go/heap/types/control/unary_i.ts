@@ -32,6 +32,10 @@ class ControlUnaryI extends HeapObject {
         result += this.get_operator_address().stringify();
         return result;
     }
+
+    public to_object(): any {
+        return "UNARY_I " + this.get_operator();
+    }
 }
 
 export { ControlUnaryI };

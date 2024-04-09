@@ -56,6 +56,19 @@ class UserStruct extends HeapObject {
     result += "}";
     return result;
   }
+
+  public to_object(): any {
+    let obj = this.get_frame().to_object()[0];
+    let result = "{ ";
+    obj.forEach((v, i) => {
+      result += v.name + ": " + v.value;
+      if (i < obj.length - 1) {
+        result += ", ";
+      }
+    })
+    result += " }";
+    return result;
+  }
 }
 
 export { UserStruct };
