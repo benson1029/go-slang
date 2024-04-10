@@ -67,8 +67,8 @@ class ControlBinary extends HeapObject {
   }
 
   public to_object(): any {
-    return "(" + this.get_left_operand_address().to_object() + ") " + this.get_operator()
-        + " (" + this.get_right_operand_address().to_object() + ")";
+    return "(" + this.get_left_operand_address().to_object() + " " + this.get_operator()
+        + " " + this.get_right_operand_address().to_object() + ")";
   }
 }
 

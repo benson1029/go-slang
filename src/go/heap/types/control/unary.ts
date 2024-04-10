@@ -52,7 +52,7 @@ class ControlUnary extends HeapObject {
   }
 
   public to_object(): any {
-    return this.get_operator() + "(" + this.get_operand_address().to_object() + ")";
+    return "(" + this.get_operator() + this.get_operand_address().to_object() + ")";
   }
 }
 
