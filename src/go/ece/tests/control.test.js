@@ -278,4 +278,34 @@ describe('Evaluating control structures', () => {
         fmt.Println(f())
         `)).toBe("2\n");
     })
+
+    it('loop variable can be updated in loop scope', () => {
+        expect(evaluateSequence(`
+        var f func() int32
+        for i := 0; i < 10; i++ {
+            f = func() int32 {
+                return i
+            }
+            i++
+            fmt.Println(i)
+        }
+        fmt.Println(f())
+        `)).toBe("1\n3\n5\n7\n9\n9\n");
+    })
+
+    it('loop variable can be updated in loop scope (wt. continue)', () => {
+        expect(evaluateSequence(`
+        var f func() int32
+        for i := 0; i < 10; i++ {
+            f = func() int32 {
+                return i
+            }
+            i++
+            fmt.Println(i)
+            continue
+            fmt.Println("unreachable")
+        }
+        fmt.Println(f())
+        `)).toBe("1\n3\n5\n7\n9\n9\n");
+    })
 })

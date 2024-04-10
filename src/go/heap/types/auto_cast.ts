@@ -48,6 +48,7 @@ import { ControlLogicalI } from "./control/logical_i";
 import { ControlLogicalImmI } from "./control/logical_imm_i";
 import { ControlMake } from "./control/make";
 import { ControlMakeI } from "./control/make_i";
+import { ControlMarkerI } from "./control/marker_i";
 import { ControlMember } from "./control/member";
 import { ControlMemberAddress } from "./control/member_address";
 import { ControlMemberAddressI } from "./control/member_address_i";
@@ -183,6 +184,7 @@ import {
   TAG_CONTROL_slice_address_i,
   TAG_COMPLEX_wait_group,
   TAG_USER_type_wait_group,
+  TAG_CONTROL_marker_i,
 } from "./tags"
 import { UserChannel } from "./user/channel";
 import { UserSlice } from "./user/slice";
@@ -352,6 +354,8 @@ function auto_cast(heap: Heap, address: number): HeapObject {
       return new ControlSliceAddress(heap, address);
     case TAG_CONTROL_slice_address_i:
       return new ControlSliceAddressI(heap, address);
+    case TAG_CONTROL_marker_i:
+      return new ControlMarkerI(heap, address);
     case TAG_ENVIRONMENT_entry:
       return new EnvironmentEntry(heap, address);
     case TAG_ENVIRONMENT_frame:

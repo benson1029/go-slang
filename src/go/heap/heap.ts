@@ -72,6 +72,7 @@ import { ControlLogicalI } from "./types/control/logical_i";
 import { ControlLogicalImmI } from "./types/control/logical_imm_i";
 import { ControlMake } from "./types/control/make";
 import { ControlMakeI } from "./types/control/make_i";
+import { ControlMarkerI } from "./types/control/marker_i";
 import { ControlMember } from "./types/control/member";
 import { ControlMemberAddress } from "./types/control/member_address";
 import { ControlMemberAddressI } from "./types/control/member_address_i";
@@ -186,6 +187,7 @@ import {
     TAGSTRING_CONTROL_slice_address,
     TAGSTRING_CONTROL_slice_address_i,
     TAGSTRING_USER_type_wait_group,
+    TAGSTRING_CONTROL_marker_i,
 } from "./types/tags";
 import { UserType } from "./types/user/type";
 import { UserTypeArray } from "./types/user/type/array";
@@ -1177,6 +1179,14 @@ class Heap {
     }
 
     /**
+     * CONTROL_marker_i
+     * Fields    : none
+     */
+    public allocate_CONTROL_marker_i(): number {
+        return ControlMarkerI.allocate(this);
+    }
+
+    /**
      * ENVIRONMENT_frame
      * Fields    : number of children
      * Children  :
@@ -1488,6 +1498,8 @@ class Heap {
                 return this.allocate_CONTROL_slice_address_i();
             case TAGSTRING_CONTROL_push_i:
                 return this.allocate_CONTROL_push_i(obj);
+            case TAGSTRING_CONTROL_marker_i:
+                return this.allocate_CONTROL_marker_i();
             case TAGSTRING_ENVIRONMENT_frame:
                 return this.allocate_ENVIRONMENT_frame(obj);
             case TAGSTRING_USER_type_array:

@@ -120,6 +120,7 @@ function lookup_microcode_sequential(tag: number): Function {
       return array.evaluate_slice_address;
     case tags.TAG_CONTROL_slice_address_i:
       return array.evaluate_slice_address_i;
+    case tags.TAG_CONTROL_marker_i:
     case tags.TAG_PRIMITIVE_nil:
       return (...args: any[]) => {};
     default:

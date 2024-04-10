@@ -6,8 +6,9 @@ import { ControlFor } from '../../heap/types/control/for';
 import { PrimitiveBool } from '../../heap/types/primitive/bool';
 import { auto_cast } from '../../heap/types/auto_cast';
 import { ControlForI } from '../../heap/types/control/for_i';
-import { TAG_COMPLEX_string, TAG_CONTROL_exit_scope_i, TAG_CONTROL_for_i, TAG_CONTROL_var } from '../../heap/types/tags';
+import { TAG_COMPLEX_string, TAG_CONTROL_exit_scope_i, TAG_CONTROL_for_i, TAG_CONTROL_marker_i, TAG_CONTROL_var } from '../../heap/types/tags';
 import { ControlVar } from '../../heap/types/control/var';
+import { ComplexString } from '../../heap/types/complex/string';
 
 function evaluate_for(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
     const cmd_object = new ControlFor(heap, cmd);
@@ -67,9 +68,21 @@ function evaluate_for_i(cmd: number, heap: Heap, C: ContextControl, S: ContextSt
             E.push_frame();
             E.get_frame().insert_new_variable(loopVar.address);
             E.get_frame().get_variable_address(loopVar.address).set_value(value);
+            const assign_i_cmd = heap.allocate_any({ tag: "assign_i" });
+            C.push(assign_i_cmd);
+            heap.free_object(assign_i_cmd);
+            const name_address_cmd = heap.allocate_any({ tag: "name-address", name: (loopVar as ComplexString).get_string() });
+            C.push(name_address_cmd);
+            heap.free_object(name_address_cmd);
             const exit_scope_cmd = heap.allocate_any({ tag: "exit-scope_i" });
             C.push(exit_scope_cmd);
             heap.free_object(exit_scope_cmd);
+            const name_cmd = heap.allocate_any({ tag: "name", name: (loopVar as ComplexString).get_string() });
+            C.push(name_cmd);
+            heap.free_object(name_cmd);
+            const marker_cmd = heap.allocate_any({ tag: "marker_i" });
+            C.push(marker_cmd);
+            heap.free_object(marker_cmd);
         }
 
         C.push(body.address);
@@ -96,11 +109,8 @@ function evaluate_break(cmd: number, heap: Heap, C: ContextControl, S: ContextSt
 function evaluate_continue(cmd: number, heap: Heap, C: ContextControl, S: ContextStash, E: ContextEnv): void {
     const cmd_object = new ControlForI(heap, cmd);
     const top_cmd = auto_cast(heap, C.pop());
-    if (top_cmd.get_tag() === TAG_CONTROL_for_i) {
-        const for_i_cmd = top_cmd as ControlForI;
-        C.push(for_i_cmd.address);
-        C.push(for_i_cmd.get_condition_address().address);
-        C.push(for_i_cmd.get_update_address().address);
+    if (top_cmd.get_tag() === TAG_CONTROL_marker_i) {
+        // Do nothing to finish the continuing
     } else {
         if (top_cmd.get_tag() === TAG_CONTROL_exit_scope_i) {
             E.pop_frame();

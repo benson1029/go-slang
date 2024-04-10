@@ -32,6 +32,7 @@ export const TAG_CONTROL_chan_send_i = 0x8009; // 1000 0000 0000 1001
 export const TAG_CONTROL_chan_receive_i = 0x800A; // 1000 0000 0000 1010
 export const TAG_CONTROL_slice_i = 0x800B; // 1000 0000 0000 1011
 export const TAG_CONTROL_slice_address_i = 0x800C; // 1000 0000 0000 1100
+export const TAG_CONTROL_marker_i = 0x800D; // 1000 0000 0000 1101
 
 
 export const TAG_CONTROL_name = 0xC001; // 1100 0000 0000 0001
@@ -197,6 +198,7 @@ export const TAGSTRING_CONTROL_member_address_i = "member_address_i";
 export const TAGSTRING_CONTROL_push_i = "push_i";
 export const TAGSTRING_CONTROL_slice_i = "slice_i";
 export const TAGSTRING_CONTROL_slice_address_i = "slice_address_i";
+export const TAGSTRING_CONTROL_marker_i = "marker_i";
 
 
 export const TAGSTRING_USER_type_bool = "bool-type";
