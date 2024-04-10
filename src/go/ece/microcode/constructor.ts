@@ -208,6 +208,20 @@ function evaluate_constructor_i(cmd: number, heap: Heap, C: ContextControl, S: C
             heap.free_object(slice);
             break;
         }
+        case TAG_USER_type_struct_decl: {
+            const struct_decl = type as UserTypeStructDecl;
+            const struct = E.get_struct_frame().get_variable_address(struct_decl.get_name().address).get_value() as UserTypeStruct;
+            const struct_val = auto_cast(heap, UserStruct.allocate(heap, struct)) as UserStruct;
+            for (let i = 0; i < constructor_i_cmd.get_number_of_arguments(); i++) {
+                const field = struct.get_member_name(i);
+                const value = auto_cast(heap, S.pop());
+                struct_val.get_frame().get_variable_address(field.address).set_value(value);
+                value.free();
+            }
+            S.push(struct_val.address);
+            struct_val.free();
+            break;
+        }
         default:
             throw new Error("evaluate_constructor_i: Invalid type");
     }

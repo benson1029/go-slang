@@ -51,6 +51,7 @@ class DeclarationObject {
 class StructObject {
   name: string;
   fields: Map<string, Type>;
+  ordered_fields: Array<{ name: string; type: Type }>;
   methods: Map<string, FunctionType | BuiltinType>;
 
   constructor(name: string, fields: Array<{ name: string; type: Type }>) {
@@ -60,6 +61,7 @@ class StructObject {
     for (let field of fields) {
       this.fields.set(field.name, field.type);
     }
+    this.ordered_fields = fields;
   }
 
   addMethod(name: string, type: FunctionType | BuiltinType) {
@@ -839,23 +841,47 @@ const microcode_preprocess: {
     type_check: boolean
   ) => {
     const t = toType(comp.type);
-    for (let arg of comp.args) {
-      const actual_t = preprocess(arg, scope, type_check);
-      if (!type_check) {
-        continue;
-      }
-      if (!t.isArray() && !t.isSlice()) {
-        throw new Error("Constructor on non-array type.");
-      }
-      const expected_t = (t as ArrayType).type;
-      if (!isEqual(actual_t.toObject(), expected_t.toObject())) {
-        throw new Error("Constructor argument type mismatch.");
+    if (!t.isArray() && !t.isSlice() && !t.isStruct()) {
+      throw new Error("Constructor on non-array, non-slice and non-struct type.");
+    }
+    if (t.isArray()) {
+      if (comp.args.length !== (t as ArrayType).len) {
+        throw new Error("Constructor argument length mismatch.");
       }
     }
+    if (t.isStruct()) {
+      const struct = scope.getType(t.tag) as StructObject;
+      if (comp.args.length !== struct.ordered_fields.length) {
+        throw new Error("Constructor argument length mismatch.");
+      }
+    }
+    comp.args.forEach((arg, i) => {
+      const actual_t = preprocess(arg, scope, type_check);
+      if (type_check) {
+        if (t.isArray() || t.isSlice()) {
+          const expected_t = (t as ArrayType).type;
+          if (!isEqual(actual_t.toObject(), expected_t.toObject())) {
+            throw new Error("Constructor argument type mismatch.");
+          }
+        }
+        if (t.isStruct()) {
+          const struct = scope.getType(t.tag) as StructObject;
+          const expected_t = struct.ordered_fields[i].type;
+          if (!isEqual(actual_t.toObject(), expected_t.toObject())) {
+            throw new Error("Constructor argument type mismatch.");
+          }
+        }
+      }
+    })
     if (!type_check) {
       return new NilType();
     }
-    return t;
+    if (t.isArray() || t.isSlice()) {
+      return t;
+    }
+    if (t.isStruct()) {
+      return new StructType(t.tag);
+    }
   },
 
   make: (

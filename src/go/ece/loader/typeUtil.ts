@@ -232,7 +232,7 @@ abstract class Type {
   
     public toObject(): any {
       return {
-        tag: "struct-type",
+        tag: "struct-decl-type",
         name: this.tag,
       };
     }

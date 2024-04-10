@@ -171,4 +171,42 @@ describe("Structs", () => {
         const result = evaluateFunctions(functions);
         expect(result).toBe("2\n");
     })
+
+    it("supports constructor", () => {
+        const functions = `
+        type S struct {
+            x int32
+            y float32
+        }
+
+        func main() {
+            var s = S{1, 2.5}
+            fmt.Println(s.x)
+            fmt.Println(s.y)
+        }
+        `
+        const result = evaluateFunctions(functions);
+        expect(result).toBe("1\n2.5\n");
+    })
+
+    it("supports nested constructor", () => {
+        const functions = `
+        type S struct {
+            x int32
+            y float32
+        }
+
+        type T struct {
+            s S
+        }
+
+        func main() {
+            var t = T{S{1, 2.5}}
+            fmt.Println(t.s.x)
+            fmt.Println(t.s.y)
+        }
+        `
+        const result = evaluateFunctions(functions);
+        expect(result).toBe("1\n2.5\n");
+    })
 })
