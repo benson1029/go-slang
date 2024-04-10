@@ -37,12 +37,21 @@ function CodeEditor() {
 
     const handleRunCode = async (code) => {
         setOutput("Running...");
+        let completed = false;
         worker.onmessage = (e) => {
             const { output, time, snapshots } = e.data;
             setOutput(output + `\n==============\nTime: ${time}ms`);
             setSnapshots(snapshots);
             setSnapshotStep(0);
+            completed = true;
         }
+        setTimeout(() => {
+            if (completed) return;
+            worker.terminate();
+            setOutput("Execution timeout.");
+            setSnapshots([]);
+            setSnapshotStep(0);
+        }, 10000);
         worker.postMessage({ code, heapSize, visualize });
     };
 

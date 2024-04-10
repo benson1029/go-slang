@@ -38,24 +38,13 @@ function parseAndExecute(code: string, heapSize: number, visualize: boolean): { 
 }
 
 /**
- * Runs the given code and returns the result. If the execution takes more than 10 seconds,
- * it will return "Execution timeout".
+ * Runs the given code and returns the result.
  * 
  * @param code The code to run
  * @returns The result of the execution
  */
 export async function run(code: string, heapSize: number, visualize: boolean): Promise<{ output: string; snapshots: any[] }> {
-    const timeoutPromise = new Promise<{ output: string; snapshots: any[] }>((resolve) => {
-        setTimeout(() => resolve({
-            output: "Execution timeout",
-            snapshots: []
-        }), 10000);
-    });
-
-    const executionPromise = new Promise<{ output: string; snapshots: any[] }>((resolve) => {
+    return new Promise<{ output: string; snapshots: any[] }>((resolve) => {
         resolve(parseAndExecute(code, heapSize, visualize));
     });
-
-    const result = await Promise.race([executionPromise, timeoutPromise]);
-    return result;
 }
