@@ -11,6 +11,7 @@ import 'react-tabs/style/react-tabs.css';
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
 import { Stage, Layer, Rect, Text } from 'react-konva';
+import { useSearchParams } from "react-router-dom";
 
 const sampleCode = `package main
 
@@ -34,6 +35,18 @@ function CodeEditor() {
     const [snapshotStep, setSnapshotStep] = useState(0);
     const [autoPlay, setAutoPlay] = useState(false);
     const [tabIndex, setTabIndex] = useState(0);
+
+    const [searchParams, setSearchParams] = useSearchParams();
+    const codeParam = searchParams.get("code");
+
+    if (codeParam) {
+        fetch(process.env.PUBLIC_URL + "/examples/" + codeParam)
+            .then((response) => response.text())
+            .then((data) => {
+                setCode(data);
+            });
+        setSearchParams({});
+    }
 
     const handleRunCode = async (code) => {
         setOutput("Running...");

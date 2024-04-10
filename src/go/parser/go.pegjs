@@ -107,7 +107,7 @@ ___
     = (WhiteSpace / LineTerminator / Comment)*
 
 LineTerminator
-  = "\n"
+  = "\r\n" / "\n"
 
 SingleLineCommentCharacter
     = [^\n]
