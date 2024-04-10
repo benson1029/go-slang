@@ -22,6 +22,13 @@ function HomepageHeader() {
             Language Specification
           </Link>
         </div>
+        <div className={styles.buttons} style={{marginTop: "10px"}}>
+          <Link
+            className="button button--secondary button--lg"
+            to="https://benson1029.github.io/go-slang/">
+            Try it out!
+          </Link>
+        </div>
       </div>
     </header>
   );

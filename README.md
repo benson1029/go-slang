@@ -2,6 +2,8 @@
 
 This CS4215 project is an implementation of a sublanguage of Go, applying the notion of an Explicit-control Evaluator (ECE). It comes with a web-based IDE for users to write and run Go programs. You can try it out [here](https://benson1029.github.io/go-slang/) and the documentation can be found [here](https://benson1029.github.io/go-slang/docs/).
 
+![](https://raw.githubusercontent.com/benson1029/go-slang/main/public/screenshot.png)
+
 ## Available Scripts
 
 In the project directory, you can run:

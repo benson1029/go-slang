@@ -130,7 +130,7 @@ function CodeEditor() {
                         onChange={(e) => setHeapSize(e.target.value)}
                         />
                     <button
-                        onClick={() => window.location.replace('./docs/')}
+                        onClick={() => window.open('/go-slang/docs/', '_blank').focus()}
                         style={{
                             padding: '10px',
                             borderRadius: '5px',
