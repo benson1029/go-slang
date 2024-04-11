@@ -6,7 +6,7 @@ sidebar_position: 1
 
 **Title**: Explicit-control evaluator (ECE) for Go
 
-**Team Members**: Rama Aryasuta Pangestu (student number to be inserted), Yeung Man Tsung (A0255829N)
+**Team Members**: Rama Aryasuta Pangestu (A0236444E), Yeung Man Tsung (A0255829N)
 
 **Repository URL**: [https://github.com/benson1029/go-slang](https://github.com/benson1029/go-slang)
 
@@ -17,10 +17,10 @@ This report can be viewed online on [https://benson1029.github.io/go-slang/docs/
 ## Table of Contents
 
 - [Language Processing Steps](#language-processing-steps)
-- [Objectives](#objectives)
-    - [Language Features](#language-features)
-    - [Specification of One Baseline Objective](#specification-of-one-baseline-objective)
-    - [Met and Unmet Objectives](#met-and-unmet-objectives)
+- [ECE Specification](#ece-specification)
+  - [Instruction Set](#instruction-set)
+  - [State Representation](#state-representation)
+  - [Inference Rules for Some Parts](#inference-rules-for-some-parts)
 - [Project Source](#project-source)
 - [Test Cases](#test-cases)
 
@@ -37,17 +37,127 @@ flowchart LR
     goprogram[Go Program] -- Parser --> ast["Abstract Syntax Tree (AST)"] -- Preprocessor --> preprocessed["Preprocessed AST"] -- Loader --> heap["Heap"] -- ECE Machine --> output["Output"]
 ```
 
-## Objectives
+## ECE Specification
 
-### Language Features
+### Instruction Set
+
+The following tables show the instruction set of the ECE machine.
+
+#### Helper Instructions
+
+| Instruction | Description | Parameters | Stash |
+| --- | --- | --- | --- |
+| `PUSH_I` | Pushes a value into the stash | `value` (value) | None |
+| `POP_I` | Pops a value from the stash | None | `value` (value) |
+
+#### Expressions
+
+| Instruction | Description | Parameters | Stash |
+| --- | --- | --- | --- |
+| `BINARY` | Performs a binary operation (includes logical operations) | `operator` (string), `left_operand` (rvalue expression), `right_operand` (rvalue expression) | None |
+| `BINARY_I` | Performs a binary operation | `operator` (string) | None | `left_operand` (value), `right_operand` (value) |
+| `LOGICAL_IMM_I` | Performs a logical operation with only the left operand in the stash | `operator` (string), `right_operand` (rvalue expression) | `left_operand` (value) |
+| `LOGICAL_I` | Performs a logical operation with only the right operand in the stash | `operator` (string) | `right_operand` (value) |
+| `UNARY` | Performs a unary operation | `operator` (string), `operand` (rvalue expression) | None |
+| `UNARY_I` | Performs a unary operation | `operator` (string) | None | `operand` (value) |
+| `LITERAL` | Pushes a literal value into the stash | `type` (string), `value` (value) | None |
+
+#### Variables
+
+| Instruction | Description | Parameters | Stash |
+| --- | --- | --- | --- |
+| `ASSIGN` | Assigns a value to a variable | `name` (lvalue expression), `value` (rvalue expression) | None |
+| `ASSIGN_I` | Assigns a value to a variable | None | `name` (address), `value` (value) |
+| `VAR` | Declares a variable with an initial value | `name` (string), `value` (rvalue expression) | None |
+| `VAR_I` | Declares a variable with an initial value | `name` (string) | `value` (value) |
+| `NAME` | Accesses the value of a variable | `name` (string) | None |
+| `NAME_ADDRESS` | Accesses the address of a variable | `name` (string) | None |
+
+#### Control Flow
+
+| Instruction | Description | Parameters | Stash |
+| --- | --- | --- | --- |
+| `SEQUENCE` | Executes a sequence of instructions | `body` (linked list of instructions) | None |
+| `BLOCK` | Starts a scope, i.e. pushes a new environment frame | `body` (sequence) | None |
+| `EXIT_SCOPE_I` | Exits the current scope, i.e. pops the environment frame | None | None |
+| `IF` | Conditional statement | `condition` (rvalue expression), `then_body` (block), `else_body` (block) | None |
+| `IF_I` | Conditional statement | `then_body` (block), `else_body` (block) | `condition` (boolean) |
+| `FOR` | Iterative statement | `init` (statement), `condition` (rvalue expression), `update` (statement), `body` (block) | None |
+| `FOR_I` | Iterative statement | `condition` (rvalue expression), `update` (statement), `body` (block) | `condition` (boolean) |
+| `MARKER_I` | Marker to signify the end of the loop body | None | None |
+| `BREAK` | Breaks out of the loop | None | None |
+| `CONTINUE` | Continues to the next iteration of the loop | None | None |
+
+#### Functions
+
+| Instruction | Description | Parameters | Stash |
+| --- | --- | --- | --- |
+| `FUNCTION` | Declares a function | `name` (string), `param_names` (array of strings), `capture_names` (array of strings), `body` (block) | None |
+| `CALL` | Calls a function | `function` (rvalue expression), `args` (array of rvalue expressions) | None |
+| `CALL_I` | Calls a function | `num_args` (int) | `function` (value), `args` (array of values) |
+| `CALL_STMT` | Calls a function and discards the return value | `body` (a `CALL` instruction) | None |
+| `RETURN` | Returns a value from a function | `value` (rvalue expression) | None |
+| `RETURN_I` | Returns a value from a function | None | `value` (value) |
+| `RESTORE_ENV_I` | Restores the environment frame before the function call | `frame` (environment frame) | None |
+
+#### Constructors
+
+| Instruction | Description | Parameters | Stash |
+| --- | --- | --- | --- |
+| `DEFAULT_MAKE` | Pushes the default value of a type into the stash | `type` (string), `args` (array of any) | None |
+| `MAKE` | Constructs a value of a type according to the `make` function call | `type` (string), `args` (array of rvalue expressions) | None |
+| `MAKE_I` | Constructs a value of a type according to the `make` function call | `type` (string), `num_args` (int) | `args` (array of values) |
+| `CONSTRUCTOR` | Constructs a value of a type according to the initializer list `{...}` | `type` (string), `args` (array of rvalue expressions) | None |
+| `CONSTRUCTOR_I` | Constructs a value of a type according to the initializer list `{...}` | `type` (string), `num_args` (int) | `args` (array of values) |
+
+
+#### Arrays
+
+| Instruction | Description | Parameters | Stash |
+| --- | --- | --- | --- |
+| `INDEX` | Accesses the value of an array element | `array` (rvalue expression), `index` (rvalue expression) | None |
+| `INDEX_I` | Accesses the value of an array element | None | `array` (value), `index` (value) |
+| `INDEX_ADDRESS` | Accesses the address of an array element | `array` (rvalue expression), `index` (rvalue expression) | None |
+| `INDEX_ADDRESS_I` | Accesses the address of an array element | None | `array` (address), `index` (value) |
+
+#### Structs
+
+| Instruction | Description | Parameters | Stash |
+| --- | --- | --- | --- |
+| `STRUCT` | Declares a struct | `name` (string), `fields` (array of names and types) | None |
+| `METHOD` | Declares a method for a struct | `struct_name` (string, name of the struct), `name` (string), `self_name` (string), `param_names` (array of strings), `capture_names` (array of strings), `body` (block) | None |
+| `MEMBER` | Accesses the value of a struct member | `object` (rvalue expression), `member` (string) | None |
+| `MEMBER_I` | Accesses the value of a struct member | None | `object` (value), `member` (string) |
+| `MEMBER_ADDRESS` | Accesses the address of a struct member | `object` (rvalue expression), `member` (string) | None |
+| `MEMBER_ADDRESS_I` | Accesses the address of a struct member | None | `object` (address), `member` (string) |
+| `METHOD_MEMBER` | Accesses the value of a method member, and pushes the current object into the stash (for the method call to use) | `object` (rvalue expression), `member` (string) , `struct` (string, name of the struct, annotated during type checking) | None |
+
+#### Slices
+
+| Instruction | Description | Parameters | Stash |
+| --- | --- | --- | --- |
+| `SLICE` | Slices an array | `array` (rvalue expression), `start` (rvalue expression), `end` (rvalue expression) | None |
+| `SLICE_I` | Slices an array | None | `array` (value), `start` (value), `end` (value) |
+| `SLICE_ADDRESS` | Slices an array | `array` (rvalue expression), `start` (rvalue expression), `end` (rvalue expression) | None |
+| `SLICE_ADDRESS_I` | Slices an array | None | `array` (address), `start` (value), `end` (value) |
+
+### Goroutines and Channels
+
+| Instruction | Description | Parameters | Stash |
+| --- | --- | --- | --- |
+| `GO_CALL_STMT` | Calls a function in a new goroutine | `body` (a `CALL` instruction) | None |
+| `CHAN_RECEIVE` | Receives a value from a channel | `channel` (lvalue expression) | None |
+| `CHAN_RECEIVE_I` | Receives a value from a channel | None | `channel` (address) |
+| `CHAN_RECEIVE_STMT` | Receives a value from a channel and discards it | `body` (a `CHAN_RECEIVE` instruction) | None |
+| `CHAN_SEND` | Sends a value to a channel | `channel` (lvalue expression), `value` (rvalue expression) | None |
+| `CHAN_SEND_I` | Sends a value to a channel | None | `channel` (address), `value` (value) |
+
+
+### State Representation
 
 TODO
 
-### Specification of One Baseline Objective
-
-TODO
-
-### Met and Unmet Objectives
+### Inference Rules for Some Parts
 
 TODO
 
