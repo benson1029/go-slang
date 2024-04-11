@@ -89,10 +89,11 @@ export const TAG_CONTROL_make_i = 0xC038; // 1100 0000 0011 1000
 export const TAG_CONTROL_slice = 0xC039; // 1100 0000 0011 1001
 export const TAG_CONTROL_slice_address = 0xC03A; // 1100 0000 0011 1010
 
-
 export const TAG_CONTROL_select_i = 0xC03B; // 1100 0000 0011 1011
-export const TAG_CONTROL_select_case_i = 0xC03C; // 1100 0000 0011 1100
-export const TAG_CONTROL_select_default_i = 0xC03D; // 1100 0000 0011 1101
+export const TAG_CONTROL_select = 0xC03E; // 1100 0000 0011 1110
+export const TAG_CONTROL_case_default = 0xC03F; // 1100 0000 0011 1111
+export const TAG_CONTROL_case_send = 0xC040; // 1100 0000 0100 0000
+export const TAG_CONTROL_case_receive = 0xC041; // 1100 0000 0100 0001
 
 export const TAG_ENVIRONMENT_entry = 0xC100; // 1100 0001 0000 0000
 export const TAG_ENVIRONMENT_frame = 0xC101; // 1100 0001 0000 0001
@@ -200,6 +201,10 @@ export const TAGSTRING_CONTROL_slice_i = "slice_i";
 export const TAGSTRING_CONTROL_slice_address_i = "slice_address_i";
 export const TAGSTRING_CONTROL_marker_i = "marker_i";
 
+export const TAGSTRING_CONTROL_select = "select";
+export const TAGSTRING_CONTROL_case_default = "case-default";
+export const TAGSTRING_CONTROL_case_send = "case-send";
+export const TAGSTRING_CONTROL_case_receive = "case-receive";
 
 export const TAGSTRING_USER_type_bool = "bool-type";
 export const TAGSTRING_USER_type_int32 = "int32-type";

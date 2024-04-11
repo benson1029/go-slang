@@ -25,6 +25,9 @@ import { ControlBreak } from "./control/break";
 import { ControlCall } from "./control/call";
 import { ControlCallI } from "./control/call_i";
 import { ControlCallStmt } from "./control/call_stmt";
+import { ControlCaseDefault } from "./control/case_default";
+import { ControlCaseReceive } from "./control/case_receive";
+import { ControlCaseSend } from "./control/case_send";
 import { ControlChanReceive } from "./control/chan_receive";
 import { ControlChanReceiveI } from "./control/chan_receive_i";
 import { ControlChanReceiveStmt } from "./control/chan_receive_stmt";
@@ -63,6 +66,8 @@ import { ControlPushI } from "./control/push_i";
 import { ControlRestoreEnvI } from "./control/restore_env_i";
 import { ControlReturn } from "./control/return";
 import { ControlReturnI } from "./control/return_i";
+import { ControlSelect } from "./control/select";
+import { ControlSelectI } from "./control/select_i";
 import { ControlSequence } from "./control/sequence";
 import { ControlSlice } from "./control/slice";
 import { ControlSliceAddress } from "./control/slice_address";
@@ -185,6 +190,11 @@ import {
   TAG_COMPLEX_wait_group,
   TAG_USER_type_wait_group,
   TAG_CONTROL_marker_i,
+  TAG_CONTROL_select,
+  TAG_CONTROL_case_default,
+  TAG_CONTROL_case_send,
+  TAG_CONTROL_case_receive,
+  TAG_CONTROL_select_i,
 } from "./tags"
 import { UserChannel } from "./user/channel";
 import { UserSlice } from "./user/slice";
@@ -356,6 +366,16 @@ function auto_cast(heap: Heap, address: number): HeapObject {
       return new ControlSliceAddressI(heap, address);
     case TAG_CONTROL_marker_i:
       return new ControlMarkerI(heap, address);
+    case TAG_CONTROL_select_i:
+      return new ControlSelectI(heap, address);
+    case TAG_CONTROL_select:
+      return new ControlSelect(heap, address);
+    case TAG_CONTROL_case_default:
+      return new ControlCaseDefault(heap, address);
+    case TAG_CONTROL_case_send:
+      return new ControlCaseSend(heap, address);
+    case TAG_CONTROL_case_receive:
+      return new ControlCaseReceive(heap, address);
     case TAG_ENVIRONMENT_entry:
       return new EnvironmentEntry(heap, address);
     case TAG_ENVIRONMENT_frame:

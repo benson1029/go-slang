@@ -11,6 +11,7 @@ import * as control_var from "./var";
 import * as tags from "../../heap/types/tags";
 import * as concurrent_go from "./concurrent/go";
 import * as concurrent_channel from "./concurrent/channel";
+import * as concurrent_select from "./concurrent/select";
 import { Heap } from "../../heap";
 import { ContextThread } from "../../heap/types/context/thread";
 import { ContextScheduler } from "../../heap/types/context/scheduler";
@@ -144,6 +145,10 @@ function lookup_microcode(tag: number): Function {
       return concurrent_channel.evaluate_chan_receive_stmt;
     case tags.TAG_CONTROL_chan_receive_i:
       return concurrent_channel.evaluate_chan_receive_i;
+    case tags.TAG_CONTROL_select:
+      return concurrent_select.evaluate_select;
+    case tags.TAG_CONTROL_select_i:
+      return concurrent_select.evaluate_select_i;
     default:
       return (
         cmd: number,

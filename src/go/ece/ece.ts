@@ -54,6 +54,10 @@ class ECE {
   }
 
   public evaluate(check_all_free: boolean = false): { output: string; snapshots: any[] } {
+    // return {
+    //   output: JSON.stringify(this.program, null, 2),
+    //   snapshots: this.snapshots,
+    // };
     // return JSON.stringify(this.program, null, 2);
     const scheduler = new ContextScheduler(
       this.heap,

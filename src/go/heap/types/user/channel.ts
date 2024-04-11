@@ -121,6 +121,7 @@ class UserChannel extends HeapObject {
       this.waitingRecv().length() > 0
     ) {
       this.buffer().enqueue(value);
+      thread.stash().push(PrimitiveNil.allocate());
 
       if (this.waitingRecv().length() > 0) {
         const waiting = this.waitingRecv().dequeue() as ContextWaitingInstance;
@@ -131,7 +132,12 @@ class UserChannel extends HeapObject {
         }
 
         const new_value = this.buffer().dequeue(); // Guaranteed to be non-empty
+
         waiting.get_waker().get_thread().stash().push(new_value.address);
+        if (!waiting.get_assign().is_nil()) {
+          const variable = waiting.get_assign() as UserVariable;
+          variable.set_value(new_value);
+        }
 
         if (!waiting.get_body().is_nil()) {
           // For select case, push the case body to the thread's control stack
@@ -185,16 +191,10 @@ class UserChannel extends HeapObject {
     }
   }
 
-  /**
-   * Note: the received value is stored in the thread's stash, if successful.
-   *
-   * @param thread
-   * @param scheduler
-   * @returns
-   */
   public try_recv(
     thread: ContextThread,
-    scheduler: ContextScheduler
+    scheduler: ContextScheduler,
+    assign: UserVariable
   ): { success: boolean; waitingQueue: ComplexQueue } {
     if (this.get_tag() !== TAG_USER_channel) {
       throw new Error("UserChannel.get_buffer_size: invalid object tag");
@@ -209,6 +209,7 @@ class UserChannel extends HeapObject {
 
       const new_value = waiting.get_value();
       this.buffer().enqueue(new_value);
+      waiting.get_waker().get_thread().stash().push(PrimitiveNil.allocate());
 
       if (!waiting.get_body().is_nil()) {
         // For select case, push the case body to the thread's control stack
@@ -227,12 +228,18 @@ class UserChannel extends HeapObject {
     if (this.buffer().length() > 0) {
       const value = this.buffer().dequeue();
       thread.stash().push(value.address);
+      if (!assign.is_nil()) {
+        assign.set_value(value);
+      }
       value.free();
       return { success: true, waitingQueue: null };
     } else {
       if (this.isClosed()) {
         const zero = this.zero();
         thread.stash().push(zero.address);
+        if (!assign.is_nil()) {
+          assign.set_value(zero);
+        }
         zero.free();
         return { success: true, waitingQueue: null };
       }
@@ -243,12 +250,13 @@ class UserChannel extends HeapObject {
   public recv(
     thread: ContextThread,
     scheduler: ContextScheduler,
+    assign: UserVariable,
     body: HeapObject
   ): void {
     if (this.get_tag() !== TAG_USER_channel) {
       throw new Error("UserChannel.get_buffer_size: invalid object tag");
     }
-    const result = this.try_recv(thread, scheduler);
+    const result = this.try_recv(thread, scheduler, assign);
     if (result.success) {
       scheduler.enqueue(thread);
     } else {
@@ -258,6 +266,7 @@ class UserChannel extends HeapObject {
         ContextWaitingInstance.allocate(this.heap, waker)
       );
 
+      waiting_instance.set_assign(assign);
       waiting_instance.set_body(body);
       result.waitingQueue.enqueue(waiting_instance);
 

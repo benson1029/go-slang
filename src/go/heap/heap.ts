@@ -50,6 +50,9 @@ import { ControlBreak } from "./types/control/break";
 import { ControlCall } from "./types/control/call";
 import { ControlCallI } from "./types/control/call_i";
 import { ControlCallStmt } from "./types/control/call_stmt";
+import { ControlCaseDefault } from "./types/control/case_default";
+import { ControlCaseReceive } from "./types/control/case_receive";
+import { ControlCaseSend } from "./types/control/case_send";
 import { ControlChanReceive } from "./types/control/chan_receive";
 import { ControlChanReceiveStmt } from "./types/control/chan_receive_stmt";
 import { ControlChanSend } from "./types/control/chan_send";
@@ -87,6 +90,7 @@ import { ControlPushI } from "./types/control/push_i";
 import { ControlRestoreEnvI } from "./types/control/restore_env_i";
 import { ControlReturn } from "./types/control/return";
 import { ControlReturnI } from "./types/control/return_i";
+import { ControlSelect } from "./types/control/select";
 import { ControlSequence } from "./types/control/sequence";
 import { ControlSlice } from "./types/control/slice";
 import { ControlSliceAddress } from "./types/control/slice_address";
@@ -188,6 +192,10 @@ import {
     TAGSTRING_CONTROL_slice_address_i,
     TAGSTRING_USER_type_wait_group,
     TAGSTRING_CONTROL_marker_i,
+    TAGSTRING_CONTROL_select,
+    TAGSTRING_CONTROL_case_send,
+    TAGSTRING_CONTROL_case_receive,
+    TAGSTRING_CONTROL_case_default,
 } from "./types/tags";
 import { UserType } from "./types/user/type";
 import { UserTypeArray } from "./types/user/type/array";
@@ -1187,6 +1195,50 @@ class Heap {
     }
 
     /**
+     * CONTROL_select
+     * Fields    : number of children
+     * Children  :
+     * - 4 bytes * num_cases: addresses of ControlCase objects
+     */
+    public allocate_CONTROL_select(obj: { tag: string, body: any[] }): number {
+        return ControlSelect.allocate(this, obj.body);
+    }
+
+    /**
+     * CONTROL_case_default
+     * Fields    : number of children
+     * Children  :
+     * - address of body
+     */
+    public allocate_CONTROL_case_default(obj: { tag: string, body: any }): number {
+        return ControlCaseDefault.allocate(this, obj.body);
+    }
+
+    /**
+     * CONTROL_case_receive
+     * Fields    : number of children
+     * Children  :
+     * - address of body
+     * - address of channel (CONTROL_name_address)
+     * - address of assign expression (CONTROL_name_address)
+     */
+    public allocate_CONTROL_case_receive(obj: { tag: string, body: any, channel: any, assign: any }): number {
+        return ControlCaseReceive.allocate(this, obj.body, obj.channel, obj.assign);
+    }
+
+    /**
+     * CONTROL_case_send
+     * Fields    : number of children
+     * Children  :
+     * - address of body
+     * - address of channel (CONTROL_name_address)
+     * - address of value expression
+     */
+    public allocate_CONTROL_case_send(obj: { tag: string, body: any, channel: any, value: any }): number {
+        return ControlCaseSend.allocate(this, obj.body, obj.channel, obj.value);
+    }
+
+    /**
      * ENVIRONMENT_frame
      * Fields    : number of children
      * Children  :
@@ -1500,6 +1552,14 @@ class Heap {
                 return this.allocate_CONTROL_push_i(obj);
             case TAGSTRING_CONTROL_marker_i:
                 return this.allocate_CONTROL_marker_i();
+            case TAGSTRING_CONTROL_select:
+                return this.allocate_CONTROL_select(obj);
+            case TAGSTRING_CONTROL_case_default:
+                return this.allocate_CONTROL_case_default(obj);
+            case TAGSTRING_CONTROL_case_receive:
+                return this.allocate_CONTROL_case_receive(obj);
+            case TAGSTRING_CONTROL_case_send:
+                return this.allocate_CONTROL_case_send(obj);
             case TAGSTRING_ENVIRONMENT_frame:
                 return this.allocate_ENVIRONMENT_frame(obj);
             case TAGSTRING_USER_type_array:

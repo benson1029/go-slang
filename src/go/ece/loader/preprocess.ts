@@ -13,7 +13,7 @@ import {
   StructType,
   Type,
   isEqual,
-  toType
+  toType,
 } from "./typeUtil";
 
 class VariableObject {
@@ -279,13 +279,19 @@ const microcode_preprocess: {
       return method;
     }
     if (scope.current_declaration != null) {
-      scope.current_declaration.captures.push({ name: "METHOD." + obj_t.name + "." + comp.member, type: method });
+      scope.current_declaration.captures.push({
+        name: "METHOD." + obj_t.name + "." + comp.member,
+        type: method,
+      });
     }
     for (let i = scope.function_declaration_stack.length - 1; i >= 0; i--) {
       let f = scope.function_declaration_stack[i];
-      f.comp.captures.push({ name: "METHOD." + obj_t.name + "." + comp.member, type: method });
+      f.comp.captures.push({
+        name: "METHOD." + obj_t.name + "." + comp.member,
+        type: method,
+      });
     }
-    return method
+    return method;
   },
 
   "name-address": (
@@ -502,7 +508,7 @@ const microcode_preprocess: {
         if (left.isString() && right.isString()) {
           return new StringType();
         }
-        // eslint-disable-next-line no-fallthrough
+      // eslint-disable-next-line no-fallthrough
       case "-":
       case "*":
       case "/":
@@ -842,7 +848,9 @@ const microcode_preprocess: {
   ) => {
     const t = toType(comp.type);
     if (!t.isArray() && !t.isSlice() && !t.isStruct()) {
-      throw new Error("Constructor on non-array, non-slice and non-struct type.");
+      throw new Error(
+        "Constructor on non-array, non-slice and non-struct type."
+      );
     }
     if (t.isArray()) {
       if (comp.args.length !== (t as ArrayType).len) {
@@ -872,7 +880,7 @@ const microcode_preprocess: {
           }
         }
       }
-    })
+    });
     if (!type_check) {
       return new NilType();
     }
@@ -953,7 +961,7 @@ const microcode_preprocess: {
   ) => {
     return preprocess(comp.body, scope, type_check);
   },
-  
+
   select: (
     comp: {
       tag: string;
@@ -962,36 +970,108 @@ const microcode_preprocess: {
     scope: Scope,
     type_check: boolean
   ) => {
+    let num_default = 0;
     for (let exp of comp.body) {
       preprocess(exp, scope, type_check);
+      switch (exp.tag) {
+        case "case-default":
+          num_default++;
+          break;
+        case "case-receive":
+          break;
+        case "case-send":
+          break;
+        default:
+          throw new Error(`Invalid tag ${exp.tag} in select case.`);
+      }
+    }
+    if (num_default > 1) {
+      throw new Error("Multiple default cases in select statement.");
     }
     return new NilType();
   },
 
-  "select-case": (
+  "case-default": (
     comp: {
       tag: string;
-      case: any;
       body: any;
     },
     scope: Scope,
     type_check: boolean
   ) => {
-    preprocess(comp.case, scope, type_check);
-    preprocess(comp.body, scope, type_check);
-    return new NilType();
+    if (comp.body.tag !== "block") {
+      comp.body = {
+        tag: "block",
+        body: comp.body,
+      };
+    }
+    return preprocess(comp.body, scope, type_check);
   },
 
-  "select-default": (
+  "case-receive": (
     comp: {
       tag: string;
+      channel: any;
+      assign: any;
       body: any;
     },
     scope: Scope,
     type_check: boolean
   ) => {
-    preprocess(comp.body, scope, type_check);
-    return new NilType();
+    if (comp.body.tag !== "block") {
+      comp.body = {
+        tag: "block",
+        body: comp.body,
+      };
+    }
+    const channel_t = preprocess(comp.channel, scope, type_check);
+    const assign_t = preprocess(comp.assign, scope, type_check);
+    if (type_check) {
+      if (!channel_t.isChannel()) {
+        throw new Error("Channel receive on non-channel type.");
+      }
+      if (
+        !assign_t.isNil() &&
+        !isEqual(
+          (channel_t as ChannelType).type.toObject(),
+          assign_t.toObject()
+        )
+      ) {
+        throw new Error("Channel receive type mismatch.");
+      }
+    }
+    return preprocess(comp.body, scope, type_check);
+  },
+
+  "case-send": (
+    comp: {
+      tag: string;
+      channel: any;
+      value: any;
+      body: any;
+    },
+    scope: Scope,
+    type_check: boolean
+  ) => {
+    if (comp.body.tag !== "block") {
+      comp.body = {
+        tag: "block",
+        body: comp.body,
+      };
+    }
+    const channel_t = preprocess(comp.channel, scope, type_check);
+    const value_t = preprocess(comp.value, scope, type_check);
+    if (type_check) {
+      if (!channel_t.isChannel()) {
+        throw new Error("Channel send on non-channel type.");
+      }
+      if (
+        !isEqual((channel_t as ChannelType).type.toObject(), value_t.toObject())
+      ) {
+        throw new Error("Channel send type mismatch.");
+      }
+    }
+    return preprocess(comp.body, scope, type_check);
   },
 
   program: (
@@ -1018,12 +1098,21 @@ const microcode_preprocess: {
             type_check
           );
         } else if (exp.tag === "struct") {
-          scope.addStruct(exp.name.name, exp.fields.map((f : any) => {
-            return { name: f.name, type: toType(f.type) };
-          }))
+          scope.addStruct(
+            exp.name.name,
+            exp.fields.map((f: any) => {
+              return { name: f.name, type: toType(f.type) };
+            })
+          );
         } else if (exp.tag === "struct-method") {
           const struct = scope.getType(exp.struct.name) as StructObject;
-          struct.addMethod(exp.name, new FunctionType(exp.params.map((p: any) => toType(p.type)), toType(exp.returnType)));
+          struct.addMethod(
+            exp.name,
+            new FunctionType(
+              exp.params.map((p: any) => toType(p.type)),
+              toType(exp.returnType)
+            )
+          );
         } else {
           throw new Error(`Invalid tag ${exp.tag} in global namespace.`);
         }
@@ -1085,12 +1174,21 @@ const microcode_preprocess: {
             type_check
           );
         } else if (exp.tag === "struct") {
-          scope.addStruct(exp.name.name, exp.fields.map((f : any) => {
-            return { name: f.name, type: toType(f.type) };
-          }))
+          scope.addStruct(
+            exp.name.name,
+            exp.fields.map((f: any) => {
+              return { name: f.name, type: toType(f.type) };
+            })
+          );
         } else if (exp.tag === "struct-method") {
           const struct = scope.getType(exp.struct.name) as StructObject;
-          struct.addMethod(exp.name, new FunctionType(exp.params.map((p: any) => toType(p.type)), toType(exp.returnType)));
+          struct.addMethod(
+            exp.name,
+            new FunctionType(
+              exp.params.map((p: any) => toType(p.type)),
+              toType(exp.returnType)
+            )
+          );
         } else {
           throw new Error(`Invalid tag ${exp.tag} in global namespace.`);
         }
@@ -1152,21 +1250,26 @@ function preprocess_program(
   let scope = new Scope();
   for (let imp of imports) {
     if (imp.type === "package") {
-      scope.addStruct("IMPORT." + imp.name, imp.value.map((f: any) => {
-        return { name: f.name, type: new BuiltinType(f.value.name) };
-      }))
+      scope.addStruct(
+        "IMPORT." + imp.name,
+        imp.value.map((f: any) => {
+          return { name: f.name, type: new BuiltinType(f.value.name) };
+        })
+      );
       scope.addVariable(imp.name, new StructType("IMPORT." + imp.name));
     } else if (imp.type === "function") {
       scope.addVariable(imp.name, new BuiltinType(imp.value.name));
     } else if (imp.type === "struct") {
-      scope.addStruct(imp.value.name, imp.value.members
-        .map((f: any) => {
+      scope.addStruct(
+        imp.value.name,
+        imp.value.members.map((f: any) => {
           return { name: f.name, type: toType(f.type) };
-        }))
+        })
+      );
       const struct_obj = scope.getType(imp.value.name) as StructObject;
       imp.value.functions.forEach((f: any) => {
         struct_obj.addMethod(f.name, new BuiltinType(f.value.name));
-      })
+      });
     }
   }
   preprocess(program, scope, type_check);
