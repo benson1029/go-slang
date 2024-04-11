@@ -35,6 +35,7 @@ function CodeEditor() {
     const [snapshotStep, setSnapshotStep] = useState(0);
     const [autoPlay, setAutoPlay] = useState(false);
     const [tabIndex, setTabIndex] = useState(0);
+    const [speed, setSpeed] = useState(5);
 
     const [searchParams, setSearchParams] = useSearchParams();
     const codeParam = searchParams.get("code");
@@ -85,17 +86,17 @@ function CodeEditor() {
                         setTabIndex(newTabIndex);
                     } else {
                         setTabIndex(currentThreadIndex);
-                        setTimeout(() => setTabIndex(newTabIndex), 1000);
+                        setTimeout(() => setTabIndex(newTabIndex), 5000/speed);
                     }
                 } else {
                     setAutoPlay(false);
                 }
             }
-        }, 2000);
+        }, 10000/speed);
         return () => {
             clearInterval(autoPlayTask);
         }
-    }, [autoPlay, snapshotStep, snapshots, tabIndex]);
+    }, [autoPlay, snapshotStep, snapshots, tabIndex, speed]);
 
     return (
         <>
@@ -278,6 +279,23 @@ function CodeEditor() {
                         <span style={{ color: 'white', marginLeft: '10px' }}>
                             {snapshotStep + 1} / {snapshots.length}
                         </span>
+                        <br />
+                        <span style={{ marginLeft: '10px' }}>
+                            Speed:
+                        </span>
+                        <input
+                            type="number"
+                            style={{
+                                marginLeft: '5px',
+                                padding: '5px',
+                                borderRadius: '5px',
+                                width: '100px',
+                                backgroundColor: '#2e3235',
+                                color: 'white',
+                            }}
+                            value={speed}
+                            onChange={(e) => setSpeed(e.target.value)}
+                            />
                         <Tabs selectedIndex={tabIndex} onSelect={(index) => setTabIndex(index)}>
                             <TabList>
                                 {
