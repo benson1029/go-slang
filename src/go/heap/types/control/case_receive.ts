@@ -45,8 +45,20 @@ class ControlCaseReceive extends ControlCase {
     assign: any
   ): number {
     const address = heap.allocate_object(TAG_CONTROL_case_receive, 1, 3);
-    const body_address = heap.allocate_any(body);
+
+    // After case_receive, the received value is pushed to the stash.
+    // We need to add a pop_i command to pop the value from the stash.
+    const pop_i_cmd = heap.allocate_any({ tag: "pop_i" });
+    const body_address = heap.allocate_any({
+      tag: "sequence",
+      body: [
+        pop_i_cmd,
+        body,
+      ]
+    });
     heap.set_child(address, 0, body_address);
+    heap.free_object(pop_i_cmd);
+
     const channel_address = heap.allocate_any(channel);
     heap.set_child(address, 1, channel_address);
     const assign_address = heap.allocate_any(assign);

@@ -21,13 +21,8 @@ function evaluate_chan_send(
   const name = cmd_object.get_name_address();
   const value = cmd_object.get_value_address();
 
-  const pop_i_cmd = heap.allocate_any({ tag: "pop_i" });
   const chan_send_i = ControlChanSendI.allocate(heap);
-
-  thread.control().push(pop_i_cmd);
   thread.control().push(chan_send_i);
-
-  heap.free_object(pop_i_cmd);
   heap.free_object(chan_send_i);
 
   thread.control().push(name.address);

@@ -15,13 +15,8 @@ function evaluate_select(
 ) {
   const cmd_object = auto_cast(heap, cmd) as ControlSelect;
 
-  const pop_i_cmd = heap.allocate_any({ tag: "pop_i" });
   const select_i = ControlSelectI.allocate(heap, cmd_object);
-
-  thread.control().push(pop_i_cmd);
   thread.control().push(select_i);
-
-  heap.free_object(pop_i_cmd);
   heap.free_object(select_i);
 
   for (let i = 0; i < cmd_object.get_number_of_cases(); i++) {

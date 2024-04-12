@@ -121,7 +121,6 @@ class UserChannel extends HeapObject {
       this.waitingRecv().length() > 0
     ) {
       this.buffer().enqueue(value);
-      thread.stash().push(PrimitiveNil.allocate());
 
       if (this.waitingRecv().length() > 0) {
         const waiting = this.waitingRecv().dequeue() as ContextWaitingInstance;
@@ -209,7 +208,6 @@ class UserChannel extends HeapObject {
 
       const new_value = waiting.get_value();
       this.buffer().enqueue(new_value);
-      waiting.get_waker().get_thread().stash().push(PrimitiveNil.allocate());
 
       if (!waiting.get_body().is_nil()) {
         // For select case, push the case body to the thread's control stack

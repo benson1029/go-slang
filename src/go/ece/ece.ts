@@ -54,6 +54,7 @@ class ECE {
   }
 
   public evaluate(check_all_free: boolean = false): { output: string; snapshots: any[] } {
+    // check_all_free = true;
     // return {
     //   output: JSON.stringify(this.program, null, 2),
     //   snapshots: this.snapshots,
