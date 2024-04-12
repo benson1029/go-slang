@@ -391,10 +391,10 @@ PostfixStatement "postfix"
     }
 
 ChannelSendStatement "channel send"
-    = name:VariableAddress __ "<-" ___ exp:Expression { return { tag: "chan-send", name: name, value: exp }; }
+    = name:PostfixExpression __ "<-" ___ exp:Expression { return { tag: "chan-send", name: name, value: exp }; }
 
 ChannelReceiveExpression "channel receive"
-    = "<-" __ name:VariableAddress { return { tag: "chan-receive", name: name }; }
+    = "<-" __ name:PostfixExpression { return { tag: "chan-receive", name: name }; }
 
 ChannelReceiveStatement "channel receive"
     = body:ChannelReceiveExpression { return { tag: "chan-receive-stmt", body: body }; }
@@ -492,10 +492,10 @@ SelectCase
     = "case" WhiteSpace ___ stmt:ChannelSendStatement __ ":" ___ body:StatementList {
         return { tag: "case-send", channel: stmt.name, value: stmt.value, body: body };
     }
-    / "case" WhiteSpace ___ name:VariableAddress __ "=" ___ "<-" __ channel:VariableAddress  __ ":" ___ body:StatementList {
+    / "case" WhiteSpace ___ name:VariableAddress __ "=" ___ "<-" __ channel:PostfixExpression  __ ":" ___ body:StatementList {
         return { tag: "case-receive", channel: channel, assign: name, body: body };
     }
-    / "case" WhiteSpace ___ "<-" __ channel:VariableAddress  __ ":" ___ body:StatementList {
+    / "case" WhiteSpace ___ "<-" __ channel:PostfixExpression  __ ":" ___ body:StatementList {
         return { tag: "case-receive", channel: channel, assign: null, body: body };
     }
     / "default" __ ":" ___ body:StatementList { return { tag: "case-default", body: body }; }

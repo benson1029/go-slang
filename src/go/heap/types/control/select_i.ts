@@ -58,13 +58,13 @@ class ControlSelectI extends HeapObject {
     );
 
     let cases_send: {
-      channel: UserVariable;
+      channel: UserChannel;
       value_address: HeapObject;
       body: HeapObject;
     }[] = [];
 
     let cases_recv: {
-      channel: UserVariable;
+      channel: UserChannel;
       assign_address: UserVariable;
       body: HeapObject;
     }[] = [];
@@ -76,10 +76,10 @@ class ControlSelectI extends HeapObject {
         continue;
       }
 
-      const user_channel_variable_address = thread.stash().pop();
-      const user_channel_variable = new UserVariable(
+      const user_channel_address = thread.stash().pop();
+      const user_channel = new UserChannel(
         this.heap,
-        user_channel_variable_address
+        user_channel_address
       );
       const body = control_case.get_body_address().reference();
 
@@ -87,7 +87,7 @@ class ControlSelectI extends HeapObject {
         const value_address = thread.stash().pop();
         const value = auto_cast(this.heap, value_address);
         cases_send.push({
-          channel: user_channel_variable,
+          channel: user_channel,
           value_address: value,
           body: body,
         });
@@ -100,7 +100,7 @@ class ControlSelectI extends HeapObject {
         }
         const assign = new UserVariable(this.heap, assign_address);
         cases_recv.push({
-          channel: user_channel_variable,
+          channel: user_channel,
           assign_address: assign,
           body: body,
         });
@@ -132,11 +132,10 @@ class ControlSelectI extends HeapObject {
     for (let i = 0; i < num_cases; i++) {
       const ordering = orderings[i];
       if (ordering < cases_send.length) {
-        const variable = cases_send[ordering].channel;
+        const channel = cases_send[ordering].channel;
         const value = cases_send[ordering].value_address;
         const body = cases_send[ordering].body;
 
-        const channel = variable.get_value() as UserChannel;
         const try_send = channel.try_send(thread, scheduler, value);
 
         if (try_send.success) {
@@ -149,12 +148,10 @@ class ControlSelectI extends HeapObject {
         }
       } else {
         const ordering_recv = ordering - cases_send.length;
-        console.log("recv", ordering_recv);
-        const variable = cases_recv[ordering_recv].channel;
+        const channel = cases_recv[ordering_recv].channel;
         const assign = cases_recv[ordering_recv].assign_address;
         const body = cases_recv[ordering_recv].body;
 
-        const channel = variable.get_value() as UserChannel;
         const try_recv = channel.try_recv(thread, scheduler, assign);
 
         if (try_recv.success) {

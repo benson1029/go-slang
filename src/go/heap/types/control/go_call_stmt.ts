@@ -40,7 +40,7 @@ class ControlGoCallStmt extends HeapObject {
     }
 
     public to_object(): any {
-        return this.get_body_address().to_object();
+        return "go " + this.get_body_address().to_object();
     }
 }
 

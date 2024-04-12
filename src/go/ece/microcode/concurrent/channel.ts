@@ -43,15 +43,15 @@ function evaluate_chan_send_i(
   thread: ContextThread,
   scheduler: ContextScheduler
 ) {
-  const name = auto_cast(heap, thread.stash().pop()) as UserVariable;
+  const name = auto_cast(heap, thread.stash().pop()) as UserChannel;
   const value = auto_cast(heap, thread.stash().pop());
 
-  if (name.get_value().is_nil()) {
+  if (name.is_nil()) {
     throw new Error("evaluate_chan_send_i: nil channel");
   }
 
   // Note: send() is responsible for enqueueing the thread.
-  (name.get_value() as UserChannel).send(
+  name.send(
     thread,
     scheduler,
     value,
@@ -103,14 +103,14 @@ function evaluate_chan_receive_i(
   thread: ContextThread,
   scheduler: ContextScheduler
 ) {
-  const name = auto_cast(heap, thread.stash().pop()) as UserVariable;
+  const name = auto_cast(heap, thread.stash().pop()) as UserChannel;
 
-  if (name.get_value().is_nil()) {
+  if (name.is_nil()) {
     throw new Error("evaluate_chan_receive_i: nil channel");
   }
 
   // Note: receive() is responsible for enqueueing the thread.
-  (name.get_value() as UserChannel).recv(
+  (name as UserChannel).recv(
     thread,
     scheduler,
     new UserVariable(heap, PrimitiveNil.allocate()),

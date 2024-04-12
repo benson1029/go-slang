@@ -4382,7 +4382,7 @@ function peg$parse(input, options) {
 
     peg$silentFails++;
     s0 = peg$currPos;
-    s1 = peg$parseVariableAddress();
+    s1 = peg$parsePostfixExpression();
     if (s1 !== peg$FAILED) {
       s2 = peg$parse__();
       if (input.substr(peg$currPos, 2) === peg$c47) {
@@ -4433,7 +4433,7 @@ function peg$parse(input, options) {
     }
     if (s1 !== peg$FAILED) {
       s2 = peg$parse__();
-      s3 = peg$parseVariableAddress();
+      s3 = peg$parsePostfixExpression();
       if (s3 !== peg$FAILED) {
         peg$savedPos = s0;
         s0 = peg$f84(s3);
@@ -6082,7 +6082,7 @@ function peg$parse(input, options) {
               }
               if (s8 !== peg$FAILED) {
                 s9 = peg$parse__();
-                s10 = peg$parseVariableAddress();
+                s10 = peg$parsePostfixExpression();
                 if (s10 !== peg$FAILED) {
                   s11 = peg$parse__();
                   if (input.charCodeAt(peg$currPos) === 58) {
@@ -6152,7 +6152,7 @@ function peg$parse(input, options) {
             }
             if (s4 !== peg$FAILED) {
               s5 = peg$parse__();
-              s6 = peg$parseVariableAddress();
+              s6 = peg$parsePostfixExpression();
               if (s6 !== peg$FAILED) {
                 s7 = peg$parse__();
                 if (input.charCodeAt(peg$currPos) === 58) {
