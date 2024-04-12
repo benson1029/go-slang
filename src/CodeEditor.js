@@ -36,6 +36,7 @@ function CodeEditor() {
     const [autoPlay, setAutoPlay] = useState(false);
     const [tabIndex, setTabIndex] = useState(0);
     const [speed, setSpeed] = useState(5);
+    const [switchThread, setSwitchThread] = useState(true);
 
     const [searchParams, setSearchParams] = useSearchParams();
     const codeParam = searchParams.get("code");
@@ -84,7 +85,7 @@ function CodeEditor() {
                     const newTabIndex = snapshots[snapshotStep + 1].findIndex(thread => thread.current);
                     if (currentThreadIndex == null || currentThreadIndex === -1) {
                         setTabIndex(newTabIndex);
-                    } else {
+                    } else if (switchThread) {
                         setTabIndex(currentThreadIndex);
                         setTimeout(() => setTabIndex(newTabIndex), 5000/speed);
                     }
@@ -96,7 +97,7 @@ function CodeEditor() {
         return () => {
             clearInterval(autoPlayTask);
         }
-    }, [autoPlay, snapshotStep, snapshots, tabIndex, speed]);
+    }, [autoPlay, snapshotStep, snapshots, tabIndex, speed, switchThread]);
 
     return (
         <>
@@ -296,6 +297,13 @@ function CodeEditor() {
                             value={speed}
                             onChange={(e) => setSpeed(e.target.value)}
                             />
+                        <input
+                            type="checkbox"
+                            style={{ marginLeft: '10px' }}
+                            checked={switchThread}
+                            onChange={(e) => setSwitchThread(e.target.checked)}
+                        />
+                        Switch Thread
                         <Tabs selectedIndex={tabIndex} onSelect={(index) => setTabIndex(index)}>
                             <TabList>
                                 {
