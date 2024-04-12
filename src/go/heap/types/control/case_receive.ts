@@ -10,7 +10,7 @@
 import { Heap } from "../../heap";
 import { auto_cast } from "../auto_cast";
 import { HeapObject } from "../objects";
-import { TAG_CONTROL_case_receive } from "../tags";
+import { TAG_CONTROL_case_receive, TAG_PRIMITIVE_nil } from "../tags";
 import { ControlCase } from "./case";
 
 class ControlCaseReceive extends ControlCase {
@@ -52,6 +52,15 @@ class ControlCaseReceive extends ControlCase {
     const assign_address = heap.allocate_any(assign);
     heap.set_child(address, 2, assign_address);
     return address;
+  }
+
+  public to_object(): any {
+    let result = "case ";
+    if (this.get_assign_address().get_tag() !== TAG_PRIMITIVE_nil) {
+      result += this.get_assign_address().to_object() + " = ";
+    }
+    result += "<-" + this.get_channel_address().to_object() + ": " + this.get_body_address().to_object();
+    return result;
   }
 }
 

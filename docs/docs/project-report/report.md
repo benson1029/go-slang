@@ -146,12 +146,16 @@ The following tables show the instruction set of the ECE machine.
 | Instruction | Description | Parameters | Stash |
 | --- | --- | --- | --- |
 | `GO_CALL_STMT` | Calls a function in a new goroutine | `body` (a `CALL` instruction) | None |
-| `CHAN_RECEIVE` | Receives a value from a channel | `channel` (lvalue expression) | None |
+| `CHAN_RECEIVE` | Receives a value from a channel | `channel` (rvalue expression) | None |
 | `CHAN_RECEIVE_I` | Receives a value from a channel | None | `channel` (address) |
 | `CHAN_RECEIVE_STMT` | Receives a value from a channel and discards it | `body` (a `CHAN_RECEIVE` instruction) | None |
-| `CHAN_SEND` | Sends a value to a channel | `channel` (lvalue expression), `value` (rvalue expression) | None |
+| `CHAN_SEND` | Sends a value to a channel | `channel` (rvalue expression), `value` (rvalue expression) | None |
 | `CHAN_SEND_I` | Sends a value to a channel | None | `channel` (address), `value` (value) |
-
+| `SELECT` | Selects a case from a list of cases | `cases` (array of cases) | None |
+| `SELECT_I` | Selects a case from a list of cases, with the expressions already evaluated | `select` (a `SELECT` instruction) | The evaluated expressions for all cases |
+| `CASE_SEND` | A case for sending to a channel | `channel` (rvalue expression), `value` (rvalue expression), `body` (sequence) | None |
+| `CASE_RECEIVE` | A case for receiving from a channel | `channel` (rvalue expression), `assign` (null or lvalue expression), `body` (sequence) | None |
+| `CASE_DEFAULT` | A default case | `body` (sequence) | None |
 
 ### State Representation
 

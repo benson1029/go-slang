@@ -41,6 +41,14 @@ class ControlSelect extends HeapObject {
     }
     return result;
   }
+
+  public to_object(): any {
+    let result = "select { ";
+    for (let i = 0; i < this.get_number_of_cases(); i++) {
+      result += this.get_case(i).to_object() + " ";
+    }
+    return result + "}";
+  }
 }
 
 export { ControlSelect };

@@ -34,6 +34,10 @@ class ControlCaseDefault extends ControlCase {
     heap.set_child(address, 0, body_address);
     return address;
   }
+
+  public to_object(): any {
+    return "default: " + this.get_body_address().to_object();
+  }
 }
 
 export { ControlCaseDefault };

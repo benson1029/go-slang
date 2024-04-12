@@ -215,6 +215,10 @@ class ControlSelectI extends HeapObject {
     heap.set_child(address, 0, select.reference().address);
     return address;
   }
+
+  public to_object(): any {
+    return "SELECT_I " + this.get_select().to_object();
+  }
 }
 
 export { ControlSelectI };

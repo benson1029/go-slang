@@ -53,6 +53,11 @@ class ControlCaseSend extends ControlCase {
     heap.set_child(address, 2, value_address);
     return address;
   }
+
+  public to_object(): any {
+    return "case " + this.get_channel_address().to_object() + " <- " + this.get_value_address().to_object() + ": "
+        + this.get_body_address().to_object();
+  }
 }
 
 export { ControlCaseSend };
