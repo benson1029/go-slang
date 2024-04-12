@@ -32,31 +32,18 @@ class ControlFor extends HeapObject {
     
     public static allocate(heap: Heap, init: any, condition: any, update: any, body: any): number {
         const address = heap.allocate_object(TAG_CONTROL_for, 4, 4);
-        heap.set_cannnot_be_freed(address, true);
 
         const init_address = heap.allocate_any(init);
-        heap.set_cannnot_be_freed(init_address, true);
+        heap.set_child(address, 0, init_address);
 
         const condition_address = heap.allocate_any(condition);
-        heap.set_cannnot_be_freed(condition_address, true);
+        heap.set_child(address, 1, condition_address);
 
         const update_address = heap.allocate_any(update);
-        heap.set_cannnot_be_freed(update_address, true);
-
-        const body_address = heap.allocate_any(body);
-        heap.set_cannnot_be_freed(body_address, true);
-
-        heap.set_child(address, 0, init_address);
-        heap.set_child(address, 1, condition_address);
         heap.set_child(address, 2, update_address);
+        
+        const body_address = heap.allocate_any(body);
         heap.set_child(address, 3, body_address);
-
-        // Unmark cannot-be-free
-        heap.set_cannnot_be_freed(address, false);
-        heap.set_cannnot_be_freed(init_address, false);
-        heap.set_cannnot_be_freed(condition_address, false);
-        heap.set_cannnot_be_freed(update_address, false);
-        heap.set_cannnot_be_freed(body_address, false);
 
         return address;
     }

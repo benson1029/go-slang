@@ -37,8 +37,8 @@ class ContextWaker extends HeapObject {
     }
     const thread = new ContextThread(this.heap, this.get_child(0));
     if (!thread.is_nil()) {
-      this.set_child(0, PrimitiveNil.allocate());
       scheduler.enqueue(thread);
+      this.set_child(0, PrimitiveNil.allocate());
       thread.free();
       return true;
     }

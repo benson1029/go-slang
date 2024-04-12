@@ -58,23 +58,15 @@ class ControlSliceAddress extends HeapObject {
 
   public static allocate(heap: Heap, array: any, start: any, end: any): number {
     const address = heap.allocate_object(TAG_CONTROL_slice_address, 1, 3);
-    heap.set_cannnot_be_freed(address, true);
+
     const array_address = heap.allocate_any(array);
-    heap.set_cannnot_be_freed(array_address, true);
-    const start_address = heap.allocate_any(start);
-    heap.set_cannnot_be_freed(start_address, true);
-    const end_address = heap.allocate_any(end);
-    heap.set_cannnot_be_freed(end_address, true);
-
     heap.set_child(address, 0, array_address);
-    heap.set_child(address, 1, start_address);
-    heap.set_child(address, 2, end_address);
 
-    // Unmark cannot-be-free
-    heap.set_cannnot_be_freed(address, false);
-    heap.set_cannnot_be_freed(array_address, false);
-    heap.set_cannnot_be_freed(start_address, false);
-    heap.set_cannnot_be_freed(end_address, false);
+    const start_address = heap.allocate_any(start);
+    heap.set_child(address, 1, start_address);
+
+    const end_address = heap.allocate_any(end);
+    heap.set_child(address, 2, end_address);
 
     return address;
   }

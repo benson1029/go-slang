@@ -21,16 +21,9 @@ class UserTypeStructDecl extends UserType {
 
   public static allocate(heap: Heap, name: string): number {
     const address = heap.allocate_object(TAG_USER_type_struct_decl, 1, 1);
-    heap.set_cannnot_be_freed(address, true);
 
     const name_address = ComplexString.allocate(heap, name);
-    heap.set_cannnot_be_freed(name_address, true);
-
     heap.set_child(address, 0, name_address);
-
-    // Unmark cannot-be-free
-    heap.set_cannnot_be_freed(address, false);
-    heap.set_cannnot_be_freed(name_address, false);
 
     return address;
   }

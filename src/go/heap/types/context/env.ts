@@ -140,6 +140,7 @@ class ContextEnv extends HeapObject {
       throw new Error("ContextEnv.pop_frame: Invalid tag");
     }
     const env = this.get_frame();
+    this.heap.mark_intermediate(env.address);
     this.set_child(0, env.pop_frame().address);
   }
 

@@ -53,7 +53,6 @@ class UserTypeFunction extends UserType {
       1,
       2 + params.length
     );
-    heap.set_cannnot_be_freed(address, true);
 
     let params_string = []
 
@@ -75,8 +74,6 @@ class UserTypeFunction extends UserType {
     );
     heap.set_child(address, 0, name_address);
 
-    // Unmark cannot-be-free
-    heap.set_cannnot_be_freed(address, false);
     return address;
   }
 

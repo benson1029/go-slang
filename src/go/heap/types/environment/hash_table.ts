@@ -56,16 +56,13 @@ class EnvironmentHashTable extends HeapObject {
       throw new Error("EnvironmentHashTable.rehash: Invalid tag");
     }
 
-    this.set_cannnot_be_freed(true);
-
     const old_table = this.get_table_address() as ComplexArray;
-    old_table.set_cannnot_be_freed(true);
+    this.heap.mark_intermediate(old_table.address);
 
     const new_table = new ComplexArray(this.heap, ComplexArray.allocate(this.heap, new_capacity));
-    new_table.set_cannnot_be_freed(true);
+    this.set_child(0, new_table.address);
 
     this.set_field(1, 0);
-    this.set_child(0, new_table.address);
 
     for (let i = 0; i < old_table.get_length(); i++) {
       const value = old_table.get_value_address(i) as EnvironmentEntry;
@@ -73,10 +70,6 @@ class EnvironmentHashTable extends HeapObject {
         this.insert_internal(value);
       }
     }
-
-    this.set_cannnot_be_freed(false);
-    old_table.set_cannnot_be_freed(false);
-    new_table.set_cannnot_be_freed(false);
 
     old_table.free();
   }
@@ -215,9 +208,7 @@ class EnvironmentHashTable extends HeapObject {
     }
 
     if (this.get_table_address().is_nil()) {
-      this.set_cannnot_be_freed(true);
       this.set_child(0, ComplexArray.allocate(this.heap, INITIAL_CAPACITY));
-      this.set_cannnot_be_freed(false);
     } else if (this.should_grow()) {
       this.rehash(this.get_table_capacity() * 2);
     }

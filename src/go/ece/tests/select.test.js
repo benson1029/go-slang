@@ -10,8 +10,11 @@ function evaluateFunctions(functions, isRecursive = false) {
     ${functions}
     `
     const parsed_program = parse(program);
-    const heapSize = 1048576;
-    return (new ECE(heapSize, parsed_program)).evaluate(!isRecursive).output;
+    const heapSize = 32768;
+    const return_value = (new ECE(heapSize, parsed_program)).evaluate(!isRecursive).output;
+    const check_mark_and_sweep = (new ECE(heapSize, parsed_program)).evaluate(!isRecursive, true).output;
+    expect(return_value).toBe(check_mark_and_sweep);
+    return return_value;
 }
 
 describe("Select", () => {
@@ -23,6 +26,10 @@ describe("Select", () => {
 
           cc <- 1
           a <- cc
+
+          for i := 0; i < 100; i++ {
+            // busy waiting
+          }
 
           var i int32
           select {
@@ -43,6 +50,10 @@ describe("Select", () => {
 
           a <- cc
 
+          for i := 0; i < 100; i++ {
+            // busy waiting
+          }
+
           var i int32
           select {
           case i = <-(<-a):
@@ -61,6 +72,10 @@ describe("Select", () => {
       func main() {
         a := make(chan chan int32, 1)
         cc := make(chan int32, 1)
+
+        for i := 0; i < 100; i++ {
+          // busy waiting
+        }
 
         var i int32
         select {
@@ -88,6 +103,10 @@ describe("Select", () => {
         c <- 100
       }()
 
+      for i := 0; i < 100; i++ {
+        // busy waiting
+      }
+
       cnt := 0
       for cnt := 0; cnt < 1; cnt++ {
         var i int32
@@ -110,6 +129,10 @@ describe("Select", () => {
     const functions = `
     func main() {
       c := make(chan int32)
+  
+      for i := 0; i < 100; i++ {
+        // busy waiting
+      }
 
       for cnt := 0; cnt < 1; cnt++ {
         var i int32
@@ -150,6 +173,10 @@ describe("Select", () => {
         }
       }()
 
+      for i := 0; i < 100; i++ {
+        // busy waiting
+      }
+
       for cnt := 0; cnt < 20; cnt++ {
         var i int32
         select {
@@ -174,6 +201,10 @@ describe("Select", () => {
       go func() {
         c <- 100
       }()
+
+      for i := 0; i < 100; i++ {
+        // busy waiting
+      }
 
       for cnt := 0; cnt < 20; cnt++ {
         var i int32

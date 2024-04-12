@@ -99,7 +99,6 @@ class ControlMethod extends HeapObject {
       3,
       4 + param_names.length + capture_names.length
     );
-    heap.set_cannnot_be_freed(address, true);
 
     heap.set_field(address, 1, param_names.length);
     heap.set_field(address, 2, capture_names.length);
@@ -128,9 +127,6 @@ class ControlMethod extends HeapObject {
       );
       heap.set_child(address, 4 + param_names.length + i, capture_name_address);
     }
-
-    // Unmark cannot-be-free
-    heap.set_cannnot_be_freed(address, false);
 
     return address;
   }

@@ -135,7 +135,9 @@ class ComplexQueue extends HeapObject {
     }
 
     const value = this.front().reference();
-    this.set_child(0, this.front_linked_list().remove_current_node().address);
+    this.heap.mark_intermediate(value.address);
+
+    this.set_child(0, this.front_linked_list().pop_front().address);
     this.decrement_length();
 
     if (this.length() === 0) {

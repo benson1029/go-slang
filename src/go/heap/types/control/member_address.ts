@@ -44,21 +44,12 @@ class ControlMemberAddress extends HeapObject {
 
   public static allocate(heap: Heap, object: any, member: string): number {
     const address = heap.allocate_object(TAG_CONTROL_member_address, 2, 2);
-    heap.set_cannnot_be_freed(address, true);
 
     const object_address = heap.allocate_any(object);
-    heap.set_cannnot_be_freed(object_address, true);
+    heap.set_child(address, 0, object_address);
 
     const member_name_address = ComplexString.allocate(heap, member);
-    heap.set_cannnot_be_freed(member_name_address, true);
-
-    heap.set_child(address, 0, object_address);
     heap.set_child(address, 1, member_name_address);
-
-    // Unmark cannot-be-free
-    heap.set_cannnot_be_freed(address, false);
-    heap.set_cannnot_be_freed(object_address, false);
-    heap.set_cannnot_be_freed(member_name_address, false);
 
     return address;
   }

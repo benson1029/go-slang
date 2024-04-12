@@ -8,7 +8,7 @@
  *     - 5 bit  : bucket of allocated memory
  *     - 1 bit  : marker for mark-and-sweep
  *     - 1 bit  : marker for objects that cannot be freed
- *     - 1 bit  : unused
+ *     - 1 bit  : marker for objects in intermediate stack
  *   - 2 byte   : type tag of the object
  *     - 1 bit  : 1 if kernel-related objects (control, environment), 0 otherwise
  *     - 1 bit  : 1 if object has children, 0 otherwise
@@ -214,9 +214,17 @@ import { UserTypeWaitGroup } from "./types/user/type/wait_group";
 
 class Heap {
     private alloc: BuddyAllocator;
+    private check_mark_and_sweep: boolean;
 
+    public set_check_mark_and_sweep(value: boolean): void {
+        this.check_mark_and_sweep = value;
+    }
 
     public allocate_object(tag: number, fields: number, children: number): number {
+        if (this.check_mark_and_sweep) {
+            this.mark_and_sweep();
+        }
+
         const words = 2 + fields + children;
         let address = this.alloc.allocate(words);
 
@@ -252,6 +260,7 @@ class Heap {
         }
 
         this.increment_reference_count(address);
+        this.mark_intermediate(address);
         return address;
     }
 
@@ -340,13 +349,6 @@ class Heap {
         this.set_reference_count(address, ref_count - 1);
     }
 
-    public set_cannnot_be_freed(address: number, value: boolean): void {
-        // if (value === this.alloc.get_cannnot_be_freed(address)) {
-        //     console.log("Warning: Setting cannnot_be_freed to the same value " + auto_cast(this, address).stringify());
-        // }
-        this.alloc.set_cannnot_be_freed(address, value);
-    }
-
     public check_all_free(): boolean {
         return this.alloc.check_all_free(
             (address: number) => auto_cast(this, address).stringify() + " reference count: " + this.get_reference_count(address)
@@ -367,8 +369,6 @@ class Heap {
     }
 
     public copy_object(address: number): number {
-        this.set_cannnot_be_freed(address, true);
-
         const copy_address = this.allocate_object(
             this.get_tag(address),
             this.get_number_of_fields(address),
@@ -381,7 +381,6 @@ class Heap {
             this.set_child(copy_address, i, this.reference_object(this.get_child(address, i)));
         }
 
-        this.set_cannnot_be_freed(address, false);
         return copy_address;
     }
 
@@ -393,6 +392,7 @@ class Heap {
     constructor(memory: number) { // memory is in bytes
         const num_words = Math.floor(memory / WORD_SIZE);
         this.alloc = new BuddyAllocator(num_words);
+        this.check_mark_and_sweep = false;
 
         {
             /**
@@ -407,7 +407,7 @@ class Heap {
             this.alloc.memory_set_2_bytes(address + 1, TAG_PRIMITIVE_nil); // 2 bytes tag
             this.alloc.memory_set_byte(address + 3, 0); // 1 byte number of fields
             this.alloc.memory_set_word(address + 4, 0); // 4 bytes reference count
-            this.alloc.set_cannnot_be_freed(address, true);
+            this.alloc.set_cannot_be_freed(address, true);
         }
 
         {
@@ -423,16 +423,20 @@ class Heap {
             this.alloc.memory_set_2_bytes(address + 1, TAG_PRIMITIVE_undefined); // 2 bytes tag
             this.alloc.memory_set_byte(address + 3, 0); // 1 byte number of fields
             this.alloc.memory_set_word(address + 4, 0); // 4 bytes reference count
-            this.alloc.set_cannnot_be_freed(address, true);
+            this.alloc.set_cannot_be_freed(address, true);
         }
     }
 
-    public set_root(address: number): void {
-        this.alloc.set_root_address(address);
+    public set_cannot_be_freed(address: number, value: boolean): void {
+        this.alloc.set_cannot_be_freed(address, value);
     }
 
-    public get_root(): number {
-        return this.alloc.get_root_address();
+    public set_root(root_index: number, address: number): void {
+        this.alloc.set_root_address(root_index, address);
+    }
+
+    public get_root(root_index: number): number {
+        return this.alloc.get_root_address(root_index);
     }
 
     private mark_dfs(address: number): void {
@@ -451,11 +455,34 @@ class Heap {
         }
     }
 
+    private INTERMEDIATE_ADDRESSES: Array<number> = [];
+
     public mark_and_sweep(): void {
-        const root = this.get_root();
-        this.mark_dfs(root);
-        this.alloc.mark_all_cannot_be_freed(this.mark_dfs);
+        for (let i = 0; i < this.alloc.get_number_of_roots(); i++) {
+            const root = this.get_root(i);
+            this.mark_dfs(root);
+        }
+        for (const address of this.INTERMEDIATE_ADDRESSES) {
+            this.mark_dfs(address);
+        }
         this.alloc.sweep_and_free();
+    }
+
+    public mark_intermediate(address: number): void {
+        if (this.alloc.get_in_intermediate(address)) {
+            return;
+        }
+        this.alloc.set_in_intermediate(address, true);
+        this.reference_object(address);
+        this.INTERMEDIATE_ADDRESSES.push(address);
+    }
+
+    public clear_intermediate(): void {
+        for (const address of this.INTERMEDIATE_ADDRESSES) {
+            this.alloc.set_in_intermediate(address, false);
+            this.free_object(address);
+        }
+        this.INTERMEDIATE_ADDRESSES = [];
     }
 
     /**

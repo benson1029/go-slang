@@ -25,7 +25,7 @@ class ECE {
   constructor(memory: number, program: any, visualize: boolean = false) {
     this.memory = memory;
     this.heap = new Heap(this.memory);
-    this.program = program;
+    this.program = JSON.parse(JSON.stringify(program)); // Deep copy `program`
     this.visualize = visualize;
   }
 
@@ -53,23 +53,22 @@ class ECE {
     return thread;
   }
 
-  public evaluate(check_all_free: boolean = false): { output: string; snapshots: any[] } {
-    // check_all_free = true;
-    // return {
-    //   output: JSON.stringify(this.program, null, 2),
-    //   snapshots: this.snapshots,
-    // };
-    // return JSON.stringify(this.program, null, 2);
+  public evaluate(check_all_free: boolean = false, check_mark_and_sweep = false): { output: string; snapshots: any[] } {
+    this.heap.set_check_mark_and_sweep(check_mark_and_sweep);
+
+    // Create the scheduler.
     const scheduler = new ContextScheduler(
       this.heap,
       ContextScheduler.allocate(this.heap)
     );
-
-    this.heap.set_root(scheduler.address);
+    this.heap.set_root(0, scheduler.address);
+    this.heap.clear_intermediate();
 
     // Keep a copy of the main thread.
     const main_thread = this.startup_thread();
+    this.heap.set_root(1, main_thread.address);
     scheduler.enqueue(main_thread);
+    this.heap.clear_intermediate();
 
     // Create output buffer
     let output_buffer = ``;
@@ -97,6 +96,7 @@ class ECE {
         this.heap.free_object(cmd);
       }
       thread.free();
+      this.heap.clear_intermediate();
     }
 
     if (!main_thread.control().empty()) {
@@ -122,6 +122,15 @@ class ECE {
     main_thread.free();
 
     if (check_all_free) {
+      if (this.heap.check_all_free() === false) {
+        throw new Error(
+          "ECE.evaluate: Not all objects are freed after program execution"
+        );
+      }
+    }
+
+    if (check_mark_and_sweep) {
+      this.heap.mark_and_sweep();
       if (this.heap.check_all_free() === false) {
         throw new Error(
           "ECE.evaluate: Not all objects are freed after program execution"

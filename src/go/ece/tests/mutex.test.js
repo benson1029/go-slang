@@ -13,8 +13,11 @@ function evaluateFunctions(functions, isRecursive = false) {
     ${functions}
     `
     const parsed_program = parse(program);
-    const heapSize = 1048576;
-    return (new ECE(heapSize, parsed_program)).evaluate(!isRecursive).output;
+    const heapSize = 32768;
+    const return_value = (new ECE(heapSize, parsed_program)).evaluate(!isRecursive).output;
+    const check_mark_and_sweep = (new ECE(heapSize, parsed_program)).evaluate(!isRecursive, true).output;
+    expect(return_value).toBe(check_mark_and_sweep);
+    return return_value;
 }
 
 describe("Mutex", () => {

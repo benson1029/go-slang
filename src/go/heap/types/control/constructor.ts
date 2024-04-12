@@ -31,7 +31,6 @@ class ControlConstructor extends HeapObject {
 
   public static allocate(heap: Heap, type: any, args: any[]): number {
     const address = heap.allocate_object(TAG_CONTROL_constructor, 1, 1 + args.length);
-    heap.set_cannnot_be_freed(address, true);
 
     const type_address = heap.allocate_any(type);
     heap.set_child(address, 0, type_address);
@@ -40,9 +39,6 @@ class ControlConstructor extends HeapObject {
       const arg_address = heap.allocate_any(args[i]);
       heap.set_child(address, 1 + i, arg_address);
     }
-
-    // Unmark cannot be freed
-    heap.set_cannnot_be_freed(address, false);
 
     return address;
   }

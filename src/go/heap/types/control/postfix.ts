@@ -28,21 +28,12 @@ class ControlPostfix extends HeapObject {
 
   public static allocate(heap: Heap, operator: string, operand: any): number {
     const address = heap.allocate_object(TAG_CONTROL_postfix, 1, 2);
-    heap.set_cannnot_be_freed(address, true);
 
     const operator_address = ComplexString.allocate(heap, operator);
-    heap.set_cannnot_be_freed(operator_address, true);
+    heap.set_child(address, 0, operator_address);
 
     const operand_address = heap.allocate_any(operand);
-    heap.set_cannnot_be_freed(operand_address, true);
-
-    heap.set_child(address, 0, operator_address);
     heap.set_child(address, 1, operand_address);
-
-    // Unmark cannot-be-free
-    heap.set_cannnot_be_freed(address, false);
-    heap.set_cannnot_be_freed(operator_address, false);
-    heap.set_cannnot_be_freed(operand_address, false);
 
     return address;
   }

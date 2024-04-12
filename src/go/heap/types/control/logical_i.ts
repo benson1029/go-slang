@@ -22,17 +22,10 @@ class ControlLogicalI extends HeapObject {
   
   public static allocate(heap: Heap, operator: number): number {
     const address = heap.allocate_object(TAG_CONTROL_logical_i, 1, 1);
-    heap.set_cannnot_be_freed(address, true);
 
     const operator_address = heap.allocate_any(operator);
-    heap.set_cannnot_be_freed(operator_address, true);
-
     heap.set_child(address, 0, operator_address);
 
-    // Unmark cannot-be-free
-    heap.set_cannnot_be_freed(address, false);
-    heap.set_cannnot_be_freed(operator_address, false);
-  
     return address;
   }
 

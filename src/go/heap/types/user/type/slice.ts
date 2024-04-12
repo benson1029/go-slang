@@ -28,7 +28,6 @@ class UserTypeSlice extends UserType {
 
   public static allocate(heap: Heap, type: any): number {
     const address = heap.allocate_object(TAG_USER_type_slice, 1, 2);
-    heap.set_cannnot_be_freed(address, true);
 
     const type_address = heap.allocate_any(type);
     heap.set_child(address, 1, type_address);
@@ -38,10 +37,6 @@ class UserTypeSlice extends UserType {
       "[]" + (auto_cast(heap, type_address) as UserType).get_name().get_string()
     );
     heap.set_child(address, 0, name_address);
-
-    // Unmark cannot-be-freed
-    heap.set_cannnot_be_freed(address, false);
-    heap.set_cannnot_be_freed(name_address, false);
   
     return address;
   }

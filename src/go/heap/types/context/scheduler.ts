@@ -21,7 +21,9 @@ class ContextScheduler extends HeapObject {
    * (it does not decrease the reference count of the value).
    */
   public dequeue(): ContextThread {
-    return this.get_queue_address().dequeue() as ContextThread;
+    const thread = this.get_queue_address().dequeue() as ContextThread;
+    this.heap.mark_intermediate(thread.address);
+    return thread;
   }
 
   /**

@@ -39,10 +39,6 @@ class HeapObject {
     this.heap.set_child(this.address, index, value);
   }
 
-  public set_cannnot_be_freed(value: boolean): void {
-    this.heap.set_cannnot_be_freed(this.address, value);
-  }
-
   public is_nil(): boolean {
     return this.get_tag() === TAG_PRIMITIVE_nil;
   }

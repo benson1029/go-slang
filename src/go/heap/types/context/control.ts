@@ -38,7 +38,8 @@ class ContextControl extends HeapObject {
     }
     const control_stack = this.get_control();
     const cmd = control_stack.get_value_address().reference().address;
-    this.set_child(0, control_stack.remove_current_node().address);
+    this.heap.mark_intermediate(cmd);
+    this.set_child(0, control_stack.pop_front().address);
     return cmd;
   }
 

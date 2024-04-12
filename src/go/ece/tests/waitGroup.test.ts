@@ -13,8 +13,11 @@ function evaluateFunctions(functions, isRecursive = false) {
     ${functions}
     `
     const parsed_program = parse(program);
-    const heapSize = 1048576;
-    return (new ECE(heapSize, parsed_program)).evaluate(!isRecursive).output;
+    const heapSize = 32768;
+    const return_value = (new ECE(heapSize, parsed_program)).evaluate(!isRecursive).output;
+    const check_mark_and_sweep = (new ECE(heapSize, parsed_program)).evaluate(!isRecursive, true).output;
+    expect(return_value).toBe(check_mark_and_sweep);
+    return return_value;
 }
 
 describe("WaitGroup", () => {
@@ -24,7 +27,7 @@ describe("WaitGroup", () => {
             var wg sync.WaitGroup
             wg.Add(1)
             go func() {
-                for i := 0; i < 1000; i++ {
+                for i := 0; i < 100; i++ {
                     // busy waiting
                 }
                 fmt.Println("Hello")
@@ -44,14 +47,14 @@ describe("WaitGroup", () => {
             var wg sync.WaitGroup
             wg.Add(2)
             go func() {
-                for i := 0; i < 1000; i++ {
+                for i := 0; i < 100; i++ {
                     // busy waiting
                 }
                 fmt.Print("Hello, ")
                 wg.Done()
             }()
             go func() {
-                for i := 0; i < 1000; i++ {
+                for i := 0; i < 100; i++ {
                     // busy waiting
                 }
                 fmt.Print("World")
@@ -71,7 +74,7 @@ describe("WaitGroup", () => {
             var wg sync.WaitGroup
             wg.Add(1)
             go func() {
-                for i := 0; i < 1000; i++ {
+                for i := 0; i < 100; i++ {
                     // busy waiting
                 }
                 fmt.Println("Hello")

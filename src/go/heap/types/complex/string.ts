@@ -49,7 +49,6 @@ class ComplexString extends HeapObject {
 
   public static allocate(heap: Heap, str: string): number {
     const address = heap.allocate_object(TAG_COMPLEX_string, 2, str.length);
-    heap.set_cannnot_be_freed(address, true);
 
     for (let i = 0; i < str.length; i++) {
       const rune = PrimitiveRune.allocate(heap, str.codePointAt(i));
@@ -58,8 +57,6 @@ class ComplexString extends HeapObject {
 
     heap.set_field(address, 1, hash_string(str));
 
-    // Unmark cannot-be-free
-    heap.set_cannnot_be_freed(address, false);
     return address;
   }
 

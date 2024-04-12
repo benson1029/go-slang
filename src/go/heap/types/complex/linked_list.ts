@@ -45,9 +45,9 @@ class ComplexLinkedList extends HeapObject {
    * Important: This method calls free() on the current node,
    * and returns the next node (with reference count increased).
    */
-  public remove_current_node(): ComplexLinkedList {
+  public pop_front(): ComplexLinkedList {
     if (this.get_tag() !== TAG_COMPLEX_linked_list) {
-      throw new Error("ComplexLinkedList.remove_current_node: Invalid tag");
+      throw new Error("ComplexLinkedList.pop_front: Invalid tag");
     }
     const next = this.get_next_address().reference() as ComplexLinkedList;
     this.free();
@@ -72,16 +72,9 @@ class ComplexLinkedList extends HeapObject {
     const value = auto_cast(heap, value_address);
     const next = auto_cast(heap, next_address);
 
-    value.set_cannnot_be_freed(true);
-    next.set_cannnot_be_freed(true);
-
     const head = heap.allocate_object(TAG_COMPLEX_linked_list, 1, 2);
     heap.set_child(head, 0, value.reference().address);
     heap.set_child(head, 1, next.reference().address);
-
-    // Unmark cannot-be-free
-    value.set_cannnot_be_freed(false);
-    next.set_cannnot_be_freed(false);
 
     return head;
   }

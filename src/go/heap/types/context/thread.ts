@@ -61,7 +61,6 @@ class ContextThread extends HeapObject {
     }
 
     const forked_address = this.heap.allocate_object(TAG_CONTEXT_thread, 2, 3);
-    this.heap.set_cannnot_be_freed(forked_address, true);
     this.heap.set_field(forked_address, 1, ContextThread.generate_thread_id());
 
     const control = this.control().copy();
@@ -73,7 +72,6 @@ class ContextThread extends HeapObject {
     const env = this.env().copy();
     this.heap.set_child(forked_address, 2, env.address);
 
-    this.heap.set_cannnot_be_freed(forked_address, false);
     return new ContextThread(this.heap, forked_address);
   }
 
@@ -88,7 +86,6 @@ class ContextThread extends HeapObject {
 
   public static allocate(heap: Heap): number {
     const address = heap.allocate_object(TAG_CONTEXT_thread, 2, 3);
-    heap.set_cannnot_be_freed(address, true);
     heap.set_field(address, 1, this.generate_thread_id());
 
     const control = ContextControl.allocate(heap);
@@ -100,7 +97,6 @@ class ContextThread extends HeapObject {
     const env = ContextEnv.allocate(heap);
     heap.set_child(address, 2, env);
 
-    heap.set_cannnot_be_freed(address, false);
     return address;
   }
 

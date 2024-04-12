@@ -17,12 +17,7 @@ class ControlRestoreEnvI extends HeapObject {
 
   public static allocate(heap: Heap, frame: EnvironmentFrame): number {
     const address = heap.allocate_object(TAG_CONTROL_restore_env_i, 1, 1);
-    heap.set_cannnot_be_freed(address, true);
-
     heap.set_child(address, 0, frame.reference().address);
-
-    // Unmark cannot-be-free
-    heap.set_cannnot_be_freed(address, false);
     return address;
   }
 

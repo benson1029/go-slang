@@ -52,7 +52,8 @@ class ContextStash extends HeapObject {
     }
     const stash = this.get_stash();
     const value = stash.get_value_address().reference().address;
-    this.set_child(0, stash.remove_current_node().address);
+    this.heap.mark_intermediate(value);
+    this.set_child(0, stash.pop_front().address);
     return value;
   }
 

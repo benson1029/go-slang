@@ -50,15 +50,9 @@ class EnvironmentEntry extends HeapObject {
     const key = new ComplexString(heap, key_address);
     const variable = new UserVariable(heap, variable_address);
 
-    key.set_cannnot_be_freed(true);
-    variable.set_cannnot_be_freed(true);
-
     const address = heap.allocate_object(TAG_ENVIRONMENT_entry, 1, 2);
     heap.set_child(address, 0, key.reference().address);
     heap.set_child(address, 1, variable.reference().address);
-
-    key.set_cannnot_be_freed(false);
-    variable.set_cannnot_be_freed(false);
 
     return address;
   }

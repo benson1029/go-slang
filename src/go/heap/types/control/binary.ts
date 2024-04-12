@@ -33,26 +33,15 @@ class ControlBinary extends HeapObject {
 
   public static allocate(heap: Heap, operator: string, left_operand: any, right_operand: any): number {
     const address = heap.allocate_object(TAG_CONTROL_binary, 1, 3);
-    heap.set_cannnot_be_freed(address, true);
 
     const operator_address = ComplexString.allocate(heap, operator);
-    heap.set_cannnot_be_freed(operator_address, true);
+    heap.set_child(address, 0, operator_address);
 
     const left_operand_address = heap.allocate_any(left_operand);
-    heap.set_cannnot_be_freed(left_operand_address, true);
+    heap.set_child(address, 1, left_operand_address);
 
     const right_operand_address = heap.allocate_any(right_operand);
-    heap.set_cannnot_be_freed(right_operand_address, true);
-
-    heap.set_child(address, 0, operator_address);
-    heap.set_child(address, 1, left_operand_address);
     heap.set_child(address, 2, right_operand_address);
-
-    // Unmark cannot-be-free
-    heap.set_cannnot_be_freed(address, false);
-    heap.set_cannnot_be_freed(operator_address, false);
-    heap.set_cannnot_be_freed(left_operand_address, false);
-    heap.set_cannnot_be_freed(right_operand_address, false);
 
     return address;
   }

@@ -12,7 +12,7 @@ function evaluate_sequence(cmd: number, heap: Heap, C: ContextControl, S: Contex
     }
     const value = linked_list.get_value_address().reference();
     const seq_object_copy = seq_object.copy() as ControlSequence;
-    seq_object_copy.remove_first_linked_list_element();
+    seq_object_copy.pop_front();
     C.push(seq_object_copy.address);
     C.push(value.address);
     value.free();

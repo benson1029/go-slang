@@ -6,8 +6,10 @@ const MIN_ALLOC = 2 ** MIN_ALLOC_LOG2;
 const MAX_ALLOC_LOG2 = 31;
 const MAX_ALLOC = 2 ** MAX_ALLOC_LOG2;
 
-const NUM_SPECIAL_VALUE = 3; // [null, undefined, root]
-const ROOT_ADDRESS = (NUM_SPECIAL_VALUE - 1) * WORD_SIZE * MIN_ALLOC;
+const NUM_ROOTS = 2;
+
+const NUM_SPECIAL_VALUE = 2 + NUM_ROOTS; // [null, undefined, roots...]
+const ROOT_BASE_ADDRESS = (NUM_SPECIAL_VALUE - NUM_ROOTS) * WORD_SIZE * MIN_ALLOC;
 
 class BuddyAllocator {
   private data: ArrayBuffer;
@@ -92,16 +94,20 @@ class BuddyAllocator {
     return this.memory_get_bit(address, 5);
   }
 
+  public set_cannot_be_freed(address: number, value: boolean): void {
+    this.memory_set_bit(address, 6, value);
+  }
+
   public get_cannot_be_freed(address: number): boolean {
     return this.memory_get_bit(address, 6);
   }
 
-  public set_cannnot_be_freed(address: number, value: boolean): void {
-    this.memory_set_bit(address, 6, value);
+  public set_in_intermediate(address: number, value: boolean): void {
+    this.memory_set_bit(address, 7, value);
   }
 
-  public get_cannnot_be_freed(address: number): boolean {
-    return this.memory_get_bit(address, 6);
+  public get_in_intermediate(address: number): boolean {
+    return this.memory_get_bit(address, 7);
   }
 
   private get_bucket(words: number): number | null {
@@ -223,12 +229,16 @@ class BuddyAllocator {
     return bucket;
   }
 
-  public set_root_address(address: number): void {
-    this.memory_set_word(ROOT_ADDRESS + WORD_SIZE, address);
+  public set_root_address(root_index: number, address: number): void {
+    this.memory_set_word(ROOT_BASE_ADDRESS + root_index * MIN_ALLOC * WORD_SIZE, address);
   }
 
-  public get_root_address(): number {
-    return this.memory_get_word(ROOT_ADDRESS + WORD_SIZE);
+  public get_root_address(root_index: number): number {
+    return this.memory_get_word(ROOT_BASE_ADDRESS + root_index * MIN_ALLOC * WORD_SIZE);
+  }
+
+  public get_number_of_roots(): number {
+    return NUM_ROOTS;
   }
 
   public is_user_address(address: number): boolean {
@@ -379,7 +389,7 @@ class BuddyAllocator {
   public deallocate(address: number): void {
     if (address == null ||
       !this.is_user_address(address) ||
-      this.get_cannnot_be_freed(address)
+      this.get_cannot_be_freed(address)
     ) {
       return;
     }
@@ -471,7 +481,7 @@ class BuddyAllocator {
 
   public mark_all_cannot_be_freed(mark_dfs: (address: number) => void): void {
     this.iterate_non_free((node: number, bucket: number, address: number) => {
-      if (this.get_cannnot_be_freed(address)) {
+      if (this.get_cannot_be_freed(address)) {
         mark_dfs(address);
       }
 
@@ -487,7 +497,7 @@ class BuddyAllocator {
   public sweep_and_free(): void {
     // console.log("Sweep and free");
     this.iterate_non_free((node: number, bucket: number, address: number) => {
-      if (this.get_mark_and_sweep(address) || this.get_cannnot_be_freed(address)) {
+      if (this.get_mark_and_sweep(address) || this.get_cannot_be_freed(address)) {
         // already marked, this node is alive
         // we reset the mark bit
         this.set_mark_and_sweep(address, false);

@@ -27,21 +27,12 @@ class ControlLogicalImmI extends HeapObject {
 
   public static allocate(heap: Heap, right: number, operator: number): number {
     const address = heap.allocate_object(TAG_CONTROL_logical_imm_i, 2, 2);
-    heap.set_cannnot_be_freed(address, true);
 
     const right_address = heap.allocate_any(right);
-    heap.set_cannnot_be_freed(right_address, true);
+    heap.set_child(address, 0, right_address);
 
     const operator_address = heap.allocate_any(operator);
-    heap.set_cannnot_be_freed(operator_address, true);
-
-    heap.set_child(address, 0, right_address);
     heap.set_child(address, 1, operator_address);
-
-    // Unmark cannot-be-free
-    heap.set_cannnot_be_freed(address, false);
-    heap.set_cannnot_be_freed(right_address, false);
-    heap.set_cannnot_be_freed(operator_address, false);
 
     return address;
   }

@@ -58,17 +58,10 @@ class ComplexWaitGroup extends HeapObject {
 
     public static allocate(heap: Heap, value: number): number {
         const address = heap.allocate_object(TAG_COMPLEX_wait_group, 2, 1);
-        heap.set_cannnot_be_freed(address, true);
 
         const queue_address = ComplexQueue.allocate(heap);
-        heap.set_cannnot_be_freed(queue_address, true);
-
         heap.set_child(address, 0, queue_address);
         heap.set_field(address, 1, value);
-
-        // Unmark cannot-be-free
-        heap.set_cannnot_be_freed(address, false);
-        heap.set_cannnot_be_freed(queue_address, false);
 
         return address;
     }

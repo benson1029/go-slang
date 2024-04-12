@@ -97,7 +97,6 @@ class EnvironmentFrame extends HeapObject {
     if (this.get_tag() !== TAG_ENVIRONMENT_frame) {
       throw new Error("EnvironmentFrame.insert_to_cache: Invalid tag");
     }
-    this.set_cannnot_be_freed(true);
     if (this.get_cache_hash_table_address().is_nil()) {
       this.set_child(
         CACHE_HASH_TABLE,
@@ -105,7 +104,6 @@ class EnvironmentFrame extends HeapObject {
       );
     }
     this.get_cache_hash_table_address().force_insert(entry);
-    this.set_cannnot_be_freed(false);
   }
 
   /**
@@ -153,14 +151,11 @@ class EnvironmentFrame extends HeapObject {
     }
 
     // Insert to the current scope lookup_entry hash table
-    this.set_cannnot_be_freed(true);
-
     if (this.get_lookup_hash_table_address().is_nil()) {
       this.set_child(CUR_HASH_TABLE, EnvironmentHashTable.allocate(this.heap));
     }
     this.get_lookup_hash_table_address().insert_new_variable(new_entry.address);
 
-    this.set_cannnot_be_freed(false);
     return new_entry;
   }
 
@@ -181,7 +176,6 @@ class EnvironmentFrame extends HeapObject {
       throw new Error("Variable already exists in current scope.");
     }
 
-    this.set_cannnot_be_freed(true);
     const variable_nil = UserVariable.allocate_nil(this.heap);
     const new_entry_address = EnvironmentEntry.allocate(
       this.heap,
@@ -190,7 +184,6 @@ class EnvironmentFrame extends HeapObject {
     );
     this.heap.free_object(variable_nil);
     const new_entry = new EnvironmentEntry(this.heap, new_entry_address);
-    this.set_cannnot_be_freed(false);
 
     this.insert_entry(new_entry);
     new_entry.free();
@@ -234,19 +227,18 @@ class EnvironmentFrame extends HeapObject {
     }
     const parent_frame =
       this.get_parent_frame_address().reference() as EnvironmentFrame;
+    this.heap.mark_intermediate(this.address);
     this.free();
     return parent_frame;
   }
 
   public static allocate(heap: Heap, parent_frame_address: number) {
     const parent_frame = auto_cast(heap, parent_frame_address).reference();
-    heap.set_cannnot_be_freed(parent_frame.address, true);
 
     const address = heap.allocate_object(TAG_ENVIRONMENT_frame, 1, 3);
     heap.set_child(address, 0, parent_frame.address);
     heap.set_child(address, CUR_HASH_TABLE, PrimitiveNil.allocate());
     heap.set_child(address, CACHE_HASH_TABLE, PrimitiveNil.allocate());
-    heap.set_cannnot_be_freed(parent_frame.address, false);
 
     return address;
   }
@@ -264,14 +256,14 @@ class EnvironmentFrame extends HeapObject {
     let result = [
       this.get_lookup_hash_table_address().is_nil()
         ? []
-        : this.get_lookup_hash_table_address().to_object()
+        : this.get_lookup_hash_table_address().to_object(),
     ];
     if (!this.get_parent_frame_address().is_nil()) {
-      this.get_parent_frame_address().to_object().forEach(
-        (parent_frame: any) => {
+      this.get_parent_frame_address()
+        .to_object()
+        .forEach((parent_frame: any) => {
           result.push(parent_frame);
-        }
-      );
+        });
     }
     return result;
   }

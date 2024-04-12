@@ -237,7 +237,7 @@ describe('BuddyAllocator', () => {
     expect(address2).not.toBeNull();
     expect(address3).not.toBeNull();
 
-    allocator.set_cannnot_be_freed(address2, true);
+    allocator.set_cannot_be_freed(address2, true);
     allocator.deallocate(address2);
 
     const address4 = allocator.allocate(16);
@@ -253,7 +253,7 @@ describe('BuddyAllocator', () => {
     expect(address6).toBeNull();
     expect(address7).not.toBeNull();
 
-    allocator.set_cannnot_be_freed(address2, false);
+    allocator.set_cannot_be_freed(address2, false);
     allocator.sweep_and_free();
 
     const address8 = allocator.allocate(32);

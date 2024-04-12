@@ -74,7 +74,6 @@ class UserTypeStruct extends UserType {
       1,
       1 + 2 * members.length
     );
-    heap.set_cannnot_be_freed(address, true);
 
     const name_address = ComplexString.allocate(heap, name);
     heap.set_child(address, 0, name_address);
@@ -86,9 +85,6 @@ class UserTypeStruct extends UserType {
       const member_type_address = heap.allocate_any(members[i].type);
       heap.set_child(address, 2 + 2 * i, member_type_address);
     }
-
-    // Unmark cannot-be-free
-    heap.set_cannnot_be_freed(address, false);
 
     return address;
   }

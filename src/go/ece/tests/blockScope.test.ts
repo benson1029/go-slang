@@ -16,8 +16,11 @@ function checkSequence(sequence: string, hasError: boolean = false): void {
 
     if (hasError) {
         expect(() => (new ECE(heapSize, parsed_program)).evaluate(true)).toThrow();
+        expect(() => (new ECE(heapSize, parsed_program)).evaluate(true, true)).toThrow();
     } else {
         const result = (new ECE(heapSize, parsed_program)).evaluate(true).output;
+        const check_mark_and_sweep = (new ECE(heapSize, parsed_program)).evaluate(true, true).output;
+        expect(result).toBe(check_mark_and_sweep);
         expect(result).toBe("");
     }
 }

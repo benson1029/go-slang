@@ -12,14 +12,20 @@ function evaluateSequence(sequence, checkAllFree = true) {
     }
     `
     const parsed_program = parse(program);
-    const heapSize = 1048576;
-    return (new ECE(heapSize, parsed_program)).evaluate(checkAllFree).output;
+    const heapSize = 32768;
+    const return_value = (new ECE(heapSize, parsed_program)).evaluate(checkAllFree).output;
+    const check_mark_and_sweep = (new ECE(heapSize, parsed_program)).evaluate(checkAllFree, true);
+    expect(return_value).toBe(check_mark_and_sweep.output);
+    return return_value;
 }
 
 function evaluateProgram(program, checkAllFree = true) {
     const parsed_program = parse(program);
-    const heapSize = 1048576;
-    return (new ECE(heapSize, parsed_program)).evaluate(checkAllFree).output;
+    const heapSize = 32768;
+    const return_value = (new ECE(heapSize, parsed_program)).evaluate(checkAllFree).output;
+    const check_mark_and_sweep = (new ECE(heapSize, parsed_program)).evaluate(checkAllFree, true);
+    expect(return_value).toBe(check_mark_and_sweep.output);
+    return return_value;
 }
 
 describe("Fixed size array", () => {

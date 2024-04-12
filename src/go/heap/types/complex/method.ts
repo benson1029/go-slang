@@ -71,9 +71,6 @@ class ComplexMethod extends HeapObject {
             heap,
             current_environment_frame_address
         );
-        
-        control_method.set_cannnot_be_freed(true);
-        current_environment_frame.set_cannnot_be_freed(true);
 
         const address = heap.allocate_object(
             TAG_COMPLEX_method,
@@ -81,7 +78,6 @@ class ComplexMethod extends HeapObject {
             3 + control_method.get_number_of_params()
         );
 
-        heap.set_cannnot_be_freed(address, true);
         heap.set_field(address, 1, control_method.get_number_of_params());
 
         // Transfer the body
@@ -114,10 +110,6 @@ class ComplexMethod extends HeapObject {
             }
             environment.insert_entry(capture_entry);
         }
-
-        control_method.set_cannnot_be_freed(false);
-        current_environment_frame.set_cannnot_be_freed(false);
-        heap.set_cannnot_be_freed(address, false);
 
         return address;
     }

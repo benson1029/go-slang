@@ -31,20 +31,14 @@ class ControlMake extends HeapObject {
 
   public static allocate(heap: Heap, type: any, args: any[]): number {
     const address = heap.allocate_object(TAG_CONTROL_make, 2, 1 + args.length);
-    heap.set_cannnot_be_freed(address, true);
 
     const type_address = heap.allocate_any(type);
-    heap.set_cannnot_be_freed(type_address, true);
-
     heap.set_child(address, 0, type_address);
+
     for (let i = 0; i < args.length; i++) {
       const arg_address = heap.allocate_any(args[i]);
       heap.set_child(address, i + 1, arg_address);
     }
-
-    // Unmark cannot-be-free
-    heap.set_cannnot_be_freed(address, false);
-    heap.set_cannnot_be_freed(type_address, false);
 
     return address;
   }

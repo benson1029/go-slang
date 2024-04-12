@@ -17,16 +17,9 @@ class ControlChanReceive extends HeapObject {
 
   public static allocate(heap: Heap, name: any) {
     const address = heap.allocate_object(TAG_CONTROL_chan_receive, 1, 1);
-    heap.set_cannnot_be_freed(address, true);
 
     const name_address = heap.allocate_any(name);
-    heap.set_cannnot_be_freed(name_address, true);
-
     heap.set_child(address, 0, name_address);
-
-    // Unmark cannot-be-free
-    heap.set_cannnot_be_freed(address, false);
-    heap.set_cannnot_be_freed(name_address, false);
 
     return address;
   }

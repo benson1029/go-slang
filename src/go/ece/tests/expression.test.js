@@ -13,7 +13,10 @@ function evaluateExpression(expression) {
     `
     const parsed_program = parse(program);
     const heapSize = 8196;
-    return (new ECE(heapSize, parsed_program)).evaluate(true).output;
+    const return_value = (new ECE(heapSize, parsed_program)).evaluate(true).output;
+    const check_mark_and_sweep = (new ECE(heapSize, parsed_program)).evaluate(true, true).output;
+    expect(return_value).toBe(check_mark_and_sweep);
+    return return_value;
 }
 
 describe('Evaluating expressions', () => {

@@ -42,21 +42,12 @@ class ControlIndexAddress extends HeapObject {
 
   public static allocate(heap: Heap, array: any, index: any): number {
     const address = heap.allocate_object(TAG_CONTROL_index_address, 2, 2);
-    heap.set_cannnot_be_freed(address, true);
 
     const array_address = heap.allocate_any(array);
-    heap.set_cannnot_be_freed(array_address, true);
+    heap.set_child(address, 0, array_address);
 
     const index_address = heap.allocate_any(index);
-    heap.set_cannnot_be_freed(index_address, true);
-
-    heap.set_child(address, 0, array_address);
     heap.set_child(address, 1, index_address);
-
-    // Unmark cannot-be-free
-    heap.set_cannnot_be_freed(address, false);
-    heap.set_cannnot_be_freed(array_address, false);
-    heap.set_cannnot_be_freed(index_address, false);
 
     return address;
   }
