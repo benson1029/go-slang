@@ -40,6 +40,16 @@ class FunctionObject {
   }
 }
 
+class ForObject {
+  comp: any;
+  level: number;
+
+  constructor(comp: any, level: number) {
+    this.comp = comp;
+    this.level = level;
+  }
+}
+
 class DeclarationObject {
   captures: any[];
 
@@ -93,12 +103,14 @@ class Scope {
   variables: Map<string, Array<VariableObject | StructObject>>;
   function_declaration_stack: Array<FunctionObject>;
   current_declaration: DeclarationObject | null;
+  for_declaration_stack: Array<ForObject>;
 
   constructor() {
     this.frames = [new Map()];
     this.variables = new Map();
     this.function_declaration_stack = [];
     this.current_declaration = null;
+    this.for_declaration_stack = [];
   }
 
   level(): number {
@@ -619,7 +631,9 @@ const microcode_preprocess: {
     preprocess(comp.init, scope, type_check);
     const c = preprocess(comp.condition, scope, type_check);
     preprocess(comp.update, scope, type_check);
+    scope.for_declaration_stack.push(new ForObject(comp, scope.level()));
     preprocess(comp.body, scope, type_check);
+    scope.for_declaration_stack.pop();
     scope.popFrame();
     if (!type_check) {
       return new NilType();
@@ -637,7 +651,20 @@ const microcode_preprocess: {
     scope: Scope,
     type_check: boolean
   ) => {
-    // nothing to do
+    if (scope.for_declaration_stack.length === 0) {
+      throw new Error("Break statement outside of loop.");
+    }
+    if (scope.function_declaration_stack.length > 0) {
+      const for_level = scope.for_declaration_stack[
+        scope.for_declaration_stack.length - 1
+      ].level;
+      const function_level = scope.function_declaration_stack[
+        scope.function_declaration_stack.length - 1
+      ].level;
+      if (for_level < function_level) {
+        throw new Error("Break statement outside of loop.");
+      }
+    }
     return new NilType();
   },
 
@@ -648,7 +675,20 @@ const microcode_preprocess: {
     scope: Scope,
     type_check: boolean
   ) => {
-    // nothing to do
+    if (scope.for_declaration_stack.length === 0) {
+      throw new Error("Continue statement outside of loop.");
+    }
+    if (scope.function_declaration_stack.length > 0) {
+      const for_level = scope.for_declaration_stack[
+        scope.for_declaration_stack.length - 1
+      ].level;
+      const function_level = scope.function_declaration_stack[
+        scope.function_declaration_stack.length - 1
+      ].level;
+      if (for_level < function_level) {
+        throw new Error("Continue statement outside of loop.");
+      }
+    }
     return new NilType();
   },
 
