@@ -145,7 +145,7 @@ Literal "literal"
     / StringLiteral
 
 ReservedWord "reserved"
-    = "var" / "func" / "return" / "if" / "else" / "for" / "go" / "package" / "import" / "break" / "continue"
+    = "var" / "func" / "return" / "if" / "else" / "for" / "go" / "package" / "import" / "break" / "continue" / "case"
 
 PackageName "packageName"
     = [a-zA-Z_][a-zA-Z0-9_]* { return text(); }
