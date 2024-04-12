@@ -5,7 +5,6 @@ import { ComplexFunction } from "./complex/function";
 import { ComplexLinkedList } from "./complex/linked_list";
 import { ComplexMethod } from "./complex/method";
 import { ComplexMutex } from "./complex/mutex";
-import { ComplexPointer } from "./complex/pointer";
 import { ComplexString } from "./complex/string";
 import { ComplexWaitGroup } from "./complex/wait_group";
 import { ContextControl } from "./context/control";
@@ -61,7 +60,6 @@ import { ControlMethodMember } from "./control/method_member";
 import { ControlName } from "./control/name";
 import { ControlNameAddress } from "./control/name_address";
 import { ControlPopI } from "./control/pop_i";
-import { ControlPostfix } from "./control/postfix";
 import { ControlPushI } from "./control/push_i";
 import { ControlRestoreEnvI } from "./control/restore_env_i";
 import { ControlReturn } from "./control/return";
@@ -95,13 +93,11 @@ import {
   TAG_PRIMITIVE_rune,
   TAG_COMPLEX_string,
   TAG_COMPLEX_linked_list,
-  TAG_COMPLEX_pointer,
   TAG_CONTROL_name,
   TAG_CONTROL_literal,
   TAG_CONTROL_var,
   TAG_CONTROL_assign,
   TAG_CONTROL_unary,
-  TAG_CONTROL_postfix,
   TAG_CONTROL_binary,
   TAG_CONTROL_sequence,
   TAG_CONTROL_call,
@@ -165,7 +161,6 @@ import {
   TAG_CONTROL_chan_receive_stmt,
   TAG_USER_type_struct_decl,
   TAG_CONTROL_struct,
-  TAG_USER_type_method,
   TAG_CONTROL_method,
   TAG_CONTROL_member_address_i,
   TAG_COMPLEX_method,
@@ -206,7 +201,6 @@ import { UserTypeChannel } from "./user/type/channel";
 import { UserTypeFloat32 } from "./user/type/float32";
 import { UserTypeFunction } from "./user/type/function";
 import { UserTypeInt32 } from "./user/type/int32";
-import { UserTypeMethod } from "./user/type/method";
 import { UserTypeMutex } from "./user/type/mutex";
 import { UserTypeNil } from "./user/type/nil";
 import { UserTypeSlice } from "./user/type/slice";
@@ -234,8 +228,6 @@ function auto_cast(heap: Heap, address: number): HeapObject {
       return new ComplexString(heap, address);
     case TAG_COMPLEX_linked_list:
       return new ComplexLinkedList(heap, address);
-    case TAG_COMPLEX_pointer:
-      return new ComplexPointer(heap, address);
     case TAG_COMPLEX_array:
       return new ComplexArray(heap, address);
     case TAG_COMPLEX_function:
@@ -260,8 +252,6 @@ function auto_cast(heap: Heap, address: number): HeapObject {
       return new ControlAssignI(heap, address);
     case TAG_CONTROL_unary:
       return new ControlUnary(heap, address);
-    case TAG_CONTROL_postfix:
-      return new ControlPostfix(heap, address);
     case TAG_CONTROL_binary:
       return new ControlBinary(heap, address);
     case TAG_CONTROL_sequence:
@@ -428,8 +418,6 @@ function auto_cast(heap: Heap, address: number): HeapObject {
       return new UserTypeBuiltin(heap, address);
     case TAG_USER_type_struct_decl:
       return new UserTypeStructDecl(heap, address);
-    case TAG_USER_type_method:
-      return new UserTypeMethod(heap, address);
     case TAG_USER_type_mutex:
       return new UserTypeMutex(heap, address);
     case TAG_USER_type_wait_group:

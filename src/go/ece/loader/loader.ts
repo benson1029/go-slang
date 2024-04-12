@@ -22,8 +22,6 @@ function load(
   preprocess_program(program, imports, true);
   sort_global_declarations(program, imports, false);
 
-  tag_struct_methods(program);
-
   // // Stub for loading the main function directly:
   // let main = program.body.filter((x: any) => x.tag === "function" && x.name === "main")[0];
   // const _main_addr = heap.allocate_any(main.body.body);
@@ -81,27 +79,6 @@ function load(
           C.push(addr);
           heap.free_object(addr);
         }
-      }
-    }
-  }
-}
-
-function tag_struct_methods(program: any) {
-  let struct_methods = {};
-  for (let stmt of program.body) {
-    if (stmt.tag === "struct-method") {
-      struct_methods[stmt.struct.name] = struct_methods[stmt.struct.name] || [];
-      struct_methods[stmt.struct.name].push(stmt);
-    }
-  }
-  for (let stmt of program.body) {
-    if (stmt.tag === "struct") {
-      if (!struct_methods[stmt.name]) continue;
-      for (let method of struct_methods[stmt.name]) {
-        stmt.fields.push({
-          name: method.name,
-          type: { tag: "method-type" }
-        })
       }
     }
   }
