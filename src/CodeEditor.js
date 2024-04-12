@@ -97,7 +97,7 @@ function CodeEditor() {
         return () => {
             clearInterval(autoPlayTask);
         }
-    }, [autoPlay, snapshotStep, snapshots, tabIndex, speed]);
+    }, [autoPlay, snapshotStep, snapshots, tabIndex, speed, switchThread]);
 
     return (
         <>
