@@ -12,6 +12,7 @@ This report can be viewed online on [https://benson1029.github.io/go-slang/docs/
 
 ## Table of Contents
 
+- [Project Objectives](#project-objectives)
 - [Language Processing Steps](#language-processing-steps)
 - [ECE Specification](#ece-specification)
   - [Instruction Set](#instruction-set)
@@ -19,6 +20,22 @@ This report can be viewed online on [https://benson1029.github.io/go-slang/docs/
   - [Inference Rules for Selected Parts](#inference-rules-for-selected-parts)
 - [Project Source](#project-source)
 - [Test Cases](#test-cases)
+
+## Project Objectives
+
+We implement an explicit-control evaluator (ECE) for the following subset of the Go programming language:
+
+- Sequential constructs: Variable declarations and assignments, expressions, control flow (`if`, `for`), functions, and complex types (strings, structs, arrays, slices).
+- Concurrent constructs: Goroutines, mutex, wait groups, channels, and `select` statements.
+
+Additionally, we implement a low-level memory management system with both reference counting and mark-and-sweep garbage collection. All data structures, including control stack, heap, and environments, are stored in a single array buffer. We also implement a visualizer for the ECE machine.
+
+All objectives are met in the final implementation. However, the following language features are not in scope:
+
+- Sequential constructs: `switch` statements, `defer` statements, and `panic` and `recover` functions. Anonymous structs, indexing and slicing of strings, pointers, maps and tuples are also not implemented.
+- Concurrent constructs: Closing of channels is not implemented.
+
+The exact subset of the Go programming language that we support, along with some examples, can be found in the [language specification](/language-spec/quick-start) page.
 
 ## Language Processing Steps
 
@@ -137,7 +154,7 @@ The following tables show the instruction set of the ECE machine.
 | `SLICE_ADDRESS` | Slices an array | `array` (rvalue expression), `start` (rvalue expression), `end` (rvalue expression) | None |
 | `SLICE_ADDRESS_I` | Slices an array | None | `array` (address), `start` (value), `end` (value) |
 
-### Goroutines and Channels
+#### Goroutines and Channels
 
 | Instruction | Description | Parameters | Stash |
 | --- | --- | --- | --- |
@@ -163,14 +180,17 @@ We define the transition function $\rightrightarrows_S$ that maps the current sc
 
 ### Inference Rules for Selected Parts
 
-We define inference rules for selected instructions of our ECE machine, including:
-
-- [For Loop](#for-loop)
-- [Go Function Call](#go-function-call)
-- [Mutex Lock and Unlock](#mutex-lock-and-unlock)
-
+We define inference rules for selected instructions of our ECE machine.
 
 #### For Loop
+
+A for loop statement is defined in BNF as follows:
+
+```
+ForStmt = "for" WhiteSpace InitStmt ";" Expression ";" UpdStmt Block
+InitStmt = Assignment | VarDecl
+UpdStmt = Assignment | PostfixStmt
+```
 
 When the `FOR` instruction is executed, the `init` part is executed first, followed by the `condition` part. Next, the `FOR_I` instruction will checks for the result of evaluting the condition and determine the next steps. As `FOR_I` needs to know the loop variable, it is also determined and passed to the `FOR_I` instruction. The `FOR` instruction also needs to create a new environment frame for the loop variable (if any).
 
@@ -267,6 +287,12 @@ I \neq \texttt{MARKER\_I} \qquad I \neq \texttt{EXIT\_SCOPE\_I} \\ \hline
 
 
 #### Go Function Call
+
+A go function call is defined in BNF as follows:
+
+```
+GoStmt = "go" FunctionCall
+```
 
 When the `GO_CALL_STMT` instruction is executed, a new goroutine is created with the function call. The control stack of the new goroutine contains only the `CALL` instruction $I$, while the stash and environment are copied from the current goroutine.
 
