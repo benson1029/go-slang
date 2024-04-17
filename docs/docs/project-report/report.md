@@ -311,26 +311,40 @@ When `Lock()` is called on a mutex, the mutex is locked and the thread is pushed
 
 $\begin{matrix}
 M = (\texttt{false}, Q) \\ \hline
-(\texttt{CALL\_I} \ 0 \ldotp C, \texttt{sync.MutexLock (builtin)} \ldotp M \ldotp S, E) \ldotp T_{i_2} \ldotp \ldots \rightrightarrows_S T'_{i_2} \ldotp T'_{i_3} \ldotp \ldots \ldotp (C, S, E)
+(\texttt{CALL\_I} \ 0 \ldotp C, \texttt{sync.MutexLock (builtin)} \ldotp M \ldotp S, E) \ldotp T_{i_2} \ldotp \ldots \rightrightarrows_S T_{i_2} \ldotp T_{i_3} \ldotp \ldots \ldotp (C, S, E)
 \end{matrix}$
 
-where $T'_{i_2}, T'_{i_3}, \ldots$ are the threads in the scheduler after replacing all instances of $M = (\texttt{false}, Q)$ with $M' = (\texttt{true}, Q)$.
+where $M$ is replaced with $(\texttt{true}, Q)$.
 
 $\begin{matrix}
 M = (\texttt{true}, Q) \\ \hline
-(\texttt{CALL\_I} \ 0 \ldotp C, \texttt{sync.MutexLock (builtin)} \ldotp M \ldotp S, E) \ldotp T_{i_2} \ldotp \ldots \rightrightarrows_S T'_{i_2} \ldotp T'_{i_3} \ldotp \ldots
+(\texttt{CALL\_I} \ 0 \ldotp C, \texttt{sync.MutexLock (builtin)} \ldotp M \ldotp S, E) \ldotp T_{i_2} \ldotp \ldots \rightrightarrows_S T_{i_2} \ldotp T_{i_3} \ldotp \ldots
 \end{matrix}$
 
-where $T'_{i_2}, T'_{i_3}, \ldots$ are the threads in the scheduler after replacing all instances of $M = (\texttt{true}, Q)$ with $M' = (\texttt{true}, Q \ldotp (C, S, E))$.
+where $M$ is replaced with $(\texttt{true}, Q \ldotp (C, S, E))$.
 
-When `Unlock()` is called on a mutex, the mutex is unlocked and the first thread in the wait queue is popped and pushed into the scheduler.
+When `Unlock()` is called on a mutex, the mutex is unlocked and the first thread in the wait queue is popped and pushed into the scheduler (if any). It throws an error if the mutex is already unlocked.
 
 $\begin{matrix}
 M = (\texttt{true}, T_H \ldotp Q) \\ \hline
-(\texttt{CALL\_I} \ 0 \ldotp C, \texttt{sync.MutexUnlock (builtin)} \ldotp M \ldotp S, E) \ldotp T_{i_2} \ldotp \ldots \rightrightarrows_S T'_{i_2} \ldotp T'_{i_3} \ldotp \ldots \ldotp (C, S, E) \ldotp T_H
+(\texttt{CALL\_I} \ 0 \ldotp C, \texttt{sync.MutexUnlock (builtin)} \ldotp M \ldotp S, E) \ldotp T_{i_2} \ldotp \ldots \rightrightarrows_S T_{i_2} \ldotp T_{i_3} \ldotp \ldots \ldotp (C, S, E) \ldotp T_H
 \end{matrix}$
 
-where $T'_{i_2}, T'_{i_3}, \ldots$ are the threads in the scheduler after replacing all instances of $M = (\texttt{true}, T_H \ldotp Q)$ with $M' = (\texttt{false}, Q)$.
+where $M$ is replaced with $(\texttt{false}, Q)$.
+
+$\begin{matrix}
+M = (\texttt{true}, \varnothing) \\ \hline
+(\texttt{CALL\_I} \ 0 \ldotp C, \texttt{sync.MutexUnlock (builtin)} \ldotp M \ldotp S, E) \ldotp T_{i_2} \ldotp \ldots \rightrightarrows_S T_{i_2} \ldotp T_{i_3} \ldotp \ldots \ldotp (C, S, E)
+\end{matrix}$
+
+where $M$ is replaced with $(\texttt{false}, \varnothing)$.
+
+$\begin{matrix}
+M = (\texttt{false}, Q) \\ \hline
+(\texttt{CALL\_I} \ 0 \ldotp C, \texttt{sync.MutexUnlock (builtin)} \ldotp M \ldotp S, E) \ldotp T_{i_2} \ldotp \ldots \rightrightarrows_S \varepsilon
+\end{matrix}$
+
+where $\varepsilon$ is the error state.
 
 The implementation of channels uses the same idea, except that there is one waiting queue for sending and one waiting queue for receiving. Also, they use specialized instructions `CHAN_SEND_I` and `CHAN_RECEIVE_I` rather than using built-in functions.
 
