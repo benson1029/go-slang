@@ -177,6 +177,141 @@ func main() {
 }
 ```
 
+## Concurrent Constructs
+
+### Increment with a Race Condition
+
+```go
+package main
+
+import (
+    "fmt"
+    "sync"
+)
+
+var x = 0
+
+func increment(wg sync.WaitGroup) {
+    for i := 0; i < 100; i++ {
+        x++
+    }
+    wg.Done()
+}
+
+func main() {
+    var wg sync.WaitGroup
+    for i := 0; i < 10; i++ {
+        wg.Add(1)
+        go increment(wg)
+    }
+    wg.Wait()
+    fmt.Println(x) // does not print 1000
+}
+```
+
+### Increment with Synchronization (mutex)
+
+```go
+package main
+
+import (
+    "fmt"
+    "sync"
+)
+
+var x = 0
+
+func increment(wg sync.WaitGroup, m sync.Mutex) {
+    for i := 0; i < 100; i++ {
+        m.Lock()
+        x++
+        m.Unlock()
+    }
+    wg.Done()
+}
+
+func main() {
+    var wg sync.WaitGroup
+    var m sync.Mutex
+    for i := 0; i < 10; i++ {
+        wg.Add(1)
+        go increment(wg, m)
+    }
+    wg.Wait()
+    fmt.Println(x) // prints 1000
+}
+```
+
+### Increment with Synchronization (channel)
+
+```go
+package main
+
+import (
+    "fmt"
+    "sync"
+)
+
+var x = 0
+
+func increment(wg sync.WaitGroup, ch chan int32) {
+    for i := 0; i < 100; i++ {
+        ch <- 1
+        x++
+        <-ch
+    }
+    wg.Done()
+}
+
+func main() {
+    var wg sync.WaitGroup
+    ch := make(chan int32, 1)
+    for i := 0; i < 10; i++ {
+        wg.Add(1)
+        go increment(wg, ch)
+    }
+    wg.Wait()
+    fmt.Println(x) // prints 1000
+}
+```
 
 
+### Producer-Consumer
 
+```go
+package main
+
+import (
+    "fmt"
+    "sync"
+)
+
+var wg sync.WaitGroup
+var m sync.Mutex
+
+func producer(ch chan int32) {
+    for i := 0; i < 10; i++ {
+        m.Lock()
+        ch <- i
+        m.Unlock()
+    }
+    wg.Done()
+}
+
+func consumer(ch chan int32) {
+    for i := 0; i < 10; i++ {
+        m.Lock()
+        fmt.Println(<-ch)
+        m.Unlock()
+    }
+    wg.Done()
+}
+
+func main() {
+    ch := make(chan int32, 10)
+    wg.Add(2)
+    go producer(ch)
+    go consumer(ch)
+    wg.Wait()
+}
+```
