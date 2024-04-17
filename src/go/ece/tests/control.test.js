@@ -311,4 +311,22 @@ describe('Evaluating control structures', () => {
         fmt.Println(f())
         `)).toBe("1\n3\n5\n7\n9\n9\n");
     })
+
+    it("continue without a loop variable", () => {
+        expect(evaluateSequence(`
+        var i int32
+        var f func() int32
+        for i = 0; i < 10; i++ {
+            if i == 0 {
+                f = func() int32 {
+                    return i
+                }
+            }
+            i++
+            continue
+            fmt.Println("unreachable")
+        }
+        fmt.Println(f())
+        `)).toBe("10\n")
+    })
 })
