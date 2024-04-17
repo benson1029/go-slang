@@ -167,6 +167,7 @@ We define inference rules for selected instructions of our ECE machine, includin
 
 - [For Loop](#for-loop)
 - [Go Function Call](#go-function-call)
+- [Mutex Lock and Unlock](#mutex-lock-and-unlock)
 
 
 #### For Loop
@@ -275,6 +276,37 @@ $\begin{matrix}
 \hline
 (\texttt{GO\_CALL\_STMT} \ I \ldotp C, S, E) \ldotp T_{i_2} \ldotp \ldots \rightrightarrows_S T_{i_2} \ldotp \ldots \ldotp (C, S, E) \ldotp (I, S, E)
 \end{matrix}$
+
+#### Mutex Lock and Unlock
+
+Mutex is implemented as a struct, which contains a special heap object as its member. We define a mutex as a tuple $(s, Q)$ where $s$ is the state of the mutex (`true` if locked and `false` if unlocked) and $Q$ is its wait queue (a list of threads, similar to the scheduler).
+
+When `Lock()` is called on a mutex, the mutex is locked and the thread is pushed into the scheduler if it is unlocked. Otherwise, the current thread is added to the wait queue of the mutex.
+
+$\begin{matrix}
+M = (\texttt{false}, Q) \\ \hline
+(\texttt{CALL\_I} \ 0 \ldotp C, \texttt{sync.MutexLock (builtin)} \ldotp M \ldotp S, E) \ldotp T_{i_2} \ldotp \ldots \rightrightarrows_S T'_{i_2} \ldotp T'_{i_3} \ldotp \ldots \ldotp (C, S, E)
+\end{matrix}$
+
+where $T'_{i_2}, T'_{i_3}, \ldots$ are the threads in the scheduler after replacing all instances of $M = (\texttt{false}, Q)$ with $M' = (\texttt{true}, Q)$.
+
+$\begin{matrix}
+M = (\texttt{true}, Q) \\ \hline
+(\texttt{CALL\_I} \ 0 \ldotp C, \texttt{sync.MutexLock (builtin)} \ldotp M \ldotp S, E) \ldotp T_{i_2} \ldotp \ldots \rightrightarrows_S T'_{i_2} \ldotp T'_{i_3} \ldotp \ldots
+\end{matrix}$
+
+where $T'_{i_2}, T'_{i_3}, \ldots$ are the threads in the scheduler after replacing all instances of $M = (\texttt{true}, Q)$ with $M' = (\texttt{true}, Q \ldotp (C, S, E))$.
+
+When `Unlock()` is called on a mutex, the mutex is unlocked and the first thread in the wait queue is popped and pushed into the scheduler.
+
+$\begin{matrix}
+M = (\texttt{true}, T_H \ldotp Q) \\ \hline
+(\texttt{CALL\_I} \ 0 \ldotp C, \texttt{sync.MutexUnlock (builtin)} \ldotp M \ldotp S, E) \ldotp T_{i_2} \ldotp \ldots \rightrightarrows_S T'_{i_2} \ldotp T'_{i_3} \ldotp \ldots \ldotp (C, S, E) \ldotp T_H
+\end{matrix}$
+
+where $T'_{i_2}, T'_{i_3}, \ldots$ are the threads in the scheduler after replacing all instances of $M = (\texttt{true}, T_H \ldotp Q)$ with $M' = (\texttt{false}, Q)$.
+
+The implementation of channels uses the same idea, except that there is one waiting queue for sending and one waiting queue for receiving. Also, they use specialized instructions `CHAN_SEND_I` and `CHAN_RECEIVE_I` rather than using built-in functions.
 
 
 ## Project Source
