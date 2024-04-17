@@ -64,8 +64,8 @@ const config: Config = {
           label: 'Language Specification',
         },
         {
-          type: 'docSidebar',
-          sidebarId: 'reportSidebar',
+          type: 'doc',
+          docId: 'project-report/report',
           position: 'left',
           label: 'Project Report',
         },

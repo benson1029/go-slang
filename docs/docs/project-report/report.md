@@ -1,7 +1,3 @@
----
-sidebar_position: 1
----
-
 # CS4215 Project Report
 
 **Title**: Explicit-control evaluator (ECE) for Go
