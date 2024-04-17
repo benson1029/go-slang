@@ -20,7 +20,7 @@ This report can be viewed online on [https://benson1029.github.io/go-slang/docs/
 - [ECE Specification](#ece-specification)
   - [Instruction Set](#instruction-set)
   - [State Representation](#state-representation)
-  - [Inference Rules for Some Parts](#inference-rules-for-some-parts)
+  - [Inference Rules for Selected Parts](#inference-rules-for-selected-parts)
 - [Project Source](#project-source)
 - [Test Cases](#test-cases)
 
@@ -83,7 +83,7 @@ The following tables show the instruction set of the ECE machine.
 | `IF` | Conditional statement | `condition` (rvalue expression), `then_body` (block), `else_body` (block) | None |
 | `IF_I` | Conditional statement | `then_body` (block), `else_body` (block) | `condition` (boolean) |
 | `FOR` | Iterative statement | `init` (statement), `condition` (rvalue expression), `update` (statement), `body` (block) | None |
-| `FOR_I` | Iterative statement | `condition` (rvalue expression), `update` (statement), `body` (block) | `condition` (boolean) |
+| `FOR_I` | Iterative statement | `condition` (rvalue expression), `update` (statement), `body` (block), `loopVar` (name or null) | `condition` (boolean) |
 | `MARKER_I` | Marker to signify the end of the loop body | None | None |
 | `BREAK` | Breaks out of the loop | None | None |
 | `CONTINUE` | Continues to the next iteration of the loop | None | None |
@@ -159,15 +159,125 @@ The following tables show the instruction set of the ECE machine.
 
 ### State Representation
 
-TODO
+The state of the ECE machine is the scheduler $S = T_{i_1} \ldotp T_{i_2} \ldotp \ldots$, where $T_{i_1}, T_{i_2}, \ldots$ are the threads in the scheduler (unblocked). Each thread $T_i$ is a tuple $(C, S, E)$, where $C$ is the control stack, $S$ is the stash, and $E$ is the environment.
 
-### Inference Rules for Some Parts
+The control stack and the stash are represented as the concatenation of its elements $x_1 \ldotp x_2 \ldotp x_3 \ldotp \ldots \ldotp x_k$. The environment is a tuple $(\Delta_N, \Delta_S)$, where $\Delta_N$ and $\Delta_S$ are the name and struct frames, respectively. We define $\Delta[x \leftarrow v]$ as the environment frame $\Delta$ with the variable $x$ bound to the value $v$, $\varnothing \ldotp \Delta$ as the environment frame $\Delta$ with a new empty child frame, and $\Delta(x)$ be the value bound to the variable $x$ in the environment frame $\Delta$.
 
-Inference rule sample:
+We define the transition function $\rightrightarrows_S$ that maps the current scheduler $S$ to the scheduler $S'$ after evaluation, i.e. $S \rightrightarrows_S S'$.
+
+### Inference Rules for Selected Parts
+
+We define inference rules for selected instructions of our ECE machine, including:
+
+- [For Loop](#for-loop)
+- [Go Function Call](#go-function-call)
+
+
+#### For Loop
+
+When the `FOR` instruction is executed, the `init` part is executed first, followed by the `condition` part. Next, the `FOR_I` instruction will checks for the result of evaluting the condition and determine the next steps. As `FOR_I` needs to know the loop variable, it is also determined and passed to the `FOR_I` instruction. The `FOR` instruction also needs to create a new environment frame for the loop variable (if any).
+
+This is shown in the following inference rules:
 
 $\begin{matrix}
-\Delta'' = \Delta' [x_1 \leftarrow v_1] \cdots [x_n \leftarrow v_n] \\ \hline
-(v_n \ldotp \ldots \ldotp v_1 \ldotp \texttt{CLOSURE} \ (x_1, \ldots, x_n) \ p \ \Delta' \ldotp s, \texttt{APPLY} \ n \ldotp c, \Delta) \rightrightarrows_S (s, p \ldotp \texttt{MARK} \ldotp \texttt{ENV} \ \Delta \ldotp c, \Delta'')
+\texttt{init} = \texttt{VAR} \ x \ E \\ \hline
+(\texttt{FOR} \ \texttt{init} \ \texttt{condition} \ \texttt{update} \ \texttt{body} \ \ldotp C, S, (\Delta_N, \Delta_S)) \ldotp T_{i_2} \ldotp \ldots \\
+\rightrightarrows_S T_{i_2} \ldotp \ldots \ldotp (\texttt{init} \ldotp \texttt{condition} \ldotp \texttt{FOR\_I} \ \texttt{condition} \ \texttt{update} \ \texttt{body} \ x  \ldotp \texttt{EXIT\_SCOPE\_I} \ldotp C, S, (\varnothing \ldotp \Delta_N, \Delta_S))
+\end{matrix}$
+
+$\begin{matrix}
+\texttt{init} \neq \texttt{VAR} \ x \ E \\ \hline
+(\texttt{FOR} \ \texttt{init} \ \texttt{condition} \ \texttt{update} \ \texttt{body} \ \ldotp C, S, (\Delta_N, \Delta_S)) \ldotp T_{i_2} \ldotp \ldots \\
+\rightrightarrows_S T_{i_2} \ldotp \ldots \ldotp (\texttt{init} \ldotp \texttt{condition} \ldotp \texttt{FOR\_I} \ \texttt{condition} \ \texttt{update} \ \texttt{body} \ \texttt{nil}  \ldotp \texttt{EXIT\_SCOPE\_I} \ldotp C, S, (\varnothing \ldotp \Delta_N, \Delta_S)) 
+\end{matrix}$
+
+When the `FOR_I` instruction is executed, it takes the topmost value in the stash as the result of the condition. If the condition is true, the `body` is executed, followed by the `update` part, the `condition` part, and the `FOR_I` instruction again. If the condition is false, the loop is exited.
+
+If there is a loop variable, a new environment frame is created for an iteration-scope copy of the loop variable. This copy should be copied back to the loop-scope variable at the end of the iteration.
+
+Additionally, there is a `MARKER_I` instruction after the `body` to handle `CONTINUE` instructions. We cannot use `FOR_I` as the marker since the copying of the loop variable must be done after a `CONTINUE`.
+
+This is shown in the following inference rules:
+
+$\begin{matrix}
+I = \texttt{FOR\_I} \ \texttt{condition} \ \texttt{update} \ \texttt{body} \ \texttt{loopVar} \qquad \texttt{loopVar} = \texttt{nil} \\ \hline
+(I \ \ldotp C, \texttt{true} \ldotp S, (\Delta_N, \Delta_S)) \ldotp T_{i_2} \ldotp \ldots \\
+\rightrightarrows_S T_{i_2} \ldotp \ldots \ldotp (I \ldotp \texttt{condition} \ldotp \texttt{update} \ldotp \texttt{MARKER\_I} \ldotp \texttt{body} \ldotp C, S, (\Delta_N, \Delta_S))
+\end{matrix}$
+
+$\begin{matrix}
+I = \texttt{FOR\_I} \ \texttt{condition} \ \texttt{update} \ \texttt{body} \ \texttt{loopVar} \qquad \texttt{loopVar} = x \neq \texttt{nil} \\ \hline
+(I \ \ldotp C, \texttt{true} \ldotp S, (\Delta_N, \Delta_S)) \ldotp T_{i_2} \ldotp \ldots \\
+\rightrightarrows_S T_{i_2} \ldotp \ldots \ldotp (I \ldotp \texttt{condition} \ldotp \texttt{update} \ldotp \texttt{ASSIGN\_I} \ldotp \texttt{NAME\_ADDRESS} \ x \ldotp \texttt{EXIT\_SCOPE\_I} \ldotp \texttt{NAME} \ x \ldotp \\ \texttt{MARKER\_I} \ldotp \texttt{body} \ldotp C, S, (\Delta_N, \varnothing[x \leftarrow \Delta_S(x)] \ldotp \Delta_S))
+\end{matrix}$
+
+:::info
+
+$\varnothing[x \leftarrow \Delta_S(x)] \ldotp \Delta_S$ is the environment frame $\Delta_S$ with a new child frame containing a copy of the variable $x$. After the loop body is executed, the `NAME` instruction retrieves the value of the loop variable from the iteration-scope copy, the `NAME_ADDRESS` instruction (after `EXIT_SCOPE_I`) retrieves the address of the loop variable in the loop-scope frame, and the `ASSIGN_I` instruction assigns the value of the loop variable to the loop-scope frame.
+
+:::
+
+The evaluation of a `MARKER_I` instruction does not produce side effects:
+
+$\begin{matrix}
+\hline
+(\texttt{MARKER\_I} \ \ldotp C, S, E) \ldotp T_{i_2} \ldotp \ldots \rightrightarrows_S T_{i_2} \ldotp \ldots \ldotp (C, S, E)
+\end{matrix}$
+
+A `BREAK` instruction will create a `BREAK_I` instruction in the control stack, which pops from the control stack until it pops out the `FOR_I` instruction. On the other hand, a `CONTINUE` instruction will create a `CONTINUE_I` instruction in the control stack, which pops from the control stack until it pops out the `MARKER_I` instruction. All instructions except `EXIT_SCOPE_I` will be ignored during the popping process.
+
+This is shown in the following inference rules:
+
+$\begin{matrix}
+\hline
+(\texttt{BREAK} \ldotp C, S, E) \ldotp T_{i_2} \ldotp \ldots \rightrightarrows_S T_{i_2} \ldotp \ldots \ldotp (\texttt{BREAK\_I} \ldotp C, S, E)
+\end{matrix}$
+
+$\begin{matrix}
+I = \texttt{FOR\_I} \\ \hline
+(\texttt{BREAK\_I} \ldotp I \ldotp C, S, E) \ldotp T_{i_2} \ldotp \ldots \rightrightarrows_S T_{i_2} \ldotp \ldots \ldotp (C, S, E)
+\end{matrix}$
+
+$\begin{matrix}
+I = \texttt{EXIT\_SCOPE\_I} \\ \hline
+(\texttt{BREAK\_I} \ldotp I \ldotp C, S, (F \ldotp \Delta_N, \Delta_S)) \ldotp T_{i_2} \ldotp \ldots \rightrightarrows_S T_{i_2} \ldotp \ldots \ldotp (\texttt{BREAK\_I} \ldotp C, S, (\Delta_N, \Delta_S))
+\end{matrix}$
+
+$\begin{matrix}
+I \neq \texttt{FOR\_I} \qquad I \neq \texttt{EXIT\_SCOPE\_I} \\ \hline
+(\texttt{BREAK\_I} \ldotp I \ldotp C, S, E) \ldotp T_{i_2} \ldotp \ldots \rightrightarrows_S T_{i_2} \ldotp \ldots \ldotp (\texttt{BREAK\_I} \ldotp C, S, E)
+\end{matrix}$
+
+$\begin{matrix}
+\hline
+(\texttt{CONTINUE} \ldotp C, S, E) \ldotp T_{i_2} \ldotp \ldots \rightrightarrows_S T_{i_2} \ldotp \ldots \ldotp (\texttt{CONTINUE\_I} \ldotp C, S, E)
+\end{matrix}$
+
+$\begin{matrix}
+I = \texttt{MARKER\_I} \\ \hline
+(\texttt{CONTINUE\_I} \ldotp I \ldotp C, S, E) \ldotp T_{i_2} \ldotp \ldots \rightrightarrows_S T_{i_2} \ldotp \ldots \ldotp (I \ldotp C, S, E) 
+\end{matrix}$
+
+$\begin{matrix}
+I = \texttt{EXIT\_SCOPE\_I} \\ \hline
+(\texttt{CONTINUE\_I} \ldotp I \ldotp C, S, (F \ldotp \Delta_N, \Delta_S)) \ldotp T_{i_2} \ldotp \ldots \rightrightarrows_S T_{i_2} \ldotp \ldots \ldotp (\texttt{CONTINUE\_I} \ldotp C, S, (\Delta_N, \Delta_S))
+\end{matrix}$
+
+$\begin{matrix}
+I \neq \texttt{MARKER\_I} \qquad I \neq \texttt{EXIT\_SCOPE\_I} \\ \hline
+(\texttt{CONTINUE\_I} \ldotp I \ldotp C, S, E) \ldotp T_{i_2} \ldotp \ldots \rightrightarrows_S T_{i_2} \ldotp \ldots \ldotp (\texttt{CONTINUE\_I} \ldotp C, S, E)
+\end{matrix}$
+
+
+#### Go Function Call
+
+When the `GO_CALL_STMT` instruction is executed, a new goroutine is created with the function call. The control stack of the new goroutine contains only the `CALL` instruction $I$, while the stash and environment are copied from the current goroutine.
+
+This is shown in the following inference rules:
+
+$\begin{matrix}
+\hline
+(\texttt{GO\_CALL\_STMT} \ I \ldotp C, S, E) \ldotp T_{i_2} \ldotp \ldots \rightrightarrows_S T_{i_2} \ldotp \ldots \ldotp (C, S, E) \ldotp (I, S, E)
 \end{matrix}$
 
 
