@@ -163,7 +163,12 @@ TODO
 
 ### Inference Rules for Some Parts
 
-TODO
+Inference rule sample:
+
+$\begin{matrix}
+\Delta'' = \Delta' [x_1 \leftarrow v_1] \cdots [x_n \leftarrow v_n] \\ \hline
+(v_n \ldotp \ldots \ldotp v_1 \ldotp \texttt{CLOSURE} \ (x_1, \ldots, x_n) \ p \ \Delta' \ldotp s, \texttt{APPLY} \ n \ldotp c, \Delta) \rightrightarrows_S (s, p \ldotp \texttt{MARK} \ldotp \texttt{ENV} \ \Delta \ldotp c, \Delta'')
+\end{matrix}$
 
 
 ## Project Source
