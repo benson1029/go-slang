@@ -70,7 +70,7 @@ class ComplexString extends HeapObject {
   }
 
   public to_object(): any {
-    return this.get_string();
+    return "\"" + this.get_string() + "\"";
   }
 }
 
