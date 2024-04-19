@@ -14,34 +14,35 @@ This report can be viewed online on [https://benson1029.github.io/go-slang/docs/
 
 ## Table of Contents
 
-- [Table of Contents](#table-of-contents)
-- [Project Objectives](#project-objectives)
-- [Language Processing Steps](#language-processing-steps)
-- [ECE Specification](#ece-specification)
-  - [Instruction Set](#instruction-set)
-    - [Helper Instructions](#helper-instructions)
-    - [Expressions](#expressions)
-    - [Variables](#variables)
-    - [Control Flow](#control-flow)
-    - [Functions](#functions)
-    - [Constructors](#constructors)
-    - [Arrays](#arrays)
-    - [Structs](#structs)
-    - [Slices](#slices)
-    - [Goroutines and Channels](#goroutines-and-channels)
-  - [State Representation](#state-representation)
-  - [Inference Rules for Selected Parts](#inference-rules-for-selected-parts)
-    - [Helper Instructions](#helper-instructions-1)
-    - [Expressions](#expressions-1)
-    - [Variables](#variables-1)
-    - [Sequence and Block](#sequence-and-block)
-    - [For Loop](#for-loop)
-    - [Go Function Call](#go-function-call)
-    - [Mutex Lock and Unlock](#mutex-lock-and-unlock)
-    - [Channel Send and Receive](#channel-send-and-receive)
-    - [Select Statement](#select-statement)
-- [Project Source](#project-source)
-- [Test Cases](#test-cases)
+- [CS4215 Project Report](#cs4215-project-report)
+  - [Table of Contents](#table-of-contents)
+  - [Project Objectives](#project-objectives)
+  - [Language Processing Steps](#language-processing-steps)
+  - [ECE Specification](#ece-specification)
+    - [Instruction Set](#instruction-set)
+      - [Helper Instructions](#helper-instructions)
+      - [Expressions](#expressions)
+      - [Variables](#variables)
+      - [Control Flow](#control-flow)
+      - [Functions](#functions)
+      - [Constructors](#constructors)
+      - [Arrays](#arrays)
+      - [Structs](#structs)
+      - [Slices](#slices)
+      - [Goroutines and Channels](#goroutines-and-channels)
+    - [State Representation](#state-representation)
+    - [Inference Rules for Selected Parts](#inference-rules-for-selected-parts)
+      - [Helper Instructions](#helper-instructions-1)
+      - [Expressions](#expressions-1)
+      - [Variables](#variables-1)
+      - [Sequence and Block](#sequence-and-block)
+      - [For Loop](#for-loop)
+      - [Go Function Call](#go-function-call)
+      - [Mutex Lock and Unlock](#mutex-lock-and-unlock)
+      - [Channel Send and Receive](#channel-send-and-receive)
+      - [Select Statement](#select-statement)
+  - [Project Source](#project-source)
+  - [Test Cases](#test-cases)
 
 ## Project Objectives
 
@@ -201,7 +202,7 @@ $\mathbin\Vert$ denotes the concatenation of two elements. For example, $x \math
 
 :::
 
-The ECE machine has the scheduler $\mathcal{T} = T_{i_1} \mathbin\Vert T_{i_2} \mathbin\Vert \ldots$, where $T_{i_1}, T_{i_2}, \ldots$ are the (unblocked) threads in the scheduler. Each thread $T_i$ is a tuple $(C, S, E)$, where $C$ is the control stack, $S$ is the stash, and $E$ is the environment.
+The ECE machine has the scheduler $\mathcal{T} = T_{i_1} \mathbin\Vert T_{i_2} \mathbin\Vert \ldots$, where $T_{i_1}, T_{i_2}, \ldots$ are the (unblocked) threads in the scheduler. Each thread $T_i$ is a tuple $(C, S, E)$, where $C$ is the control stack (containing instructions), $S$ is the stash (containing runtime values for instructions), and $E$ is the environment.
 
 The control stack and the stash are represented as the concatenation of its elements $x_1 \mathbin\Vert x_2 \mathbin\Vert x_3 \mathbin\Vert \ldots \mathbin\Vert x_k$. The environment is a tuple $E = (\Delta_N, \Delta_S)$, where $\Delta_N$ and $\Delta_S$ are the name and struct frames, respectively. $\Delta_N$ is a concatenation of environment frames $\Delta_1 \mathbin\Vert \Delta_2 \mathbin\Vert \ldots \mathbin\Vert \Delta_n$, where each environment frame $\Delta_i$ is a hash table that maps variable names to its address in the heap. 
 
@@ -213,14 +214,19 @@ We define the following operations on the environment:
 - $\Delta(x)$ is the value bound to the variable $x$ in the environment frame $\Delta$.
 - $\Delta(x)_a$ is the address of the variable $x$ in the environment frame $\Delta$.
 
-If we update the value of an object in address $a$ to a new value $v$, this change is reflected in all threads that have a reference to the address $a$. As this is a *global change*, we denote this operation as $\mathcal{H}[a \gets v]$, where $\mathcal{H}$ is the heap. Similarly, we can denote $\mathcal{H}(a)$ as the value at address $a$ in the heap. Therefore,
+If we update the value of an object in address $a$ to a new value $v$, this change is reflected in all threads that have a reference to the address $a$. As this is a *global change*, we denote this operation as $\mathcal{H}[a \gets v]$, where $\mathcal{H}$ is the heap. Similarly, we can denote $\mathcal{H}(a)$ as the value at address $a$ in the heap.
+
+However, it's not just the values of environment variables which are stored in the heap. The scheduler $\mathcal{T}$, each of its threads $T_i = (C_i, S_i, E_i)$, the control stack $C_i$, the stash $S_i$, and the environment $E_i = (\Delta_{N_i}, \Delta_{S_i})$ are all stored in the heap. We denote the address $\mathcal{T}_a$ of the scheduler in the heap such that $\mathcal{H}(\mathcal{T}_a) = \mathcal{T}$.
+
+Therefore, since all objects determining the state of the ECE machine are stored in the heap,
 
 :::info
 
-The *state* of the ECE machine is a tuple $(\mathcal{T}, \mathcal{H})$, where $\mathcal{T}$ is the scheduler and $\mathcal{H}$ is the heap. 
+The *state* of the ECE machine is the heap $\mathcal{H}$.
 
-Note that the scheduler $\mathcal{T}$ also resides in the heap, but we treat it as a separate entity in this report for clarity.
+For clarity, however, we will slightly abuse notation and denote the state of the ECE machine as $(\mathcal{T}, \mathcal{H})$, where $\mathcal{T} = \mathcal{H}(\mathcal{T}_a)$. It is important to remember that this is a shorthand notation to easily refer to the scheduler $\mathcal{T}$, and the actual state of the ECE machine only depends on the heap $\mathcal{H}$. 
 
+This shorthand notation allows us to treat $\mathcal{T}$ as if it's a separate entity from the heap $\mathcal{H}$, but note that any changes to $\mathcal{T}$ are also reflected in $\mathcal{H}$. In other words, we can view $\mathcal{T}$ in $(\mathcal{T}, \mathcal{H})$ as a (mutable) reference to the scheduler object in the heap $\mathcal{H}(\mathcal{T}_a)$.
 :::
 
 We define the transition function $\rightrightarrows_{\mathcal{T}, \mathcal{H}}$ that maps the current state $(\mathcal{T}, \mathcal{H})$ to the next state $(\mathcal{T}', \mathcal{H}')$ after evaluation, i.e. $(\mathcal{T}, \mathcal{H}) \rightrightarrows_{\mathcal{T}, \mathcal{H}} (\mathcal{T}', \mathcal{H}')$.
