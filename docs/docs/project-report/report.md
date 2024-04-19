@@ -703,10 +703,12 @@ In our actual implementation, we also allow $\texttt{case\_receive}$ to have an 
 
 When `SELECT_I` is executed, it will randomly choose one of the cases that can proceed without blocking, and execute the $\texttt{body}$ of the case. If all cases would block, it will block until one of the cases can proceed.
 
+Since we need to be able to add $\texttt{body}$ to the top of the control stack, we need to encode it in $\texttt{WaitingInstance}$. We define $\texttt{WaitingInstance}_{W, \varnothing, b}$, where $b$ is the body of the `case` (possibly $b = \varnothing$). It is straightforward to modify the inference rules for `CHAN_SEND_I` and `CHAN_RECEIVE_I` described in the channel section to also push $b$ into the control stack.
+
 To write all possible inference rules mathematically for $n$ cases would take an exponential amount of space; however, algorithmically, it is straightforward to implement with multiple `if` statements. Therefore, for simplicity, we will only show the inference rule for the following `SELECT_I` instruction:
 - There are two `case`s with a channel send and a channel receive, respectively.
-- The first `case` is a channel send is on a channel $X$ with a value $V$ to be sent, and it has a body $b_1$.
-- The second `case` is a channel receive is on a channel $Y$, and it has a body $b_2$. The return value of the receive is pushed into the stash. In the actual implementation, the first instruction of $b_2$ is either an `ASSIGN` instruction (to assign the received value on top of the stash to a variable) or a `POP` instruction (to pop the received value from the stash). We assume $b_2$ follows this convention.
+- The first `case` is a channel send is on a channel $X$ with a value $V$ to be sent, and it has a body $b_X$.
+- The second `case` is a channel receive is on a channel $Y$, and it has a body $b_Y$. The return value of the receive is pushed into the stash. In the actual implementation, the first instruction of $b_Y$ is either an `ASSIGN` instruction (to assign the received value on top of the stash to a variable) or a `POP` instruction (to pop the received value from the stash). We assume $b_Y$ follows this convention.
 - $X$ and $Y$ are different channels, and both channels are not unbuffered ($\texttt{cap}(X) > 0$ and $\texttt{cap}(Y) > 0$).
 - If $Q_{XR}$ is non-empty, then the frontmost $\texttt{WaitingInstance}$ in $Q_{XR}$ does not hold $\texttt{Waker}_{\varnothing}$.
 - If $Q_{YS}$ is non-empty, then the frontmost $\texttt{WaitingInstance}$ in $Q_{YS}$ does not hold $\texttt{Waker}_{\varnothing}$.
@@ -718,7 +720,7 @@ $\begin{matrix}
 X = \mathcal{H}(X_a) = (B_X, Q_{XS}, \texttt{WaitingInstance}_{W, \varnothing} \mathbin\Vert Q_{XR}) \qquad \texttt{len}(B_X) = 0 \qquad W = \texttt{Waker}_{(C_W, S_W, E_W)} \\ \hline
 ((\texttt{SELECT\_I} \ \texttt{cases} \mathbin\Vert C, X \mathbin\Vert V \mathbin\Vert Y \mathbin\Vert S, E) \mathbin\Vert \mathcal{T}, \mathcal{H})
 \rightrightarrows_{\mathcal{T}, \mathcal{H}} \\
-\left(\mathcal{T} \mathbin\Vert (b_1 \mathbin\Vert C, S, E) \mathbin\Vert
+\left(\mathcal{T} \mathbin\Vert (b_X \mathbin\Vert C, S, E) \mathbin\Vert
 (C_W, V \mathbin\Vert S_W, E_W), \mathcal{H}\left[X_a \gets (B_X, Q_{XS}, Q_{XR})\right]\right)
 \end{matrix}$
 
@@ -726,7 +728,7 @@ $\begin{matrix}
 X = \mathcal{H}(X_a) = (B_X, Q_{XS}, Q_{XR}) \qquad \texttt{len}(Q_{XR}) = 0 \qquad \texttt{len}(B_X) < \texttt{cap}(B_X) \\ \hline
 ((\texttt{SELECT\_I} \ \texttt{cases} \mathbin\Vert C, X \mathbin\Vert V \mathbin\Vert Y \mathbin\Vert S, E) \mathbin\Vert \mathcal{T}, \mathcal{H})
 \rightrightarrows_{\mathcal{T}, \mathcal{H}} \\
-\left(\mathcal{T} \mathbin\Vert (b_1 \mathbin\Vert C, S, E), \mathcal{H}\left[X_a \gets (B_X \mathbin\Vert V, Q_{XS}, Q_{XR})\right]\right)
+\left(\mathcal{T} \mathbin\Vert (b_X \mathbin\Vert C, S, E), \mathcal{H}\left[X_a \gets (B_X \mathbin\Vert V, Q_{XS}, Q_{XR})\right]\right)
 \end{matrix}$
 
 If the channel $X$ would block, and the channel $Y$ can proceed without blocking, we have the following inference rule. Note that it is very similar to the inference rules for `CHAN_RECEIVE_I`.
@@ -736,7 +738,7 @@ X = \mathcal{H}(X_a) = (B_X, Q_{XS}, Q_{XR}) \qquad \texttt{len}(Q_{XR}) = 0 \qq
 Y = \mathcal{H}(Y_a) = (V_Y \mathbin\Vert B_Y, \texttt{WaitingInstance}_{W, V_Y'} \mathbin\Vert Q_{YS}, Q_{YR})  \qquad \texttt{len}(B_Y) = \texttt{cap}(B_Y) > 0 \qquad W = \texttt{Waker}_{T} \\ \hline
 ((\texttt{SELECT\_I} \ \texttt{cases} \mathbin\Vert C, X \mathbin\Vert V \mathbin\Vert Y \mathbin\Vert S, E) \mathbin\Vert \mathcal{T}, \mathcal{H})
 \rightrightarrows_{\mathcal{T}, \mathcal{H}} \\
-\left(\mathcal{T} \mathbin\Vert (C, V_Y \mathbin\Vert S, E) \mathbin\Vert T, \mathcal{H}\left[Y_a \gets (B_Y \mathbin\Vert V_Y', Q_{YS}, Q_{YR})\right]\right)
+\left(\mathcal{T} \mathbin\Vert (b_Y \mathbin\Vert C, V_Y \mathbin\Vert S, E) \mathbin\Vert T, \mathcal{H}\left[Y_a \gets (B_Y \mathbin\Vert V_Y', Q_{YS}, Q_{YR})\right]\right)
 \end{matrix}$
 
 $\begin{matrix}
@@ -744,7 +746,7 @@ X = \mathcal{H}(X_a) = (B_X, Q_{XS}, Q_{XR}) \qquad \texttt{len}(Q_{XR}) = 0 \qq
 Y = \mathcal{H}(Y_a) = (V_Y \mathbin\Vert B_Y, Q_{YS}, Q_{YR}) \qquad \texttt{len}(Q_{YS}) = 0 \\ \hline
 ((\texttt{SELECT\_I} \ \texttt{cases} \mathbin\Vert C, X \mathbin\Vert V \mathbin\Vert Y \mathbin\Vert S, E) \mathbin\Vert \mathcal{T}, \mathcal{H})
 \rightrightarrows_{\mathcal{T}, \mathcal{H}} \\
-\left(\mathcal{T} \mathbin\Vert (C, V_Y \mathbin\Vert S, E), \mathcal{H}\left[Y_a \gets (B_Y, Q_{YS}, Q_{YR})\right]\right)
+\left(\mathcal{T} \mathbin\Vert (b_Y \mathbin\Vert C, V_Y \mathbin\Vert S, E), \mathcal{H}\left[Y_a \gets (B_Y, Q_{YS}, Q_{YR})\right]\right)
 \end{matrix}$
 
 If both channels would block, we have the following inference rule:
@@ -752,7 +754,7 @@ If both channels would block, we have the following inference rule:
 $\begin{matrix}
 X = \mathcal{H}(X_a) = (B_X, Q_{XS}, Q_{XR}) \qquad \texttt{len}(Q_{XR}) = 0 \qquad \texttt{len}(B_X) = \texttt{cap}(B_X) \\
 Y = \mathcal{H}(Y_a) = (V_Y \mathbin\Vert B_Y, Q_{YS}, Q_{YR}) \qquad \texttt{len}(Q_{YS}) = 0 \qquad \texttt{len}(B_Y) = 0 \\
-W = \texttt{Waker}_{(C, S, E)} \qquad I_X = \texttt{WaitingInstance}_{W, V} \qquad I_Y = \texttt{WaitingInstance}_{W, \varnothing} \\ \hline
+W = \texttt{Waker}_{(C, S, E)} \qquad I_X = \texttt{WaitingInstance}_{W, V, b_X} \qquad I_Y = \texttt{WaitingInstance}_{W, \varnothing, b_Y} \\ \hline
 ((\texttt{SELECT\_I} \ \texttt{cases} \mathbin\Vert C, X \mathbin\Vert V \mathbin\Vert Y \mathbin\Vert S, E) \mathbin\Vert \mathcal{T}, \mathcal{H})
 \rightrightarrows_{\mathcal{T}, \mathcal{H}} \\
 \left(\mathcal{T}, \mathcal{H}\left[X_a \gets (B_X, Q_{XS} \mathbin\Vert I_X, Q_{XR})\right]\left[Y_a \gets (B_Y, Q_{YS}, Q_{YR} \mathbin\Vert I_Y)\right]\right)
