@@ -63,6 +63,7 @@ import { ControlExitScopeI } from "./types/control/exit_scope";
 import { ControlFor } from "./types/control/for";
 import { ControlForI } from "./types/control/for_i";
 import { ControlFunction } from "./types/control/function";
+import { ControlGoCallI } from "./types/control/go_call_i";
 import { ControlGoCallStmt } from "./types/control/go_call_stmt";
 import { ControlIf } from "./types/control/if";
 import { ControlIfI } from "./types/control/if_i";
@@ -191,6 +192,7 @@ import {
     TAGSTRING_CONTROL_case_send,
     TAGSTRING_CONTROL_case_receive,
     TAGSTRING_CONTROL_case_default,
+    TAGSTRING_CONTROL_go_call_i,
 } from "./types/tags";
 import { UserType } from "./types/user/type";
 import { UserTypeArray } from "./types/user/type/array";
@@ -851,6 +853,16 @@ class Heap {
     }
 
     /**
+     * CONTROL_go_call_i
+     * Fields    : number of children
+     * Children  :
+     * - 4 bytes address of the number of arguments (PRIMITIVE_number)
+     */
+    public allocate_CONTROL_go_call_i(obj: { tag: string, num_args: number }): number {
+        return ControlGoCallI.allocate(this, obj.num_args);
+    }
+
+    /**
      * CONTROL_restore_env_i
      * Fields    : number of children
      * Children  :
@@ -1468,6 +1480,8 @@ class Heap {
                 return this.allocate_CONTROL_return(obj);
             case TAGSTRING_CONTROL_call_i:
                 return this.allocate_CONTROL_call_i(obj);
+            case TAGSTRING_CONTROL_go_call_i:
+                return this.allocate_CONTROL_go_call_i(obj);
             case TAGSTRING_CONTROL_restore_env_i:
                 return this.allocate_CONTROL_restore_env_i(obj);
             case TAGSTRING_CONTROL_return_i:

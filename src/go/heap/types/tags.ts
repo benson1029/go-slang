@@ -93,6 +93,8 @@ export const TAG_CONTROL_case_default = 0xC03F; // 1100 0000 0011 1111
 export const TAG_CONTROL_case_send = 0xC040; // 1100 0000 0100 0000
 export const TAG_CONTROL_case_receive = 0xC041; // 1100 0000 0100 0001
 
+export const TAG_CONTROL_go_call_i = 0xC042; // 1100 0000 0100 0010
+
 export const TAG_ENVIRONMENT_entry = 0xC100; // 1100 0001 0000 0000
 export const TAG_ENVIRONMENT_frame = 0xC101; // 1100 0001 0000 0001
 export const TAG_ENVIRONMENT_hash_table = 0xC102; // 1100 0001 0000 0010
@@ -182,6 +184,7 @@ export const TAGSTRING_CONTROL_exit_scope_i = "exit-scope_i";
 export const TAGSTRING_CONTROL_for_i = "for_i";
 export const TAGSTRING_CONTROL_if_i = "if_i";
 export const TAGSTRING_CONTROL_call_i = "call_i";
+export const TAGSTRING_CONTROL_go_call_i = "go_call_i";
 export const TAGSTRING_CONTROL_restore_env_i = "restore-env_i";
 export const TAGSTRING_CONTROL_return_i = "return_i";
 export const TAGSTRING_CONTROL_logical_i = "logical_i";

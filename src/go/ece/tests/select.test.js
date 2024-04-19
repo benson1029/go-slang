@@ -90,7 +90,7 @@ describe("Select", () => {
         evaluateFunctions(functions);
         expect(true).toBe(false);
       } catch (e) {
-        expect(e.message).toBe("All goroutines are asleep - deadlock! (main thread control stack not empty)");
+        expect(e.message).toBe("All goroutines are asleep - deadlock!");
       }
   })
 

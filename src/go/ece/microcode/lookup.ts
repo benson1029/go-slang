@@ -135,6 +135,8 @@ function lookup_microcode(tag: number): Function {
       return control_function.evaluate_call_i;
     case tags.TAG_CONTROL_go_call_stmt:
       return concurrent_go.evaluate_go_call_stmt;
+    case tags.TAG_CONTROL_go_call_i:
+      return concurrent_go.evaluate_go_call_i;
     case tags.TAG_CONTROL_chan_send:
       return concurrent_channel.evaluate_chan_send;
     case tags.TAG_CONTROL_chan_send_i:
