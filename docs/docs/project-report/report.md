@@ -12,14 +12,29 @@ This report can be viewed online on [https://benson1029.github.io/go-slang/docs/
 
 ## Table of Contents
 
-- [Project Objectives](#project-objectives)
-- [Language Processing Steps](#language-processing-steps)
-- [ECE Specification](#ece-specification)
-  - [Instruction Set](#instruction-set)
-  - [State Representation](#state-representation)
-  - [Inference Rules for Selected Parts](#inference-rules-for-selected-parts)
-- [Project Source](#project-source)
-- [Test Cases](#test-cases)
+- [CS4215 Project Report](#cs4215-project-report)
+  - [Table of Contents](#table-of-contents)
+  - [Project Objectives](#project-objectives)
+  - [Language Processing Steps](#language-processing-steps)
+  - [ECE Specification](#ece-specification)
+    - [Instruction Set](#instruction-set)
+      - [Helper Instructions](#helper-instructions)
+      - [Expressions](#expressions)
+      - [Variables](#variables)
+      - [Control Flow](#control-flow)
+      - [Functions](#functions)
+      - [Constructors](#constructors)
+      - [Arrays](#arrays)
+      - [Structs](#structs)
+      - [Slices](#slices)
+      - [Goroutines and Channels](#goroutines-and-channels)
+    - [State Representation](#state-representation)
+    - [Inference Rules for Selected Parts](#inference-rules-for-selected-parts)
+      - [For Loop](#for-loop)
+      - [Go Function Call](#go-function-call)
+      - [Mutex Lock and Unlock](#mutex-lock-and-unlock)
+  - [Project Source](#project-source)
+  - [Test Cases](#test-cases)
 
 ## Project Objectives
 
@@ -159,6 +174,7 @@ The following tables show the instruction set of the ECE machine.
 | Instruction | Description | Parameters | Stash |
 | --- | --- | --- | --- |
 | `GO_CALL_STMT` | Calls a function in a new goroutine | `body` (a `CALL` instruction) | None |
+| `GO_CALL_I` | Calls a function in a new goroutine | `num_args` (int) | `function` (value), `args` (array of values) |
 | `CHAN_RECEIVE` | Receives a value from a channel | `channel` (rvalue expression) | None |
 | `CHAN_RECEIVE_I` | Receives a value from a channel | None | `channel` (address) |
 | `CHAN_RECEIVE_STMT` | Receives a value from a channel and discards it | `body` (a `CHAN_RECEIVE` instruction) | None |
@@ -172,11 +188,17 @@ The following tables show the instruction set of the ECE machine.
 
 ### State Representation
 
-The state of the ECE machine is the scheduler $S = T_{i_1} \ldotp T_{i_2} \ldotp \ldots$, where $T_{i_1}, T_{i_2}, \ldots$ are the threads in the scheduler (unblocked). Each thread $T_i$ is a tuple $(C, S, E)$, where $C$ is the control stack, $S$ is the stash, and $E$ is the environment.
+:::info
 
-The control stack and the stash are represented as the concatenation of its elements $x_1 \ldotp x_2 \ldotp x_3 \ldotp \ldots \ldotp x_k$. The environment is a tuple $(\Delta_N, \Delta_S)$, where $\Delta_N$ and $\Delta_S$ are the name and struct frames, respectively. We define $\Delta[x \leftarrow v]$ as the environment frame $\Delta$ with the variable $x$ bound to the value $v$, $\varnothing \ldotp \Delta$ as the environment frame $\Delta$ with a new empty child frame, and $\Delta(x)$ be the value bound to the variable $x$ in the environment frame $\Delta$.
+$\mathbin\Vert$ denotes the concatenation of two elements. For example, $x \mathbin\Vert y$ is the concatenation of $x$ and $y$.
 
-We define the transition function $\rightrightarrows_S$ that maps the current scheduler $S$ to the scheduler $S'$ after evaluation, i.e. $S \rightrightarrows_S S'$.
+:::
+
+The state of the ECE machine is the scheduler $\mathcal{T} = T_{i_1} \mathbin\Vert \mathcal{T}$, where $T_{i_1}, T_{i_2}, \ldots$ are the (unblocked) threads in the scheduler. Each thread $T_i$ is a tuple $(C, S, E)$, where $C$ is the control stack, $S$ is the stash, and $E$ is the environment.
+
+The control stack and the stash are represented as the concatenation of its elements $x_1 \mathbin\Vert x_2 \mathbin\Vert x_3 \mathbin\Vert \ldots \mathbin\Vert x_k$. The environment is a tuple $(\Delta_N, \Delta_S)$, where $\Delta_N$ and $\Delta_S$ are the name and struct frames, respectively. We define $\Delta[x \gets v]$ as the environment frame $\Delta$ with the variable $x$ bound to the value $v$, $\varnothing \mathbin\Vert \Delta$ as the environment frame $\Delta$ with a new empty child frame, and $\Delta(x)$ be the value bound to the variable $x$ in the environment frame $\Delta$.
+
+We define the transition function $\rightrightarrows_{\mathcal{T}}$ that maps the current scheduler $\mathcal{T}$ to the scheduler $\mathcal{T}'$ after evaluation, i.e. $\mathcal{T} \rightrightarrows_{\mathcal{T}} \mathcal{T}'$.
 
 ### Inference Rules for Selected Parts
 
@@ -198,14 +220,14 @@ This is shown in the following inference rules:
 
 $\begin{matrix}
 \texttt{init} = \texttt{VAR} \ x \ E \\ \hline
-(\texttt{FOR} \ \texttt{init} \ \texttt{condition} \ \texttt{update} \ \texttt{body} \ \ldotp C, S, (\Delta_N, \Delta_S)) \ldotp T_{i_2} \ldotp \ldots \\
-\rightrightarrows_S T_{i_2} \ldotp \ldots \ldotp (\texttt{init} \ldotp \texttt{condition} \ldotp \texttt{FOR\_I} \ \texttt{condition} \ \texttt{update} \ \texttt{body} \ x  \ldotp \texttt{EXIT\_SCOPE\_I} \ldotp C, S, (\varnothing \ldotp \Delta_N, \Delta_S))
+(\texttt{FOR} \ \texttt{init} \ \texttt{condition} \ \texttt{update} \ \texttt{body} \ \mathbin\Vert C, S, (\Delta_N, \Delta_S)) \mathbin\Vert \mathcal{T} \\
+\rightrightarrows_{\mathcal{T}} \mathcal{T} \mathbin\Vert (\texttt{init} \mathbin\Vert \texttt{condition} \mathbin\Vert \texttt{FOR\_I} \ \texttt{condition} \ \texttt{update} \ \texttt{body} \ x  \mathbin\Vert \texttt{EXIT\_SCOPE\_I} \mathbin\Vert C, S, (\varnothing \mathbin\Vert \Delta_N, \Delta_S))
 \end{matrix}$
 
 $\begin{matrix}
 \texttt{init} \neq \texttt{VAR} \ x \ E \\ \hline
-(\texttt{FOR} \ \texttt{init} \ \texttt{condition} \ \texttt{update} \ \texttt{body} \ \ldotp C, S, (\Delta_N, \Delta_S)) \ldotp T_{i_2} \ldotp \ldots \\
-\rightrightarrows_S T_{i_2} \ldotp \ldots \ldotp (\texttt{init} \ldotp \texttt{condition} \ldotp \texttt{FOR\_I} \ \texttt{condition} \ \texttt{update} \ \texttt{body} \ \texttt{nil}  \ldotp \texttt{EXIT\_SCOPE\_I} \ldotp C, S, (\varnothing \ldotp \Delta_N, \Delta_S)) 
+(\texttt{FOR} \ \texttt{init} \ \texttt{condition} \ \texttt{update} \ \texttt{body} \ \mathbin\Vert C, S, (\Delta_N, \Delta_S)) \mathbin\Vert \mathcal{T} \\
+\rightrightarrows_{\mathcal{T}} \mathcal{T} \mathbin\Vert (\texttt{init} \mathbin\Vert \texttt{condition} \mathbin\Vert \texttt{FOR\_I} \ \texttt{condition} \ \texttt{update} \ \texttt{body} \ \texttt{nil}  \mathbin\Vert \texttt{EXIT\_SCOPE\_I} \mathbin\Vert C, S, (\varnothing \mathbin\Vert \Delta_N, \Delta_S)) 
 \end{matrix}$
 
 When the `FOR_I` instruction is executed, it takes the topmost value in the stash as the result of the condition. If the condition is true, the `body` is executed, followed by the `update` part, the `condition` part, and the `FOR_I` instruction again. If the condition is false, the loop is exited.
@@ -218,19 +240,26 @@ This is shown in the following inference rules:
 
 $\begin{matrix}
 I = \texttt{FOR\_I} \ \texttt{condition} \ \texttt{update} \ \texttt{body} \ \texttt{loopVar} \qquad \texttt{loopVar} = \texttt{nil} \\ \hline
-(I \ \ldotp C, \texttt{true} \ldotp S, (\Delta_N, \Delta_S)) \ldotp T_{i_2} \ldotp \ldots \\
-\rightrightarrows_S T_{i_2} \ldotp \ldots \ldotp (I \ldotp \texttt{condition} \ldotp \texttt{update} \ldotp \texttt{MARKER\_I} \ldotp \texttt{body} \ldotp C, S, (\Delta_N, \Delta_S))
+(I \ \mathbin\Vert C, \texttt{true} \mathbin\Vert S, (\Delta_N, \Delta_S)) \mathbin\Vert \mathcal{T} \\
+\rightrightarrows_{\mathcal{T}} \mathcal{T} \mathbin\Vert (\texttt{body}  \mathbin\Vert \texttt{MARKER\_I} \mathbin\Vert \texttt{update} \mathbin\Vert \texttt{condition} \mathbin\Vert I \mathbin\Vert C, S, (\Delta_N, \Delta_S))
 \end{matrix}$
 
 $\begin{matrix}
 I = \texttt{FOR\_I} \ \texttt{condition} \ \texttt{update} \ \texttt{body} \ \texttt{loopVar} \qquad \texttt{loopVar} = x \neq \texttt{nil} \\ \hline
-(I \ \ldotp C, \texttt{true} \ldotp S, (\Delta_N, \Delta_S)) \ldotp T_{i_2} \ldotp \ldots \\
-\rightrightarrows_S T_{i_2} \ldotp \ldots \ldotp (I \ldotp \texttt{condition} \ldotp \texttt{update} \ldotp \texttt{ASSIGN\_I} \ldotp \texttt{NAME\_ADDRESS} \ x \ldotp \texttt{EXIT\_SCOPE\_I} \ldotp \texttt{NAME} \ x \ldotp \\ \texttt{MARKER\_I} \ldotp \texttt{body} \ldotp C, S, (\Delta_N, \varnothing[x \leftarrow \Delta_S(x)] \ldotp \Delta_S))
+(I \ \mathbin\Vert C, \texttt{true} \mathbin\Vert S, (\Delta_N, \Delta_S)) \mathbin\Vert \mathcal{T} \\
+\rightrightarrows_{\mathcal{T}} \mathcal{T} \mathbin\Vert (
+  \texttt{body} \mathbin\Vert \texttt{MARKER\_I} \mathbin\Vert \texttt{NAME} \ x \mathbin\Vert \texttt{EXIT\_SCOPE\_I} \mathbin\Vert \texttt{NAME\_ADDRESS} \ x \mathbin\Vert \texttt{ASSIGN\_I} \mathbin\Vert \\ \texttt{update} \mathbin\Vert \texttt{condition} \mathbin\Vert I \mathbin\Vert C, S, (\varnothing[x \gets \Delta_N(x)] \mathbin\Vert \Delta_N, \Delta_S))
+\end{matrix}$
+
+$\begin{matrix}
+I = \texttt{FOR\_I} \ \texttt{condition} \ \texttt{update} \ \texttt{body} \ \texttt{loopVar} \\ \hline
+(I \ \mathbin\Vert C, \texttt{false} \mathbin\Vert S, (\Delta_N, \Delta_S)) \mathbin\Vert \mathcal{T}
+\rightrightarrows_{\mathcal{T}} \mathcal{T} \mathbin\Vert (C, S, (\Delta_N, \Delta_S))
 \end{matrix}$
 
 :::info
 
-$\varnothing[x \leftarrow \Delta_S(x)] \ldotp \Delta_S$ is the environment frame $\Delta_S$ with a new child frame containing a copy of the variable $x$. After the loop body is executed, the `NAME` instruction retrieves the value of the loop variable from the iteration-scope copy, the `NAME_ADDRESS` instruction (after `EXIT_SCOPE_I`) retrieves the address of the loop variable in the loop-scope frame, and the `ASSIGN_I` instruction assigns the value of the loop variable to the loop-scope frame.
+$\varnothing[x \gets \Delta_N(x)] \mathbin\Vert \Delta_N$ is the environment frame $\Delta_N$ with a new child frame containing a copy of the variable $x$. After the loop body is executed, the `NAME` instruction retrieves the value of the loop variable from the iteration-scope copy, the `NAME_ADDRESS` instruction (after `EXIT_SCOPE_I`) retrieves the address of the loop variable in the loop-scope frame, and the `ASSIGN_I` instruction assigns the value of the loop variable to the loop-scope frame.
 
 :::
 
@@ -238,7 +267,7 @@ The evaluation of a `MARKER_I` instruction does not produce side effects:
 
 $\begin{matrix}
 \hline
-(\texttt{MARKER\_I} \ \ldotp C, S, E) \ldotp T_{i_2} \ldotp \ldots \rightrightarrows_S T_{i_2} \ldotp \ldots \ldotp (C, S, E)
+(\texttt{MARKER\_I} \ \mathbin\Vert C, S, E) \mathbin\Vert \mathcal{T} \rightrightarrows_{\mathcal{T}} \mathcal{T} \mathbin\Vert (C, S, E)
 \end{matrix}$
 
 A `BREAK` instruction will create a `BREAK_I` instruction in the control stack, which pops from the control stack until it pops out the `FOR_I` instruction. On the other hand, a `CONTINUE` instruction will create a `CONTINUE_I` instruction in the control stack, which pops from the control stack until it pops out the `MARKER_I` instruction. All instructions except `EXIT_SCOPE_I` will be ignored during the popping process.
@@ -247,42 +276,42 @@ This is shown in the following inference rules:
 
 $\begin{matrix}
 \hline
-(\texttt{BREAK} \ldotp C, S, E) \ldotp T_{i_2} \ldotp \ldots \rightrightarrows_S T_{i_2} \ldotp \ldots \ldotp (\texttt{BREAK\_I} \ldotp C, S, E)
+(\texttt{BREAK} \mathbin\Vert C, S, E) \mathbin\Vert \mathcal{T} \rightrightarrows_{\mathcal{T}} \mathcal{T} \mathbin\Vert (\texttt{BREAK\_I} \mathbin\Vert C, S, E)
 \end{matrix}$
 
 $\begin{matrix}
 I = \texttt{FOR\_I} \\ \hline
-(\texttt{BREAK\_I} \ldotp I \ldotp C, S, E) \ldotp T_{i_2} \ldotp \ldots \rightrightarrows_S T_{i_2} \ldotp \ldots \ldotp (C, S, E)
+(\texttt{BREAK\_I} \mathbin\Vert I \mathbin\Vert C, S, E) \mathbin\Vert \mathcal{T} \rightrightarrows_{\mathcal{T}} \mathcal{T} \mathbin\Vert (C, S, E)
 \end{matrix}$
 
 $\begin{matrix}
 I = \texttt{EXIT\_SCOPE\_I} \\ \hline
-(\texttt{BREAK\_I} \ldotp I \ldotp C, S, (F \ldotp \Delta_N, \Delta_S)) \ldotp T_{i_2} \ldotp \ldots \rightrightarrows_S T_{i_2} \ldotp \ldots \ldotp (\texttt{BREAK\_I} \ldotp C, S, (\Delta_N, \Delta_S))
+(\texttt{BREAK\_I} \mathbin\Vert I \mathbin\Vert C, S, (F \mathbin\Vert \Delta_N, \Delta_S)) \mathbin\Vert \mathcal{T} \rightrightarrows_{\mathcal{T}} \mathcal{T} \mathbin\Vert (\texttt{BREAK\_I} \mathbin\Vert C, S, (\Delta_N, \Delta_S))
 \end{matrix}$
 
 $\begin{matrix}
 I \neq \texttt{FOR\_I} \qquad I \neq \texttt{EXIT\_SCOPE\_I} \\ \hline
-(\texttt{BREAK\_I} \ldotp I \ldotp C, S, E) \ldotp T_{i_2} \ldotp \ldots \rightrightarrows_S T_{i_2} \ldotp \ldots \ldotp (\texttt{BREAK\_I} \ldotp C, S, E)
+(\texttt{BREAK\_I} \mathbin\Vert I \mathbin\Vert C, S, E) \mathbin\Vert \mathcal{T} \rightrightarrows_{\mathcal{T}} \mathcal{T} \mathbin\Vert (\texttt{BREAK\_I} \mathbin\Vert C, S, E)
 \end{matrix}$
 
 $\begin{matrix}
 \hline
-(\texttt{CONTINUE} \ldotp C, S, E) \ldotp T_{i_2} \ldotp \ldots \rightrightarrows_S T_{i_2} \ldotp \ldots \ldotp (\texttt{CONTINUE\_I} \ldotp C, S, E)
+(\texttt{CONTINUE} \mathbin\Vert C, S, E) \mathbin\Vert \mathcal{T} \rightrightarrows_{\mathcal{T}} \mathcal{T} \mathbin\Vert (\texttt{CONTINUE\_I} \mathbin\Vert C, S, E)
 \end{matrix}$
 
 $\begin{matrix}
 I = \texttt{MARKER\_I} \\ \hline
-(\texttt{CONTINUE\_I} \ldotp I \ldotp C, S, E) \ldotp T_{i_2} \ldotp \ldots \rightrightarrows_S T_{i_2} \ldotp \ldots \ldotp (I \ldotp C, S, E) 
+(\texttt{CONTINUE\_I} \mathbin\Vert I \mathbin\Vert C, S, E) \mathbin\Vert \mathcal{T} \rightrightarrows_{\mathcal{T}} \mathcal{T} \mathbin\Vert (I \mathbin\Vert C, S, E) 
 \end{matrix}$
 
 $\begin{matrix}
 I = \texttt{EXIT\_SCOPE\_I} \\ \hline
-(\texttt{CONTINUE\_I} \ldotp I \ldotp C, S, (F \ldotp \Delta_N, \Delta_S)) \ldotp T_{i_2} \ldotp \ldots \rightrightarrows_S T_{i_2} \ldotp \ldots \ldotp (\texttt{CONTINUE\_I} \ldotp C, S, (\Delta_N, \Delta_S))
+(\texttt{CONTINUE\_I} \mathbin\Vert I \mathbin\Vert C, S, (F \mathbin\Vert \Delta_N, \Delta_S)) \mathbin\Vert \mathcal{T} \rightrightarrows_{\mathcal{T}} \mathcal{T} \mathbin\Vert (\texttt{CONTINUE\_I} \mathbin\Vert C, S, (\Delta_N, \Delta_S))
 \end{matrix}$
 
 $\begin{matrix}
 I \neq \texttt{MARKER\_I} \qquad I \neq \texttt{EXIT\_SCOPE\_I} \\ \hline
-(\texttt{CONTINUE\_I} \ldotp I \ldotp C, S, E) \ldotp T_{i_2} \ldotp \ldots \rightrightarrows_S T_{i_2} \ldotp \ldots \ldotp (\texttt{CONTINUE\_I} \ldotp C, S, E)
+(\texttt{CONTINUE\_I} \mathbin\Vert I \mathbin\Vert C, S, E) \mathbin\Vert \mathcal{T} \rightrightarrows_{\mathcal{T}} \mathcal{T} \mathbin\Vert (\texttt{CONTINUE\_I} \mathbin\Vert C, S, E)
 \end{matrix}$
 
 
@@ -294,54 +323,67 @@ A go function call is defined in BNF as follows:
 GoStmt = "go" FunctionCall
 ```
 
-When the `GO_CALL_STMT` instruction is executed, a new goroutine is created with the function call. The control stack of the new goroutine contains only the `CALL` instruction $I$, while the stash and environment are copied from the current goroutine.
+When the `GO_CALL_STMT` instruction is executed, it will evaluate the function and function arguments, followed by `GO_CALL_I`. The `GO_CALL_I` instruction will create a new thread with a single instruction `CALL_I` in the control stack, while the stash and environment are copied from the current goroutine.
 
 This is shown in the following inference rules:
 
 $\begin{matrix}
 \hline
-(\texttt{GO\_CALL\_STMT} \ I \ldotp C, S, E) \ldotp T_{i_2} \ldotp \ldots \rightrightarrows_S T_{i_2} \ldotp \ldots \ldotp (C, S, E) \ldotp (I, S, E)
+(\texttt{GO\_CALL\_STMT} \ \texttt{CALL} \ \texttt{function} \ \texttt{args}_1 \ \dots \ \texttt{args}_n  \mathbin\Vert C, S, E) \mathbin\Vert \mathcal{T} 
+\\ \rightrightarrows_{\mathcal{T}} \mathcal{T} \mathbin\Vert (
+  \texttt{function} \mathbin\Vert \texttt{args}_n \mathbin\Vert \dots \mathbin\Vert \texttt{args}_1 \mathbin\Vert \texttt{GO\_CALL\_I} \ n \mathbin\Vert C, S, E)
 \end{matrix}$
+
+$\begin{matrix}
+\hline
+(\texttt{GO\_CALL\_I} \ n \mathbin\Vert C,  
+\texttt{args}_1 \mathbin\Vert \dots \mathbin\Vert \texttt{args}_n \mathbin\Vert \texttt{function} \mathbin\Vert S, E) \mathbin\Vert \mathcal{T} 
+\\ \rightrightarrows_{\mathcal{T}} \mathcal{T} \mathbin\Vert (C, S, E) \mathbin\Vert (\texttt{CALL\_I} \ n, \texttt{args}_1 \mathbin\Vert \dots \mathbin\Vert \texttt{args}_n \mathbin\Vert \texttt{function} \mathbin\Vert S, E)
+\end{matrix}$
+
+:::info
+
+A goroutine may contain unused values in the stash and environment. However, this does not affect the correctness, and when the goroutine finishes execution, the unused values are freed due to reference counting.
+
+:::
 
 #### Mutex Lock and Unlock
 
-Mutex is implemented as a struct, which contains a special heap object as its member. We define a mutex as a tuple $(s, Q)$ where $s$ is the state of the mutex (`true` if locked and `false` if unlocked) and $Q$ is its wait queue (a list of threads, similar to the scheduler).
+Mutex is implemented as a struct, which contains a special heap object as its member. We define a mutex as a tuple $(s, Q)$ where $s$ is the state of the mutex (`true` if locked and `false` if unlocked) and $Q$ is its wait queue (a list of threads, similar to the scheduler). We encapsulate blocked threads in $Q$ by a special heap object called $\texttt{Waker}_{(C, S, E)}$. 
+
+:::info
+
+A mutex object $M$ is stored in the heap, and it can be referenced by the environment of multiple threads. Any changes to $M$ is reflected in all threads that reference $M$ in their environment. For a scheduler $\mathcal{T}$, we denote $\mathcal{T}\left[M \gets M'\right]$ as updating (replacing) the mutex object $M$ with $M'$ in the heap, which is reflected in all threads in the scheduler.
+
+:::
 
 When `Lock()` is called on a mutex, the mutex is locked and the thread is pushed into the scheduler if it is unlocked. Otherwise, the current thread is added to the wait queue of the mutex.
 
 $\begin{matrix}
 M = (\texttt{false}, Q) \\ \hline
-(\texttt{CALL\_I} \ 0 \ldotp C, \texttt{sync.MutexLock (builtin)} \ldotp M \ldotp S, E) \ldotp T_{i_2} \ldotp \ldots \rightrightarrows_S T_{i_2} \ldotp T_{i_3} \ldotp \ldots \ldotp (C, S, E)
+(\texttt{CALL\_I} \ 0 \mathbin\Vert C, \texttt{sync.MutexLock (builtin)} \mathbin\Vert M \mathbin\Vert S, E) \mathbin\Vert \mathcal{T} \rightrightarrows_{\mathcal{T}} \left(\mathcal{T} \mathbin\Vert (C, S, E)\right)\left[M \gets (\texttt{true}, Q)\right]
 \end{matrix}$
-
-where $M$ is replaced with $(\texttt{true}, Q)$.
 
 $\begin{matrix}
 M = (\texttt{true}, Q) \\ \hline
-(\texttt{CALL\_I} \ 0 \ldotp C, \texttt{sync.MutexLock (builtin)} \ldotp M \ldotp S, E) \ldotp T_{i_2} \ldotp \ldots \rightrightarrows_S T_{i_2} \ldotp T_{i_3} \ldotp \ldots
+(\texttt{CALL\_I} \ 0 \mathbin\Vert C, \texttt{sync.MutexLock (builtin)} \mathbin\Vert M \mathbin\Vert S, E) \mathbin\Vert \mathcal{T} \rightrightarrows_{\mathcal{T}} \mathcal{T}\left[M \gets (\texttt{true}, Q \mathbin\Vert \texttt{Waker}_{(C, S, E)})\right]
 \end{matrix}$
-
-where $M$ is replaced with $(\texttt{true}, Q \ldotp (C, S, E))$.
 
 When `Unlock()` is called on a mutex, the mutex is unlocked and the first thread in the wait queue is popped and pushed into the scheduler (if any). It throws an error if the mutex is already unlocked.
 
 $\begin{matrix}
-M = (\texttt{true}, T_H \ldotp Q) \\ \hline
-(\texttt{CALL\_I} \ 0 \ldotp C, \texttt{sync.MutexUnlock (builtin)} \ldotp M \ldotp S, E) \ldotp T_{i_2} \ldotp \ldots \rightrightarrows_S T_{i_2} \ldotp T_{i_3} \ldotp \ldots \ldotp (C, S, E) \ldotp T_H
+M = (\texttt{true}, \texttt{Waker}_T \mathbin\Vert Q) \\ \hline
+(\texttt{CALL\_I} \ 0 \mathbin\Vert C, \texttt{sync.MutexUnlock (builtin)} \mathbin\Vert M \mathbin\Vert S, E) \mathbin\Vert \mathcal{T} \rightrightarrows_{\mathcal{T}} \left(\mathcal{T} \mathbin\Vert (C, S, E) \mathbin\Vert T\right)\left[M \gets (\texttt{true}, Q)\right]
 \end{matrix}$
-
-where $M$ is replaced with $(\texttt{false}, Q)$.
 
 $\begin{matrix}
 M = (\texttt{true}, \varnothing) \\ \hline
-(\texttt{CALL\_I} \ 0 \ldotp C, \texttt{sync.MutexUnlock (builtin)} \ldotp M \ldotp S, E) \ldotp T_{i_2} \ldotp \ldots \rightrightarrows_S T_{i_2} \ldotp T_{i_3} \ldotp \ldots \ldotp (C, S, E)
+(\texttt{CALL\_I} \ 0 \mathbin\Vert C, \texttt{sync.MutexUnlock (builtin)} \mathbin\Vert M \mathbin\Vert S, E) \mathbin\Vert \mathcal{T} \rightrightarrows_{\mathcal{T}} \left(\mathcal{T} \mathbin\Vert (C, S, E)\right)\left[M \gets (\texttt{false}, \varnothing)\right]
 \end{matrix}$
-
-where $M$ is replaced with $(\texttt{false}, \varnothing)$.
 
 $\begin{matrix}
 M = (\texttt{false}, Q) \\ \hline
-(\texttt{CALL\_I} \ 0 \ldotp C, \texttt{sync.MutexUnlock (builtin)} \ldotp M \ldotp S, E) \ldotp T_{i_2} \ldotp \ldots \rightrightarrows_S \varepsilon
+(\texttt{CALL\_I} \ 0 \mathbin\Vert C, \texttt{sync.MutexUnlock (builtin)} \mathbin\Vert M \mathbin\Vert S, E) \mathbin\Vert \mathcal{T} \rightrightarrows_{\mathcal{T}} \varepsilon
 \end{matrix}$
 
 where $\varepsilon$ is the error state.
