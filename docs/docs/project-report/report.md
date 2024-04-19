@@ -14,35 +14,34 @@ This report can be viewed online on [https://benson1029.github.io/go-slang/docs/
 
 ## Table of Contents
 
-- [CS4215 Project Report](#cs4215-project-report)
-  - [Table of Contents](#table-of-contents)
-  - [Project Objectives](#project-objectives)
-  - [Language Processing Steps](#language-processing-steps)
-  - [ECE Specification](#ece-specification)
-    - [Instruction Set](#instruction-set)
-      - [Helper Instructions](#helper-instructions)
-      - [Expressions](#expressions)
-      - [Variables](#variables)
-      - [Control Flow](#control-flow)
-      - [Functions](#functions)
-      - [Constructors](#constructors)
-      - [Arrays](#arrays)
-      - [Structs](#structs)
-      - [Slices](#slices)
-      - [Goroutines and Channels](#goroutines-and-channels)
-    - [State Representation](#state-representation)
-    - [Inference Rules for Selected Parts](#inference-rules-for-selected-parts)
-      - [Helper Instructions](#helper-instructions-1)
-      - [Expressions](#expressions-1)
-      - [Variables](#variables-1)
-      - [Sequence and Block](#sequence-and-block)
-      - [For Loop](#for-loop)
-      - [Go Function Call](#go-function-call)
-      - [Mutex Lock and Unlock](#mutex-lock-and-unlock)
-      - [Channel Send and Receive](#channel-send-and-receive)
-      - [Select Statement](#select-statement)
-  - [Project Source](#project-source)
-  - [Test Cases](#test-cases)
+- [Table of Contents](#table-of-contents)
+- [Project Objectives](#project-objectives)
+- [Language Processing Steps](#language-processing-steps)
+- [ECE Specification](#ece-specification)
+  - [Instruction Set](#instruction-set)
+    - [Helper Instructions](#helper-instructions)
+    - [Expressions](#expressions)
+    - [Variables](#variables)
+    - [Control Flow](#control-flow)
+    - [Functions](#functions)
+    - [Constructors](#constructors)
+    - [Arrays](#arrays)
+    - [Structs](#structs)
+    - [Slices](#slices)
+    - [Goroutines and Channels](#goroutines-and-channels)
+  - [State Representation](#state-representation)
+  - [Inference Rules for Selected Parts](#inference-rules-for-selected-parts)
+    - [Helper Instructions](#helper-instructions-1)
+    - [Expressions](#expressions-1)
+    - [Variables](#variables-1)
+    - [Sequence and Block](#sequence-and-block)
+    - [For Loop](#for-loop)
+    - [Go Function Call](#go-function-call)
+    - [Mutex Lock and Unlock](#mutex-lock-and-unlock)
+    - [Channel Send and Receive](#channel-send-and-receive)
+    - [Select Statement](#select-statement)
+- [Project Source](#project-source)
+- [Test Cases](#test-cases)
 
 ## Project Objectives
 
@@ -214,17 +213,19 @@ We define the following operations on the environment:
 - $\Delta(x)$ is the value bound to the variable $x$ in the environment frame $\Delta$.
 - $\Delta(x)_a$ is the address of the variable $x$ in the environment frame $\Delta$.
 
-If we update the value of an object in address $a$ to a new value $v$, this change is reflected in all threads that have a reference to the address $a$. As this is a *global change*, we denote this operation as $\mathcal{H}[a \Leftarrow v]$, where $\mathcal{H}$ is the heap. Similarly, we can denote $\mathcal{H}(a)$ as the value at address $a$ in the heap. Therefore,
+If we update the value of an object in address $a$ to a new value $v$, this change is reflected in all threads that have a reference to the address $a$. As this is a *global change*, we denote this operation as $\mathcal{H}[a \gets v]$, where $\mathcal{H}$ is the heap. Similarly, we can denote $\mathcal{H}(a)$ as the value at address $a$ in the heap. Therefore,
 
 :::info
 
 The *state* of the ECE machine is a tuple $(\mathcal{T}, \mathcal{H})$, where $\mathcal{T}$ is the scheduler and $\mathcal{H}$ is the heap. 
 
+Note that the scheduler $\mathcal{T}$ also resides in the heap, but we treat it as a separate entity in this report for clarity.
+
 :::
 
 We define the transition function $\rightrightarrows_{\mathcal{T}, \mathcal{H}}$ that maps the current state $(\mathcal{T}, \mathcal{H})$ to the next state $(\mathcal{T}', \mathcal{H}')$ after evaluation, i.e. $(\mathcal{T}, \mathcal{H}) \rightrightarrows_{\mathcal{T}, \mathcal{H}} (\mathcal{T}', \mathcal{H}')$.
 
-To avoid clutter, most of the time we will only show the scheduler $\mathcal{T}$ in the inference rules, and only mention the heap $\mathcal{H}$ when necessary. As a shorthand, we define the transition function $\rightrightarrows_{\mathcal{T}}$ that maps the current state $(\mathcal{T}, \mathcal{H})$ to the next state $(\mathcal{T}', \mathcal{H}')$ after evaluation, i.e. $\mathcal{T} \rightrightarrows_{\mathcal{T}} \mathcal{T}'$.
+To avoid clutter, most of the time we will only show the scheduler $\mathcal{T}$ in the inference rules, and only mention the heap $\mathcal{H}$ when necessary. As a shorthand, we define the transition function $\rightrightarrows_{\mathcal{T}}$ that maps the current state $(\mathcal{T}, \mathcal{H})$ to the next state $(\mathcal{T}', \mathcal{H})$ after evaluation, i.e. $\mathcal{T} \rightrightarrows_{\mathcal{T}} \mathcal{T}'$.
 
 ### Inference Rules for Selected Parts
 
@@ -342,7 +343,7 @@ $\begin{matrix}
 
 $\begin{matrix}
 \hline
-((\texttt{ASSIGN\_I} \mathbin\Vert C, a \mathbin\Vert v \mathbin\Vert S, (\Delta_N, \Delta_S)) \mathbin\Vert \mathcal{T}, \mathcal{H}) \rightrightarrows_{\mathcal{T}, \mathcal{H}} (\mathcal{T}, \mathcal{H}[a \Leftarrow v])
+((\texttt{ASSIGN\_I} \mathbin\Vert C, a \mathbin\Vert v \mathbin\Vert S, (\Delta_N, \Delta_S)) \mathbin\Vert \mathcal{T}, \mathcal{H}) \rightrightarrows_{\mathcal{T}, \mathcal{H}} (\mathcal{T}, \mathcal{H}[a \gets v])
 \end{matrix}$
 
 #### Sequence and Block
@@ -363,7 +364,7 @@ I = \texttt{nil} \\ \hline
 
 A block of instructions is executed using the `BLOCK` instruction. The `BLOCK` instruction will push a new environment frame into the environment. After the block is executed, the `EXIT_SCOPE_I` instruction will pop the environment frame.
 
-This is shown in the following inference rules:
+This is shown in the following inference rule:
 
 $\begin{matrix}
 \hline
@@ -528,24 +529,24 @@ When `Lock()` is called on a mutex, the mutex is locked and the thread is pushed
 
 $\begin{matrix}
 M = \mathcal{H}(M_a) = (\texttt{false}, Q) \\ \hline
-((\texttt{CALL\_I} \ 0 \mathbin\Vert C, \texttt{sync.MutexLock (builtin)} \mathbin\Vert M \mathbin\Vert S, E), \mathcal{H}) \mathbin\Vert \mathcal{T} \rightrightarrows_{\mathcal{T}, \mathcal{H}} \left(\mathcal{T} \mathbin\Vert (C, S, E), \mathcal{H}\left[M_a \Leftarrow (\texttt{true}, Q)\right] \right)
+((\texttt{CALL\_I} \ 0 \mathbin\Vert C, \texttt{sync.MutexLock (builtin)} \mathbin\Vert M \mathbin\Vert S, E), \mathcal{H}) \mathbin\Vert \mathcal{T} \rightrightarrows_{\mathcal{T}, \mathcal{H}} \left(\mathcal{T} \mathbin\Vert (C, S, E), \mathcal{H}\left[M_a \gets (\texttt{true}, Q)\right] \right)
 \end{matrix}$
 
 $\begin{matrix}
 M = \mathcal{H}(M_a) = (\texttt{true}, Q) \\ \hline
-((\texttt{CALL\_I} \ 0 \mathbin\Vert C, \texttt{sync.MutexLock (builtin)} \mathbin\Vert M \mathbin\Vert S, E) \mathbin\Vert \mathcal{T}, \mathcal{H}) \rightrightarrows_{\mathcal{T}, \mathcal{H}} \left(\mathcal{T}, \mathcal{H}\left[M_a \Leftarrow (\texttt{true}, Q \mathbin\Vert \texttt{Waker}_{(C, S, E)})\right]\right)
+((\texttt{CALL\_I} \ 0 \mathbin\Vert C, \texttt{sync.MutexLock (builtin)} \mathbin\Vert M \mathbin\Vert S, E) \mathbin\Vert \mathcal{T}, \mathcal{H}) \rightrightarrows_{\mathcal{T}, \mathcal{H}} \left(\mathcal{T}, \mathcal{H}\left[M_a \gets (\texttt{true}, Q \mathbin\Vert \texttt{Waker}_{(C, S, E)})\right]\right)
 \end{matrix}$
 
 When `Unlock()` is called on a mutex, the mutex is unlocked and the first thread in the wait queue is popped and pushed into the scheduler (if any). It throws an error if the mutex is already unlocked.
 
 $\begin{matrix}
 M = \mathcal{H}(M_a) = (\texttt{true}, \texttt{Waker}_T \mathbin\Vert Q) \\ \hline
-((\texttt{CALL\_I} \ 0 \mathbin\Vert C, \texttt{sync.MutexUnlock (builtin)} \mathbin\Vert M \mathbin\Vert S, E) \mathbin\Vert \mathcal{T}, \mathcal{H}) \rightrightarrows_{\mathcal{T}, \mathcal{H}} \left(\mathcal{T} \mathbin\Vert (C, S, E) \mathbin\Vert T, \mathcal{H}\left[M_a \Leftarrow (\texttt{true}, Q)\right]\right)
+((\texttt{CALL\_I} \ 0 \mathbin\Vert C, \texttt{sync.MutexUnlock (builtin)} \mathbin\Vert M \mathbin\Vert S, E) \mathbin\Vert \mathcal{T}, \mathcal{H}) \rightrightarrows_{\mathcal{T}, \mathcal{H}} \left(\mathcal{T} \mathbin\Vert (C, S, E) \mathbin\Vert T, \mathcal{H}\left[M_a \gets (\texttt{true}, Q)\right]\right)
 \end{matrix}$
 
 $\begin{matrix}
 M = \mathcal{H}(M_a) = (\texttt{true}, \varnothing) \\ \hline
-((\texttt{CALL\_I} \ 0 \mathbin\Vert C, \texttt{sync.MutexUnlock (builtin)} \mathbin\Vert M \mathbin\Vert S, E) \mathbin\Vert \mathcal{T}, \mathcal{H}) \rightrightarrows_{\mathcal{T}, \mathcal{H}} \left(\mathcal{T} \mathbin\Vert (C, S, E), \mathcal{H}\left[M_a \Leftarrow (\texttt{false}, \varnothing)\right]\right)
+((\texttt{CALL\_I} \ 0 \mathbin\Vert C, \texttt{sync.MutexUnlock (builtin)} \mathbin\Vert M \mathbin\Vert S, E) \mathbin\Vert \mathcal{T}, \mathcal{H}) \rightrightarrows_{\mathcal{T}, \mathcal{H}} \left(\mathcal{T} \mathbin\Vert (C, S, E), \mathcal{H}\left[M_a \gets (\texttt{false}, \varnothing)\right]\right)
 \end{matrix}$
 
 $\begin{matrix}
@@ -577,21 +578,21 @@ X = \mathcal{H}(X_a) = (B, Q_S, \texttt{WaitingInstance}_{W, V} \mathbin\Vert Q_
 ((\texttt{CHAN\_SEND\_I} \mathbin\Vert C, X \mathbin\Vert V \mathbin\Vert S, E) \mathbin\Vert \mathcal{T}, \mathcal{H}) 
 \rightrightarrows_{\mathcal{T}, \mathcal{H}} 
 \left(\mathcal{T} \mathbin\Vert (C, S, E) \mathbin\Vert 
-(C_W, V \mathbin\Vert S_W, E_W), \mathcal{H}\left[X_a \Leftarrow (B, Q_S, Q_R)\right]\right)
+(C_W, V \mathbin\Vert S_W, E_W), \mathcal{H}\left[X_a \gets (B, Q_S, Q_R)\right]\right)
 \end{matrix}$
 
 $\begin{matrix}
 X = \mathcal{H}(X_a) = (B, Q_S, Q_R) \qquad \texttt{len}(Q_R) = 0 \qquad \texttt{len}(B) < \texttt{cap}(B) \\ \hline
 ((\texttt{CHAN\_SEND\_I} \mathbin\Vert C, X \mathbin\Vert V \mathbin\Vert S, E) \mathbin\Vert \mathcal{T}, \mathcal{H})
 \rightrightarrows_{\mathcal{T}, \mathcal{H}}
-\left(\mathcal{T} \mathbin\Vert (C, S, E), \mathcal{H}\left[X_a \Leftarrow (B \mathbin\Vert V, Q_S, Q_R)\right]\right)
+\left(\mathcal{T} \mathbin\Vert (C, S, E), \mathcal{H}\left[X_a \gets (B \mathbin\Vert V, Q_S, Q_R)\right]\right)
 \end{matrix}$
 
 $\begin{matrix}
 X = \mathcal{H}(X_a) = (B, Q_S, Q_R) \qquad \texttt{len}(Q_R) = 0 \qquad \texttt{len}(B) = \texttt{cap}(B) \\ \hline
 ((\texttt{CHAN\_SEND\_I} \mathbin\Vert C, X \mathbin\Vert V \mathbin\Vert S, E) \mathbin\Vert \mathcal{T}, \mathcal{H})
 \rightrightarrows_{\mathcal{T}, \mathcal{H}}
-\left(\mathcal{T}, \mathcal{H}\left[X_a \Leftarrow (B, Q_S \mathbin\Vert \texttt{WaitingInstance}_{(C, S, E), V}, Q_R)\right]\right)
+\left(\mathcal{T}, \mathcal{H}\left[X_a \gets (B, Q_S \mathbin\Vert \texttt{WaitingInstance}_{(C, S, E), V}, Q_R)\right]\right)
 \end{matrix}$
 
 When `Receive()` is called on a channel, the value is popped from the buffer if there is any, and if there is a thread in $Q_S$, its value is pushed into the buffer. Otherwise, the current thread is added to the receive waiting queue of the channel. This is shown in the following inference rules:
@@ -605,28 +606,28 @@ $\begin{matrix}
 X = \mathcal{H}(X_a) = (V \mathbin\Vert B, \texttt{WaitingInstance}_{W, V'} \mathbin\Vert Q_S, Q_R)  \qquad \texttt{len}(B) = \texttt{cap}(B) > 0 \qquad W = \texttt{Waker}_{T} \\ \hline
 ((\texttt{CHAN\_RECEIVE\_I} \mathbin\Vert C, X \mathbin\Vert S, E) \mathbin\Vert \mathcal{T}, \mathcal{H})
 \rightrightarrows_{\mathcal{T}, \mathcal{H}}
-\left(\mathcal{T} \mathbin\Vert (C, V \mathbin\Vert S, E) \mathbin\Vert T, \mathcal{H}\left[X_a \Leftarrow (B \mathbin\Vert V', Q_S, Q_R)\right]\right)
+\left(\mathcal{T} \mathbin\Vert (C, V \mathbin\Vert S, E) \mathbin\Vert T, \mathcal{H}\left[X_a \gets (B \mathbin\Vert V', Q_S, Q_R)\right]\right)
 \end{matrix}$
 
 $\begin{matrix}
 X = \mathcal{H}(X_a) = (B, \texttt{WaitingInstance}_{W, V'} \mathbin\Vert Q_S, Q_R) \qquad \texttt{len}(B) = \texttt{cap}(B) = 0 \qquad W = \texttt{Waker}_{T} \\ \hline
 ((\texttt{CHAN\_RECEIVE\_I} \mathbin\Vert C, X \mathbin\Vert S, E) \mathbin\Vert \mathcal{T}, \mathcal{H})
 \rightrightarrows_{\mathcal{T}, \mathcal{H}}
-\left(\mathcal{T} \mathbin\Vert (C, V' \mathbin\Vert S, E) \mathbin\Vert T, \mathcal{H}\left[X_a \Leftarrow (B, Q_S, Q_R)\right]\right)
+\left(\mathcal{T} \mathbin\Vert (C, V' \mathbin\Vert S, E) \mathbin\Vert T, \mathcal{H}\left[X_a \gets (B, Q_S, Q_R)\right]\right)
 \end{matrix}$
 
 $\begin{matrix}
 X = \mathcal{H}(X_a) = (V \mathbin\Vert B, Q_S, Q_R) \qquad \texttt{len}(Q_S) = 0 \\ \hline
 ((\texttt{CHAN\_RECEIVE\_I} \mathbin\Vert C, X \mathbin\Vert S, E) \mathbin\Vert \mathcal{T}, \mathcal{H})
 \rightrightarrows_{\mathcal{T}, \mathcal{H}}
-\left(\mathcal{T} \mathbin\Vert (C, V \mathbin\Vert S, E), \mathcal{H}\left[X_a \Leftarrow (B, Q_S, Q_R)\right]\right)
+\left(\mathcal{T} \mathbin\Vert (C, V \mathbin\Vert S, E), \mathcal{H}\left[X_a \gets (B, Q_S, Q_R)\right]\right)
 \end{matrix}$
 
 $\begin{matrix}
 X = \mathcal{H}(X_a) = (B, Q_S, Q_R) \qquad \texttt{len}(Q_S) = 0 \qquad \texttt{len}(B) = 0 \\ \hline
 ((\texttt{CHAN\_RECEIVE\_I} \mathbin\Vert C, X \mathbin\Vert S, E) \mathbin\Vert \mathcal{T}, \mathcal{H})
 \rightrightarrows_{\mathcal{T}, \mathcal{H}}
-\left(\mathcal{T}, \mathcal{H}\left[X_a \Leftarrow (B, Q_S, Q_R \mathbin\Vert \texttt{WaitingInstance}_{(C, S, E), \varnothing})\right]\right)
+\left(\mathcal{T}, \mathcal{H}\left[X_a \gets (B, Q_S, Q_R \mathbin\Vert \texttt{WaitingInstance}_{(C, S, E), \varnothing})\right]\right)
 \end{matrix}$
 
 #### Select Statement
