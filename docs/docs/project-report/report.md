@@ -8,6 +8,8 @@
 
 **Live Demo**: [https://benson1029.github.io/go-slang/](https://benson1029.github.io/go-slang/)
 
+**Presentation Slides**: [CS4215_Presentation_Slides.pdf](/CS4215_Presentation_Slides.pdf)
+
 This report can be viewed online on [https://benson1029.github.io/go-slang/docs/project-report/report](https://benson1029.github.io/go-slang/docs/project-report/report).
 
 ## Table of Contents
