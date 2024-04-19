@@ -8,7 +8,7 @@ sidebar_position: 2
 
 ### Data Types
 
-The supported data types are shown in the following table:
+The supported (primitive) data types are shown in the following table:
 
 | Data Type | Description |
 | --- | --- |
@@ -16,6 +16,12 @@ The supported data types are shown in the following table:
 | `float32` | 32-bit floating point number |
 | `bool` | Boolean value |
 | `string` | String value |
+
+:::warning
+
+The type `int` is not supported. Use `int32` instead.
+
+:::
 
 ### Variable Declaration and Assignment
 
@@ -40,7 +46,6 @@ The following operators are supported, in order of decreasing precedence:
 
 | Operator | Description | Associativity |
 | --- | --- | --- |
-| `++` `--` | Postfix | Left to right |
 | `+ - !` | Unary | Right to left |
 | `* / %` | Multiplicative | Left to right |
 | `+ -` | Additive | Left to right |
@@ -49,6 +54,7 @@ The following operators are supported, in order of decreasing precedence:
 | `&&` | Logical AND | Left to right |
 | `\|\|` | Logical OR | Left to right |
 
+Additionally, we support postfix increment and decrement operators, given that they are used as a statement and not as an expression. For example, `i++` is valid, but `j = i++` is not valid.
 
 ## Control Flow
 
@@ -125,5 +131,5 @@ go add(1, 2) // Concurrent
 
 The following built-in functions are supported:
 
-- Default: `len`
+- Default: `len`, `cap`, `append`
 - `fmt`: `Println`, `Print`

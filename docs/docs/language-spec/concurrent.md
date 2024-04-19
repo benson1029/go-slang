@@ -199,3 +199,26 @@ func main() {
     wg.Wait()
 }
 ```
+
+:::note
+
+We do not support closing channels in the current version of the language.
+
+:::
+
+## Select
+
+The `select` statement is used to wait on multiple communication operations. The syntax for the `select` statement is as follows:
+
+```go
+select {
+case x := <-ch1:
+    // code
+case ch2 <- y:
+    // code
+default:
+    // code
+}
+```
+
+The `select` statement blocks until one of the cases can proceed. If multiple cases can proceed, one is chosen at random.

@@ -38,7 +38,6 @@ import { BuddyAllocator, WORD_SIZE } from "./alloc";
 import { auto_cast } from "./types/auto_cast";
 import { ComplexBuiltin } from "./types/complex/builtin";
 import { ComplexLinkedList } from "./types/complex/linked_list";
-import { ComplexPointer } from "./types/complex/pointer";
 import { ComplexString } from "./types/complex/string";
 import { ControlIndex } from "./types/control";
 import { ControlAssign } from "./types/control/assign";
@@ -86,7 +85,6 @@ import { ControlMethodMember } from "./types/control/method_member";
 import { ControlName } from "./types/control/name";
 import { ControlNameAddress } from "./types/control/name_address";
 import { ControlPopI } from "./types/control/pop_i";
-import { ControlPostfix } from "./types/control/postfix";
 import { ControlPushI } from "./types/control/push_i";
 import { ControlRestoreEnvI } from "./types/control/restore_env_i";
 import { ControlReturn } from "./types/control/return";
@@ -118,13 +116,11 @@ import {
     TAGSTRING_PRIMITIVE_rune,
     TAGSTRING_COMPLEX_string,
     TAGSTRING_COMPLEX_linked_list,
-    TAGSTRING_COMPLEX_pointer,
     TAGSTRING_CONTROL_name,
     TAGSTRING_CONTROL_literal,
     TAGSTRING_CONTROL_var,
     TAGSTRING_CONTROL_assign,
     TAGSTRING_CONTROL_unary,
-    TAGSTRING_CONTROL_postfix,
     TAGSTRING_CONTROL_binary,
     TAGSTRING_CONTROL_sequence,
     TAGSTRING_CONTROL_call,
@@ -176,7 +172,6 @@ import {
     TAGSTRING_USER_type_channel,
     TAGSTRING_USER_type_struct_decl,
     TAGSTRING_CONTROL_struct,
-    TAGSTRING_USER_type_method,
     TAGSTRING_CONTROL_method,
     TAGSTRING_CONTROL_method_member,
     TAGSTRING_CONTROL_member_address_i,
@@ -206,7 +201,6 @@ import { UserTypeChannel } from "./types/user/type/channel";
 import { UserTypeFloat32 } from "./types/user/type/float32";
 import { UserTypeFunction } from "./types/user/type/function";
 import { UserTypeInt32 } from "./types/user/type/int32";
-import { UserTypeMethod } from "./types/user/type/method";
 import { UserTypeMutex } from "./types/user/type/mutex";
 import { UserTypeSlice } from "./types/user/type/slice";
 import { UserTypeString } from "./types/user/type/string";
@@ -563,18 +557,6 @@ class Heap {
     }
 
     /**
-     * COMPLEX_pointer
-     * Fields    : number of children
-     * Children  : address of the object referenced
-     *
-     * @param value address value
-     * @returns address of the object
-     */
-    public allocate_COMPLEX_pointer(value: number): number {
-        return ComplexPointer.allocate(this, value);
-    }
-
-    /**
      * COMPLEX_builtin
      * Fields    : number of children
      * Children  :
@@ -648,20 +630,6 @@ class Heap {
      */
     public allocate_CONTROL_unary(obj: { tag: string, operator: string, operand: any }): number {
         return ControlUnary.allocate(this, obj.operator, obj.operand);
-    }
-
-    /**
-     * CONTROL_postfix
-     * Fields    : number of children
-     * Children  :
-     * - 4 bytes address of the operator (COMPLEX_string)
-     * - 4 bytes address of the operand (expression)
-     *
-     * @param obj control object
-     * @returns address of the object
-     */
-    public allocate_CONTROL_postfix(obj: { tag: string, operator: string, operand: any }): number {
-        return ControlPostfix.allocate(this, obj.operator, obj.operand);
     }
 
     /**
@@ -1396,17 +1364,6 @@ class Heap {
     }
 
     /**
-     * USER_type_method
-     * Fields    :
-     * - number of children
-     * Children  :
-     * - 4 bytes address of the name (COMPLEX_string)
-     */
-    public allocate_USER_type_method(obj: { tag: string }): number {
-        return UserTypeMethod.allocate(this);
-    }
-
-    /**
      * USER_type_mutex
      * Fields    :
      * - number of children
@@ -1473,8 +1430,6 @@ class Heap {
                 return this.allocate_COMPLEX_string(obj.value);
             case TAGSTRING_COMPLEX_linked_list:
                 return this.allocate_COMPLEX_linked_list(obj);
-            case TAGSTRING_COMPLEX_pointer:
-                return this.allocate_COMPLEX_pointer(obj);
             case TAGSTRING_COMPLEX_builtin:
                 return this.allocate_COMPLEX_builtin(obj);
             case TAGSTRING_CONTROL_name:
@@ -1487,8 +1442,6 @@ class Heap {
                 return this.allocate_CONTROL_assign(obj);
             case TAGSTRING_CONTROL_unary:
                 return this.allocate_CONTROL_unary(obj);
-            case TAGSTRING_CONTROL_postfix:
-                return this.allocate_CONTROL_postfix(obj);
             case TAGSTRING_CONTROL_binary:
                 return this.allocate_CONTROL_binary(obj);
             case TAGSTRING_CONTROL_sequence:
@@ -1621,8 +1574,6 @@ class Heap {
                 return this.allocate_USER_type_struct_decl(obj);
             case TAGSTRING_USER_type_struct:
                 return this.allocate_USER_type_struct(obj);
-            case TAGSTRING_USER_type_method:
-                return this.allocate_USER_type_method(obj);
             case TAGSTRING_USER_type_mutex:
                 return this.allocate_USER_type_mutex();
             case TAGSTRING_USER_type_slice:

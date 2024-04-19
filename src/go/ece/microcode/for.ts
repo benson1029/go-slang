@@ -80,10 +80,10 @@ function evaluate_for_i(cmd: number, heap: Heap, C: ContextControl, S: ContextSt
             const name_cmd = heap.allocate_any({ tag: "name", name: (loopVar as ComplexString).get_string() });
             C.push(name_cmd);
             heap.free_object(name_cmd);
-            const marker_cmd = heap.allocate_any({ tag: "marker_i" });
-            C.push(marker_cmd);
-            heap.free_object(marker_cmd);
         }
+        const marker_cmd = heap.allocate_any({ tag: "marker_i" });
+        C.push(marker_cmd);
+        heap.free_object(marker_cmd);
 
         C.push(body.address);
     } else {

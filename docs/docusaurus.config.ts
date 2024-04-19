@@ -64,16 +64,10 @@ const config: Config = {
           label: 'Language Specification',
         },
         {
-          type: 'docSidebar',
-          sidebarId: 'reportSidebar',
+          type: 'doc',
+          docId: 'project-report/report',
           position: 'left',
           label: 'Project Report',
-        },
-        {
-          type: 'docSidebar',
-          sidebarId: 'notesSidebar',
-          position: 'left',
-          label: 'Developer Notes',
         },
         {
           href: 'https://github.com/benson1029/go-slang',

@@ -212,4 +212,26 @@ describe("Structs", () => {
         const result = evaluateFunctions(functions);
         expect(result).toBe("1\n2.5\n");
     })
+
+    it("supports default values", () => {
+        const functions = `
+        type S struct {
+            x int32
+            y float32
+            z string
+            a bool
+            f func (int32) int32
+        }
+
+        func main() {
+            var s S
+            fmt.Println(s.x)
+            fmt.Println(s.y)
+            fmt.Println(s.z)
+            fmt.Println(s.a)
+        }
+        `
+        const result = evaluateFunctions(functions);
+        expect(result).toBe("0\n0\n\nfalse\n");
+    })
 })

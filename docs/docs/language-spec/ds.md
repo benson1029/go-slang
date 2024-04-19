@@ -129,3 +129,9 @@ func (p Person) greet() {
     fmt.Println("Hello, my name is", p.Name)
 }
 ```
+
+You can call the method on an instance of the struct:
+
+```go
+person.greet() // Hello, my name is Alice
+```

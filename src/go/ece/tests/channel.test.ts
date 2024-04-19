@@ -222,4 +222,28 @@ describe('Channel', () => {
         const result = evaluateFunctions(functions);
         expect(result).toBe("42\n");
     })
+
+    it("can evaluate channel receive statements", () => {
+        const functions = `
+        func main() {
+            ch := make(chan int32)
+            go func() {
+                ch <- 42
+            }()
+            <-ch
+        }
+        `
+        const result = evaluateFunctions(functions);
+        expect(result).toBe("");
+    })
+
+    it("can evaluate channel receive statements (blocked)", () => {
+        const functions = `
+        func main() {
+            ch := make(chan int32)
+            <-ch
+        }
+        `
+        expect(() => evaluateFunctions(functions)).toThrow();
+    })
 })
