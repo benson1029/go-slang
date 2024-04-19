@@ -41,6 +41,7 @@ import { ControlExitScopeI } from "./control/exit_scope";
 import { ControlFor } from "./control/for";
 import { ControlForI } from "./control/for_i";
 import { ControlFunction } from "./control/function";
+import { ControlGoCallI } from "./control/go_call_i";
 import { ControlGoCallStmt } from "./control/go_call_stmt";
 import { ControlIf } from "./control/if";
 import { ControlIfI } from "./control/if_i";
@@ -195,6 +196,7 @@ import {
   TAG_CONTROL_case_send,
   TAG_CONTROL_case_receive,
   TAG_CONTROL_select_i,
+  TAG_CONTROL_go_call_i,
 } from "./tags"
 import { UserChannel } from "./user/channel";
 import { UserSlice } from "./user/slice";
@@ -296,6 +298,8 @@ function auto_cast(heap: Heap, address: number): HeapObject {
       return new ControlIfI(heap, address);
     case TAG_CONTROL_call_i:
       return new ControlCallI(heap, address);
+    case TAG_CONTROL_go_call_i:
+      return new ControlGoCallI(heap, address);
     case TAG_CONTROL_restore_env_i:
       return new ControlRestoreEnvI(heap, address);
     case TAG_CONTROL_return:

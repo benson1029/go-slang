@@ -118,6 +118,7 @@ describe("Mutex", () => {
                 }
                 m.Unlock()
             }()
+            for i := 0; i < 100; i++ {}
         }
         `
         const result = evaluateFunctions(functions);
@@ -141,6 +142,7 @@ describe("Mutex", () => {
                     fmt.Println(i)
                 }
             }()
+            for i := 0; i < 30; i++ {}
         }
         `
         const result2 = evaluateFunctions(functions2);

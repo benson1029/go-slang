@@ -78,7 +78,12 @@ class ECE {
     };
 
     // Evaluate the program.
-    while (!scheduler.empty()) {
+    while (!main_thread.control().empty()) {
+      if (scheduler.empty()) {
+        throw new Error(
+          "All goroutines are asleep - deadlock!"
+        );
+      }
       if (this.visualize) {
         this.take_snapshot(scheduler);
       }
@@ -98,11 +103,8 @@ class ECE {
       thread.free();
       this.heap.clear_intermediate();
     }
-
-    if (!main_thread.control().empty()) {
-      throw new Error(
-        "All goroutines are asleep - deadlock! (main thread control stack not empty)"
-      );
+    if (this.visualize) {
+      this.take_snapshot(scheduler);
     }
     scheduler.free();
 
