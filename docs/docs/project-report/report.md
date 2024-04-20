@@ -198,13 +198,14 @@ The following tables show the instruction set of the ECE machine.
 
 :::info
 
-$\mathbin\Vert$ denotes the concatenation of two elements. For example, $x \mathbin\Vert y$ is the concatenation of $x$ and $y$.
-
+$\cdot \mathbin\Vert \cdot$ denotes the concatenation of two elements. For example, $x \mathbin\Vert y$ is the concatenation of $x$ and $y$. In particular, $x \mathbin\Vert \varnothing = x$, $\varnothing \mathbin\Vert y = y$, and $\varnothing \mathbin\Vert \varnothing = \varnothing$.
 :::
 
 The ECE machine has the scheduler $\mathcal{T} = T_{i_1} \mathbin\Vert T_{i_2} \mathbin\Vert \ldots$, where $T_{i_1}, T_{i_2}, \ldots$ are the (unblocked) threads in the scheduler. Each thread $T_i$ is a tuple $(C, S, E)$, where $C$ is the control stack (containing instructions), $S$ is the stash (containing runtime values for instructions), and $E$ is the environment.
 
-The control stack and the stash are represented as the concatenation of its elements $x_1 \mathbin\Vert x_2 \mathbin\Vert x_3 \mathbin\Vert \ldots \mathbin\Vert x_k$. The environment is a tuple $E = (\Delta_N, \Delta_S)$, where $\Delta_N$ and $\Delta_S$ are the name and struct frames, respectively. $\Delta_N$ is a concatenation of environment frames $\Delta_1 \mathbin\Vert \Delta_2 \mathbin\Vert \ldots \mathbin\Vert \Delta_n$, where each environment frame $\Delta_i$ is a hash table that maps variable names to its address in the heap.
+The control stack and the stash are represented as the concatenation of its elements $x_1 \mathbin\Vert x_2 \mathbin\Vert x_3 \mathbin\Vert \ldots \mathbin\Vert x_k$. The environment is a tuple $E = (\Delta_N, \Delta_S)$, where $\Delta_N$ and $\Delta_S$ are the name and struct frames, respectively.
+- $\Delta_N$ is a concatenation of environment frames $\Delta_1 \mathbin\Vert \Delta_2 \mathbin\Vert \ldots \mathbin\Vert \Delta_n$, where each environment frame $\Delta_i$ is a hash table that maps variable names to its address in the heap. 
+- $\Delta_S$ is a hash table that maps struct names and methods to their addresses in the heap. Currently, we only support struct declarations on the global scope, so there is a single struct frame $\Delta_S$ for the entire program.
 
 A variable $x$ is a pointer to a value $v$ in the heap (the value for the variable). Therefore, a variable will have a fixed address $a$ in the heap. When a variable is inserted into an environment frame, the environment frame hash table keeps a mapping from the variable name (represented by a string object in the heap) to its fixed address $a$ in the heap.
 
@@ -226,12 +227,12 @@ The *state* of the ECE machine is the heap $\mathcal{H}$.
 
 For clarity, however, we will slightly abuse notation and denote the state of the ECE machine as $(\mathcal{T}, \mathcal{H})$, where $\mathcal{T} = \mathcal{H}(\mathcal{T}_a)$. It is important to remember that this is a shorthand notation to easily refer to the scheduler $\mathcal{T}$, and the actual state of the ECE machine only depends on the heap $\mathcal{H}$.
 
-This shorthand notation allows us to treat $\mathcal{T}$ as if it's a separate entity from the heap $\mathcal{H}$, but note that any changes to $\mathcal{T}$ are also reflected in $\mathcal{H}$. In other words, we can view $\mathcal{T}$ in $(\mathcal{T}, \mathcal{H})$ as a (mutable) reference to the scheduler object $\mathcal{H}(\mathcal{T}_a)$ in the heap $\mathcal{H}$.
+This shorthand notation allows us to treat $\mathcal{T}$ as if it's a separate entity from the heap $\mathcal{H}$, but note that any changes to $\mathcal{T}$ are also reflected in $\mathcal{H}$. In other words, we can view $\mathcal{T}$ in $(\mathcal{T}, \mathcal{H})$ as a (mutable) reference to the scheduler object $\mathcal{H}(\mathcal{T}_a)$ in the heap $\mathcal{H}$. Implicitly, we treat the *children* of the scheduler $\mathcal{T}$ (i.e. the threads $T_i$ and their control stacks $C_i$, stashes $S_i$, and environments $E_i = (\Delta_{N_i}, \Delta_{S_i})$) as mutable references to their respective objects in the heap $\mathcal{H}$ as well.
 :::
 
 We define the transition function $\rightrightarrows_{\mathcal{T}, \mathcal{H}}$ that maps the current state $(\mathcal{T}, \mathcal{H})$ to the next state $(\mathcal{T}', \mathcal{H}')$ after evaluation, i.e. $(\mathcal{T}, \mathcal{H}) \rightrightarrows_{\mathcal{T}, \mathcal{H}} (\mathcal{T}', \mathcal{H}')$.
 
-To avoid clutter, most of the time we will only show the scheduler $\mathcal{T}$ in the inference rules, and only mention the heap $\mathcal{H}$ when necessary. As a shorthand, we define the transition function $\rightrightarrows_{\mathcal{T}}$ that maps the current state $(\mathcal{T}, \mathcal{H})$ to the next state $(\mathcal{T}', \mathcal{H})$ after evaluation, i.e. $\mathcal{T} \rightrightarrows_{\mathcal{T}} \mathcal{T}'$.
+To avoid clutter, most of the time we will only show the scheduler $\mathcal{T}$ in the inference rules, and only mention the heap $\mathcal{H}$ when we modify an existing object in the heap directly other than the scheduler and its children. As a shorthand, we define the transition function $\rightrightarrows_{\mathcal{T}}$ that maps the current state $(\mathcal{T}, \mathcal{H})$ to the next state $(\mathcal{T}', \mathcal{H}[\mathcal{T}_a \gets \mathcal{T}'])$ after evaluation, i.e. $\mathcal{T} \rightrightarrows_{\mathcal{T}} \mathcal{T}'$.
 
 ### Inference Rules for Selected Parts
 
@@ -283,22 +284,12 @@ I = (\texttt{LOGICAL\_IMM\_I} \ \texttt{||} \ E_R) \\ \hline
 \end{matrix}$
 
 $\begin{matrix}
-I = (\texttt{LOGICAL\_I} \ \texttt{\&\&}) \\ \hline
+I = (\texttt{LOGICAL\_I} \ \texttt{operator}) \\ \hline
 (I \ \mathbin\Vert C, \texttt{false} \mathbin\Vert S, E) \mathbin\Vert \mathcal{T} \rightrightarrows_{\mathcal{T}} \mathcal{T} \mathbin\Vert (C, \texttt{false} \mathbin\Vert S, E)
 \end{matrix}$
 
 $\begin{matrix}
-I = (\texttt{LOGICAL\_I} \ \texttt{\&\&}) \\ \hline
-(I \ \mathbin\Vert C, \texttt{true} \mathbin\Vert S, E) \mathbin\Vert \mathcal{T} \rightrightarrows_{\mathcal{T}} \mathcal{T} \mathbin\Vert (C, \texttt{true} \mathbin\Vert S, E)
-\end{matrix}$
-
-$\begin{matrix}
-I = (\texttt{LOGICAL\_I} \ \texttt{||}) \\ \hline
-(I \ \mathbin\Vert C, \texttt{false} \mathbin\Vert S, E) \mathbin\Vert \mathcal{T} \rightrightarrows_{\mathcal{T}} \mathcal{T} \mathbin\Vert (C, \texttt{false} \mathbin\Vert S, E)
-\end{matrix}$
-
-$\begin{matrix}
-I = (\texttt{LOGICAL\_I} \ \texttt{||}) \\ \hline
+I = (\texttt{LOGICAL\_I} \ \texttt{operator}) \\ \hline
 (I \ \mathbin\Vert C, \texttt{true} \mathbin\Vert S, E) \mathbin\Vert \mathcal{T} \rightrightarrows_{\mathcal{T}} \mathcal{T} \mathbin\Vert (C, \texttt{true} \mathbin\Vert S, E)
 \end{matrix}$
 
@@ -349,7 +340,7 @@ $\begin{matrix}
 
 $\begin{matrix}
 \hline
-((\texttt{ASSIGN\_I} \mathbin\Vert C, a \mathbin\Vert v \mathbin\Vert S, (\Delta_N, \Delta_S)) \mathbin\Vert \mathcal{T}, \mathcal{H}) \rightrightarrows_{\mathcal{T}, \mathcal{H}} (\mathcal{T}, \mathcal{H}[a \gets v])
+((\texttt{ASSIGN\_I} \mathbin\Vert C, a \mathbin\Vert v \mathbin\Vert S, (\Delta_N, \Delta_S)) \mathbin\Vert \mathcal{T}, \mathcal{H}) \rightrightarrows_{\mathcal{T}, \mathcal{H}} (\mathcal{T} \mathbin\Vert (C, S, (\Delta_N, \Delta_S)), \mathcal{H}[a \gets v])
 \end{matrix}$
 
 #### Sequence and Block
@@ -481,7 +472,7 @@ $\begin{matrix}
 
 $\begin{matrix}
 I = \texttt{MARKER\_I} \\ \hline
-(\texttt{CONTINUE\_I} \mathbin\Vert I \mathbin\Vert C, S, E) \mathbin\Vert \mathcal{T} \rightrightarrows_{\mathcal{T}} \mathcal{T} \mathbin\Vert (I \mathbin\Vert C, S, E)
+(\texttt{CONTINUE\_I} \mathbin\Vert I \mathbin\Vert C, S, E) \mathbin\Vert \mathcal{T} \rightrightarrows_{\mathcal{T}} \mathcal{T} \mathbin\Vert (C, S, E)
 \end{matrix}$
 
 $\begin{matrix}
@@ -537,7 +528,7 @@ We design $\texttt{Waker}_{(C, S, E)}$ to have a special behaviour:
 - The first time that it wakes up a thread $(C, S, E)$, it replaces itself with a $\texttt{Waker}_{\varnothing}$.
 - The second time onwards, if it is requested to wake up a thread again (since it holds $\varnothing$), it does nothing.
 
-We design $\texttt{Waker}$ this way to be able to implement `select`, as we need to be able to wait until one of the channels is ready to send or receive; the channels involved in a `select` will have a reference to the same $\texttt{Waker}$ object, so it only wakes up the thread the first time a channel is ready. In the inference rules below for mutex, we do not enforce $\texttt{Waker}$'s behaviour as we only require this behaviour in the channel implementation.
+We design $\texttt{Waker}$ this way to be able to implement `select`, as we need to be able to wait until one of the channels is ready to send or receive; the channels involved in a `select` will have a reference to the same $\texttt{Waker}$ object, so it only wakes up the thread the first time a channel is ready (and does nothing the second time onwards). In the inference rules below for mutex, we do not enforce $\texttt{Waker}$'s behaviour as we only require this behaviour in the channel implementation.
 
 :::
 
@@ -576,7 +567,12 @@ where $\varepsilon$ is the error state.
 
 The implementation of channels uses the same idea as above, except that there is one waiting queue for sending and one waiting queue for receiving. Also, they use specialized instructions `CHAN_SEND_I` and `CHAN_RECEIVE_I` rather than using built-in functions.
 
-We define a channel as a tuple $(B, Q_S, Q_R)$ where $B$ is the buffer of the channel, $Q_S$ is the send waiting queue, and $Q_R$ is the receive waiting queue. We encapsulate blocked threads in $Q_S$ and $Q_R$ by special heap objects called $\texttt{WaitingInstance}_{W, V}$ where $W$ is a $\texttt{Waker}_{(C, S, E)}$ and $V$ is the value to be sent (on receive, $V = \texttt{nil}$). We use a shorthand $\texttt{WaitingInstance}_{(C, S, E), V}$ to denote $\texttt{WaitingInstance}_{\texttt{Waker}_{(C, S, E)}, V}$.
+We define a channel as a tuple $(B, Q_S, Q_R)$ where $B$ is the buffer of the channel, $Q_S$ is the send waiting queue, and $Q_R$ is the receive waiting queue. We encapsulate blocked threads in $Q_S$ and $Q_R$ by special heap objects called $\texttt{WaitingInstance}_{W, V, b}$ where:
+- $W$ is a $\texttt{Waker}_{(C, S, E)}$
+- $V$ is the value to be sent (on receive, $V = \texttt{nil}$)
+- $b$ is an instruction to be pushed into the control stack after the thread is woken up. This is mainly used for `select` implementation, although we need to define it here.
+
+We use a shorthand $\texttt{WaitingInstance}_{(C, S, E), V}$ to denote $\texttt{WaitingInstance}_{\texttt{Waker}_{(C, S, E)}, V, \varnothing}$.
 
 For a channel $X = (B, Q_S, Q_R)$, we maintain the following invariants at all times:
 - If $Q_S$ is non-empty, then $B$ is full ($\texttt{len}(B) = \texttt{cap}(B)$).
@@ -592,18 +588,18 @@ $\begin{matrix}
 \end{matrix}$
 
 $\begin{matrix}
-X = \mathcal{H}(X_a) = (B, Q_S, \texttt{WaitingInstance}_{W, \varnothing} \mathbin\Vert Q_R) \qquad \texttt{len}(B) = 0 \qquad W = \mathcal{H}(W_a) = \texttt{Waker}_{\varnothing} \\ \hline
+X = \mathcal{H}(X_a) = (B, Q_S, \texttt{WaitingInstance}_{W, \varnothing, b} \mathbin\Vert Q_R) \qquad \texttt{len}(B) = 0 \qquad W = \mathcal{H}(W_a) = \texttt{Waker}_{\varnothing} \\ \hline
 ((\texttt{CHAN\_SEND\_I} \mathbin\Vert C, X \mathbin\Vert V \mathbin\Vert S, E) \mathbin\Vert \mathcal{T}, \mathcal{H})
 \rightrightarrows_{\mathcal{T}, \mathcal{H}} \\
 ((\texttt{CHAN\_SEND\_I} \mathbin\Vert C, X \mathbin\Vert V \mathbin\Vert S, E) \mathbin\Vert \mathcal{T}, \mathcal{H}[X_a \gets (B, Q_S, Q_R)])
 \end{matrix}$
 
 $\begin{matrix}
-X = \mathcal{H}(X_a) = (B, Q_S, \texttt{WaitingInstance}_{W, \varnothing} \mathbin\Vert Q_R) \qquad \texttt{len}(B) = 0 \qquad W = \mathcal{H}(W_a) = \texttt{Waker}_{(C_W, S_W, E_W)} \\ \hline
+X = \mathcal{H}(X_a) = (B, Q_S, \texttt{WaitingInstance}_{W, \varnothing, b} \mathbin\Vert Q_R) \qquad \texttt{len}(B) = 0 \qquad W = \mathcal{H}(W_a) = \texttt{Waker}_{(C_W, S_W, E_W)} \\ \hline
 ((\texttt{CHAN\_SEND\_I} \mathbin\Vert C, X \mathbin\Vert V \mathbin\Vert S, E) \mathbin\Vert \mathcal{T}, \mathcal{H})
 \rightrightarrows_{\mathcal{T}, \mathcal{H}} \\
 \left(\mathcal{T} \mathbin\Vert (C, S, E) \mathbin\Vert
-(C_W, V \mathbin\Vert S_W, E_W), \mathcal{H}\left[X_a \gets (B, Q_S, Q_R)\right][W_a \gets \texttt{Waker}_{\varnothing}]\right)
+(b \mathbin\Vert C_W, V \mathbin\Vert S_W, E_W), \mathcal{H}\left[X_a \gets (B, Q_S, Q_R)\right][W_a \gets \texttt{Waker}_{\varnothing}]\right)
 \end{matrix}$
 
 $\begin{matrix}
@@ -630,24 +626,24 @@ $\begin{matrix}
 \end{matrix}$
 
 $\begin{matrix}
-X = \mathcal{H}(X_a) = (B, \texttt{WaitingInstance}_{W, V'} \mathbin\Vert Q_S, Q_R)  \qquad \texttt{len}(B) = \texttt{cap}(B) \qquad W = \texttt{Waker}_{\varnothing} \\ \hline
+X = \mathcal{H}(X_a) = (B, \texttt{WaitingInstance}_{W, V', b} \mathbin\Vert Q_S, Q_R)  \qquad \texttt{len}(B) = \texttt{cap}(B) \qquad W = \mathcal{H}(W_a) = \texttt{Waker}_{\varnothing} \\ \hline
 ((\texttt{CHAN\_RECEIVE\_I} \mathbin\Vert C, X \mathbin\Vert S, E) \mathbin\Vert \mathcal{T}, \mathcal{H})
 \rightrightarrows_{\mathcal{T}, \mathcal{H}} \\
 ((\texttt{CHAN\_RECEIVE\_I} \mathbin\Vert C, X \mathbin\Vert S, E) \mathbin\Vert \mathcal{T}, \mathcal{H}\left[X_a \gets (B, Q_S, Q_R)\right])
 \end{matrix}$
 
 $\begin{matrix}
-X = \mathcal{H}(X_a) = (V \mathbin\Vert B, \texttt{WaitingInstance}_{W, V'} \mathbin\Vert Q_S, Q_R)  \qquad \texttt{len}(B) = \texttt{cap}(B) > 0 \qquad W = \texttt{Waker}_{T} \\ \hline
+X = \mathcal{H}(X_a) = (V \mathbin\Vert B, \texttt{WaitingInstance}_{W, V', b} \mathbin\Vert Q_S, Q_R)  \qquad \texttt{len}(B) = \texttt{cap}(B) > 0 \qquad W = \mathcal{H}(W_a) = \texttt{Waker}_{(C_W, S_W, E_W)} \\ \hline
 ((\texttt{CHAN\_RECEIVE\_I} \mathbin\Vert C, X \mathbin\Vert S, E) \mathbin\Vert \mathcal{T}, \mathcal{H})
 \rightrightarrows_{\mathcal{T}, \mathcal{H}} \\
-\left(\mathcal{T} \mathbin\Vert (C, V \mathbin\Vert S, E) \mathbin\Vert T, \mathcal{H}\left[X_a \gets (B \mathbin\Vert V', Q_S, Q_R)\right]\right)
+\left(\mathcal{T} \mathbin\Vert (C, V \mathbin\Vert S, E) \mathbin\Vert (b \mathbin\Vert C_W, S_W, E_W), \mathcal{H}\left[X_a \gets (B \mathbin\Vert V', Q_S, Q_R)\right]\left[W_a \gets \texttt{Waker}_{\varnothing}\right]\right)
 \end{matrix}$
 
 $\begin{matrix}
-X = \mathcal{H}(X_a) = (B, \texttt{WaitingInstance}_{W, V'} \mathbin\Vert Q_S, Q_R) \qquad \texttt{len}(B) = \texttt{cap}(B) = 0 \qquad W = \texttt{Waker}_{T} \\ \hline
+X = \mathcal{H}(X_a) = (B, \texttt{WaitingInstance}_{W, V', b} \mathbin\Vert Q_S, Q_R) \qquad \texttt{len}(B) = \texttt{cap}(B) = 0 \qquad W = \mathcal{H}(W_a) = \texttt{Waker}_{(C_W, S_W, E_W)} \\ \hline
 ((\texttt{CHAN\_RECEIVE\_I} \mathbin\Vert C, X \mathbin\Vert S, E) \mathbin\Vert \mathcal{T}, \mathcal{H})
 \rightrightarrows_{\mathcal{T}, \mathcal{H}} \\
-\left(\mathcal{T} \mathbin\Vert (C, V' \mathbin\Vert S, E) \mathbin\Vert T, \mathcal{H}\left[X_a \gets (B, Q_S, Q_R)\right]\right)
+\left(\mathcal{T} \mathbin\Vert (C, V' \mathbin\Vert S, E) \mathbin\Vert (b \mathbin\Vert C_W, S_W, E_W), \mathcal{H}\left[X_a \gets (B, Q_S, Q_R)\right]\left[W_a \gets \texttt{Waker}_{\varnothing}\right]\right)
 \end{matrix}$
 
 $\begin{matrix}
@@ -671,7 +667,7 @@ Note that if $Q_S$ is non-empty, we will keep popping the frontmost $\texttt{Wai
 Go's `select` statement is a way to wait on multiple channel operations with several optimizations. Generally, it can be defined as follows:
 - If there is at least one channel operation that can proceed without blocking, it will randomly choose one of them to execute, and continue with the `case` body.
 - If all channel operations would block, and a `default` case is present, it will execute the `default` case.
-- Otherwise, it will block until one of the channel operations can proceed.
+- Otherwise, it will block until one of the channel operations can proceed, and then execute the corresponding `case` body.
 
 Note that in a `case` channel send or receive, it may have consist of complex operations. For example, the channel involved in a `case` may be a result of a function call or even a blocking expression (e.g., the receive of a channel of channels). Similarly, on `case` with a channel send, the value to be sent may be blocking. Therefore, our implementation of `select` will evaluate all involved channels and send values (which may block) in `case`s before actually doing the `select`.
 
@@ -703,12 +699,12 @@ In our actual implementation, we also allow $\texttt{case\_receive}$ to have an 
 
 When `SELECT_I` is executed, it will randomly choose one of the cases that can proceed without blocking, and execute the $\texttt{body}$ of the case. If all cases would block, it will block until one of the cases can proceed.
 
-Since we need to be able to add $\texttt{body}$ to the top of the control stack, we need to encode it in $\texttt{WaitingInstance}$. We define $\texttt{WaitingInstance}_{W, \varnothing, b}$, where $b$ is the body of the `case` (possibly $b = \varnothing$). It is straightforward to modify the inference rules for `CHAN_SEND_I` and `CHAN_RECEIVE_I` described in the channel section to also push $b$ into the control stack.
+Since we need to be able to add $\texttt{body}$ to the top of the control stack, we need to encode it in $\texttt{WaitingInstance}$. We encode the body as the parameter $b$ in $\texttt{WaitingInstance}_{W, V, b}$ previously defined, where $b$ is the body of the `case` (possibly $b = \varnothing$).
 
 To write all possible inference rules mathematically for $n$ cases would take an exponential amount of space; however, algorithmically, it is straightforward to implement with multiple `if` statements. Therefore, for simplicity, we will only show the inference rule for the following `SELECT_I` instruction:
 - There are two `case`s with a channel send and a channel receive, respectively.
-- The first `case` is a channel send is on a channel $X$ with a value $V$ to be sent, and it has a body $b_X$.
-- The second `case` is a channel receive is on a channel $Y$, and it has a body $b_Y$. The return value of the receive is pushed into the stash. In the actual implementation, the first instruction of $b_Y$ is either an `ASSIGN` instruction (to assign the received value on top of the stash to a variable) or a `POP` instruction (to pop the received value from the stash). We assume $b_Y$ follows this convention.
+- The first `case` is a channel send is on a channel $X = (B_X, Q_{XS}, Q_{XR})$ with a value $V$ to be sent, and it has a body $b_X$.
+- The second `case` is a channel receive is on a channel $Y = (B_Y, Q_{YS}, Q_{YR})$, and it has a body $b_Y$. The return value of the receive is pushed into the stash. In the actual implementation, the first instruction of $b_Y$ is either an `ASSIGN` instruction (to assign the received value on top of the stash to a variable) or a `POP` instruction (to pop the received value from the stash). We assume $b_Y$ follows this convention.
 - $X$ and $Y$ are different channels, and both channels are not unbuffered ($\texttt{cap}(X) > 0$ and $\texttt{cap}(Y) > 0$).
 - If $Q_{XR}$ is non-empty, then the frontmost $\texttt{WaitingInstance}$ in $Q_{XR}$ does not hold $\texttt{Waker}_{\varnothing}$.
 - If $Q_{YS}$ is non-empty, then the frontmost $\texttt{WaitingInstance}$ in $Q_{YS}$ does not hold $\texttt{Waker}_{\varnothing}$.
@@ -717,11 +713,11 @@ To write all possible inference rules mathematically for $n$ cases would take an
 If channel $X$ can proceed without blocking, we have the two following inference rules. Note that it is very similar to the inference rules for `CHAN_SEND_I`.
 
 $\begin{matrix}
-X = \mathcal{H}(X_a) = (B_X, Q_{XS}, \texttt{WaitingInstance}_{W, \varnothing} \mathbin\Vert Q_{XR}) \qquad \texttt{len}(B_X) = 0 \qquad W = \texttt{Waker}_{(C_W, S_W, E_W)} \\ \hline
+X = \mathcal{H}(X_a) = (B_X, Q_{XS}, \texttt{WaitingInstance}_{W, \varnothing, b} \mathbin\Vert Q_{XR}) \qquad \texttt{len}(B_X) = 0 \qquad W = \mathcal{H}(W_a) = \texttt{Waker}_{(C_W, S_W, E_W)} \\ \hline
 ((\texttt{SELECT\_I} \ \texttt{cases} \mathbin\Vert C, X \mathbin\Vert V \mathbin\Vert Y \mathbin\Vert S, E) \mathbin\Vert \mathcal{T}, \mathcal{H})
 \rightrightarrows_{\mathcal{T}, \mathcal{H}} \\
 \left(\mathcal{T} \mathbin\Vert (b_X \mathbin\Vert C, S, E) \mathbin\Vert
-(C_W, V \mathbin\Vert S_W, E_W), \mathcal{H}\left[X_a \gets (B_X, Q_{XS}, Q_{XR})\right]\right)
+(b \mathbin\Vert C_W, V \mathbin\Vert S_W, E_W), \mathcal{H}\left[X_a \gets (B_X, Q_{XS}, Q_{XR})\right]\left[W_a \gets \texttt{Waker}_{\varnothing}\right]\right)
 \end{matrix}$
 
 $\begin{matrix}
@@ -735,10 +731,10 @@ If the channel $X$ would block, and the channel $Y$ can proceed without blocking
 
 $\begin{matrix}
 X = \mathcal{H}(X_a) = (B_X, Q_{XS}, Q_{XR}) \qquad \texttt{len}(Q_{XR}) = 0 \qquad \texttt{len}(B_X) = \texttt{cap}(B_X) \\
-Y = \mathcal{H}(Y_a) = (V_Y \mathbin\Vert B_Y, \texttt{WaitingInstance}_{W, V_Y'} \mathbin\Vert Q_{YS}, Q_{YR})  \qquad \texttt{len}(B_Y) = \texttt{cap}(B_Y) > 0 \qquad W = \texttt{Waker}_{T} \\ \hline
+Y = \mathcal{H}(Y_a) = (V_Y \mathbin\Vert B_Y, \texttt{WaitingInstance}_{W, V_Y', b} \mathbin\Vert Q_{YS}, Q_{YR})  \qquad \texttt{len}(B_Y) = \texttt{cap}(B_Y) > 0 \qquad W = \mathcal{H}(W_a) = \texttt{Waker}_{(C_W, S_W, E_W)} \\ \hline
 ((\texttt{SELECT\_I} \ \texttt{cases} \mathbin\Vert C, X \mathbin\Vert V \mathbin\Vert Y \mathbin\Vert S, E) \mathbin\Vert \mathcal{T}, \mathcal{H})
 \rightrightarrows_{\mathcal{T}, \mathcal{H}} \\
-\left(\mathcal{T} \mathbin\Vert (b_Y \mathbin\Vert C, V_Y \mathbin\Vert S, E) \mathbin\Vert T, \mathcal{H}\left[Y_a \gets (B_Y \mathbin\Vert V_Y', Q_{YS}, Q_{YR})\right]\right)
+\left(\mathcal{T} \mathbin\Vert (b_Y \mathbin\Vert C, V_Y \mathbin\Vert S, E) \mathbin\Vert (b \mathbin\Vert C_W, S_W, E_W), \mathcal{H}\left[Y_a \gets (B_Y \mathbin\Vert V_Y', Q_{YS}, Q_{YR})\right]\left[W_a \gets \texttt{Waker}_{\varnothing}\right]\right)
 \end{matrix}$
 
 $\begin{matrix}
@@ -753,8 +749,8 @@ If both channels would block, we have the following inference rule:
 
 $\begin{matrix}
 X = \mathcal{H}(X_a) = (B_X, Q_{XS}, Q_{XR}) \qquad \texttt{len}(Q_{XR}) = 0 \qquad \texttt{len}(B_X) = \texttt{cap}(B_X) \\
-Y = \mathcal{H}(Y_a) = (V_Y \mathbin\Vert B_Y, Q_{YS}, Q_{YR}) \qquad \texttt{len}(Q_{YS}) = 0 \qquad \texttt{len}(B_Y) = 0 \\
-W = \texttt{Waker}_{(C, S, E)} \qquad I_X = \texttt{WaitingInstance}_{W, V, b_X} \qquad I_Y = \texttt{WaitingInstance}_{W, \varnothing, b_Y} \\ \hline
+Y = \mathcal{H}(Y_a) = (B_Y, Q_{YS}, Q_{YR}) \qquad \texttt{len}(Q_{YS}) = 0 \qquad \texttt{len}(B_Y) = 0 \\
+W = \mathcal{H}(W_a) = \texttt{Waker}_{(C, S, E)} \qquad I_X = \texttt{WaitingInstance}_{W, V, b_X} \qquad I_Y = \texttt{WaitingInstance}_{W, \varnothing, b_Y} \\ \hline
 ((\texttt{SELECT\_I} \ \texttt{cases} \mathbin\Vert C, X \mathbin\Vert V \mathbin\Vert Y \mathbin\Vert S, E) \mathbin\Vert \mathcal{T}, \mathcal{H})
 \rightrightarrows_{\mathcal{T}, \mathcal{H}} \\
 \left(\mathcal{T}, \mathcal{H}\left[X_a \gets (B_X, Q_{XS} \mathbin\Vert I_X, Q_{XR})\right]\left[Y_a \gets (B_Y, Q_{YS}, Q_{YR} \mathbin\Vert I_Y)\right]\right)
