@@ -777,6 +777,8 @@ Unit tests for the parser and preprocessor (specially, the module for sorting gl
 
 For most test cases that does not involve recursive calls, we additionally check whether all objects in the heap are freed after the program execution. This confirms that our reference counting garbage collector is working correctly. Recursive calls will create cyclic data structures in the heap, thus we do not check for unfreed objects in these cases.
 
+Additionally, for all test cases, we will run it a second time, triggering mark and sweep garbage collection for **every** heap allocation. This is to ensure that the mark and sweep garbage collector, especially the handling of temporary roots, is working correctly. Therefore, we have high confidence that our garbage collector is working correctly.
+
 The purpose of each test is documented in the source code.
 
 To run the tests, you can run the following command:
